@@ -1,0 +1,18 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "id": "LUX-Version-1.7.17-Schema",
+  "title": "LUX Version 1.7.17 Options Schema",
+  "type": "object",
+  "description": "Aktualisiert die LUX-Applikation auf die Version 1.7.17 der LUX-Components.",
+  "properties": {
+    "project": {
+      "type": "string",
+      "description": "The name of the project.",
+      "$default": {
+        "$source": "projectName"
+      }
+    }
+  },
+  "required": [],
+  "additionalProperties": false
+}

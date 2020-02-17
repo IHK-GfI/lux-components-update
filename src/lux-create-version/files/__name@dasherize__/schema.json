@@ -1,0 +1,18 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "id": "LUX-Version-<%= dasherize(name) %>-Schema",
+  "title": "LUX Version <%= dasherize(name) %> Options Schema",
+  "type": "object",
+  "description": "Aktualisiert die LUX-Applikation auf die Version <%= dasherize(name) %> der LUX-Components.",
+  "properties": {
+    "project": {
+      "type": "string",
+      "description": "The name of the project.",
+      "$default": {
+        "$source": "projectName"
+      }
+    }
+  },
+  "required": [],
+  "additionalProperties": false
+}
