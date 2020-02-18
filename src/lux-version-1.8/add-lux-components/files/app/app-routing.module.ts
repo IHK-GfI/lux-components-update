@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { LuxLayoutModule } from '@IHK-GfI/lux-components';
+import { LuxLayoutModule } from '@ihk-gfi/lux-components';
 import { ErrorComponent } from './error/error.component';
 import { HomeComponent } from './home/home.component';
 import { ProfilComponent } from './profil/profil.component';
