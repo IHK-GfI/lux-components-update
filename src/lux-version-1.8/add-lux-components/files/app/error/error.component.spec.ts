@@ -10,7 +10,7 @@ import {
   LuxStorageService,
   LuxComponentsConfigModule,
   LuxComponentsConfigParameters,
-} from '@IHK-GfI/lux-components';
+} from '@ihk-gfi/lux-components';
 
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 

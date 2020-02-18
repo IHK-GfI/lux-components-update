@@ -20,7 +20,7 @@ import {
   LuxPipesModule,
   LuxPopupsModule,
   LuxSnackbarService
-} from '@IHK-GfI/lux-components';
+} from '@ihk-gfi/lux-components';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';

@@ -1,38 +1,44 @@
-# Update der Lux-Components mithilfe von Angular Schematics
+# LUX-Components-Update
 
-Für automatisierte Updates von LUX-Components Versionen nutzen wir Angular Schematics. Das entsprechende Projekt nennt sich lux-components-update.
+Dieses Projekt enthält Updateskripte (umgesetzt mit Angular Schematics) für die LUX-Components. 
+D.h. alle Projekte auf Basis der LUX-Components können über dieses Projekt einfach aktualisiert 
+werden. 
 
 ## Voraussetzungen 
 
-Stellen Sie zunächst sicher, dass Sie die Node v6.9 oder höher installiert haben. Installieren Sie anschließend zwei NPM-Tools global:
+Stellen Sie zunächst sicher, dass Sie die Node-Version 6.9 oder höher installiert haben. 
+Installieren Sie anschließend die folgenden zwei NPM-Pakte global:
 
 ```bash
 npm install -g @angular/cli
 npm install -g @angular-devkit/schematics-cli
 ```
 
+## LUX-Components aktualisieren
+
+Um ein Updateskript zu starten, kann der folgende Befehl verwendet werden: 
+
+```bash
+ng generate @ihk-gfi/lux-components-update:lux-version-x.y.z
+```
+
+Dabei ist zu beachten, dass die LUX-Componentsversion in der package.json 
+genau eine Version unterhalb des Updateskripts sein muss. D.h.
+für das Updateskript "ng generate @ihk-gfi/lux-components-update:lux-version-1.8.4"
+muss die LUX-Componentsversion 1.8.3 in der package.json stehen.
+
+Falls erst einmal ein Testdurchlauf ohne persistente Änderungen gewünscht ist, 
+ist es möglich den Aufruf mit dem Flag "--dry-run" zu versehen:
+
+```bash
+ng generate @ihk-gfi/lux-components-update:lux-version-x.y.z --dry-run
+```
+
 ## Ein neuen Lux-Components-Updater erstellen
 
-Um eine neue Version des Lux-Components-Updater anzulegen, wird das Ausführen folgenden Befehls benötigt:
+Um eine neue Version des Lux-Components-Updater anzulegen, 
+kann der folgende Befehl verwendet werden: 
 
 ```bash
 schematics lux-components-update:lux-create-version
 ```
-
-## Ausführen eines Lux-Components-Updaters
-
-Eine Update-Schematic kann über den folgenden Aufruf gestartet werden:
-
-```bash
-ng generate lux-components-update:lux-version-x.y.z
-```
-
-Dabei ist zu beachten, dass die aktuelle LUX-Components Version in der package.json eine Version unterhalb des Schematics-Generators sein muss 
-(z.B. "lux-components": "1.7.9" wenn "ng generate lux-components-update:lux-version-1.7.10" genutzt werden soll).
-
-Falls erst einmal ein Testdurchlauf ohne persistente Änderungen gewünscht ist, ist es möglich den Aufruf mit dem Flag --dry-run zu versehen:
-
-```bash
-ng generate lux-components-update:lux-version-x.y.z --dry-run
-```
-
