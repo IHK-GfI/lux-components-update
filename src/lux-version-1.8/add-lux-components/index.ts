@@ -56,7 +56,7 @@ export function checkVersions(): Rule {
     return (tree: Tree, context: SchematicContext) => {
         logInfoWithDescriptor('Starte die Versionsprüfung.');
         return waitForTreeCallback(tree, () => {
-            const angularVersion = '8.2.7';
+            const angularVersion = '8.';
             validateAngularVersion(tree, context, angularVersion);
 
             const minimumNodeVersion = '10.0.0';
@@ -185,7 +185,7 @@ export function updatePackageJsonDevDependencies(): Rule {
                 { type: NodeDependencyType.Dev, version: '5.20.0', name: 'tslint' },
                 { type: NodeDependencyType.Dev, version: '3.0.2', name: 'tslint-angular' },
                 { type: NodeDependencyType.Dev, version: '3.4.5', name: 'typescript' },
-                { type: NodeDependencyType.Dev, version: '0.0.57', name: '@ihk-gfi/lux-components-update' },
+                { type: NodeDependencyType.Dev, version: '0.0.58', name: '@ihk-gfi/lux-components-update' },
             ];
 
             devDependencies.forEach(devDependency => {
