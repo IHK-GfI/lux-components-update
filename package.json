@@ -1,6 +1,6 @@
 {
   "name": "@ihk-gfi/lux-components-update",
-  "version": "0.0.55",
+  "version": "0.0.56",
   "description": "Schematics für die Aktualisierung von LUX-Applikationen",
   "scripts": {
     "build": "tsc -p tsconfig.json",
@@ -12,6 +12,13 @@
     "blueprint"
   ],
   "license": "IHK-GfI Open-Source-Lizenz",
+  "files": [
+    "src/**/*",
+    "LICENSE",
+    "package.json",
+    "README.md",
+    "tsconfig.json"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/IHK-GfI/lux-components-update.git"
