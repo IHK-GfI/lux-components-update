@@ -100,12 +100,12 @@ export function updateStylesScss(options: any): Rule {
  */
 export function updatePackageJson(): Rule {
     return (tree: Tree, context: SchematicContext) => {
-        logInfoWithDescriptor('Aktualisiere LUX-Components Version auf 1.8.2.');
+        logInfoWithDescriptor('Aktualisiere LUX-Components Version auf 1.8.5.');
         return waitForTreeCallback(tree, () => {
             const newDependency: NodeDependency = {
                 type   : NodeDependencyType.Default,
-                version: '1.8.2',
-                name   : 'lux-components'
+                version: '1.8.5',
+                name   : '@ihk-gfi/lux-components'
             };
             updatePackageJsonDependency(tree, context, newDependency);
             logSuccess(`package.json erfolgreich aktualisiert.`);
@@ -135,7 +135,7 @@ export function updatePackageJsonDependencies(): Rule {
                 { type: NodeDependencyType.Default, version: '0.10.2', name: 'zone.js' },
                 { type: NodeDependencyType.Default, version: '2.0.8', name: 'hammerjs' },
                 { type: NodeDependencyType.Default, version: '5.11.2', name: '@fortawesome/fontawesome-free' },
-                { type: NodeDependencyType.Default, version: '1.8.4', name: '@IHK-GfI/lux-components' },
+                { type: NodeDependencyType.Default, version: '1.8.5', name: '@ihk-gfi/lux-components' },
                 { type: NodeDependencyType.Default, version: '6.0.2', name: 'ng2-pdf-viewer' }
             ];
 
@@ -185,7 +185,7 @@ export function updatePackageJsonDevDependencies(): Rule {
                 { type: NodeDependencyType.Dev, version: '5.20.0', name: 'tslint' },
                 { type: NodeDependencyType.Dev, version: '3.0.2', name: 'tslint-angular' },
                 { type: NodeDependencyType.Dev, version: '3.4.5', name: 'typescript' },
-                { type: NodeDependencyType.Dev, version: '0.0.40', name: 'lux-components-update' },
+                { type: NodeDependencyType.Dev, version: '^0.0.56', name: '@ihk-gfi/lux-components-update' },
             ];
 
             devDependencies.forEach(devDependency => {
