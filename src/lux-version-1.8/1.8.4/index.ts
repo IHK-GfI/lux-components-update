@@ -1,10 +1,16 @@
 import { chain, Rule, SchematicContext, Tree, } from '@angular-devkit/schematics';
 import { getProject } from '@schematics/angular/utility/project';
-import { validateIhkGfiLuxComponentsVersion, validateNodeVersion } from '../../utility/validation';
-import { NodeDependency, NodeDependencyType, updatePackageJsonDependency } from '../../utility/dependencies';
+import { validateLuxComponentsVersion, validateNodeVersion } from '../../utility/validation';
+import {
+    deletePackageJsonDependency,
+    NodeDependency,
+    NodeDependencyType,
+    updatePackageJsonDependency
+} from '../../utility/dependencies';
 import { formattedSchematicsException, logInfoWithDescriptor, logNewUpdate, logSuccess, } from '../../utility/logging';
 import chalk from 'chalk';
-import { checkSmoketestScriptExists, runInstallAndLogToDos, waitForTreeCallback } from '../../utility/util';
+import {checkSmoketestScriptExists, replaceAll, runInstallAndLogToDos, waitForTreeCallback} from '../../utility/util';
+import {iterateFilesAndModifyContent} from "../../utility/files";
 
 /**
  * Haupt-Rule für diesen Schematic-Generator.
@@ -14,10 +20,27 @@ export const luxVersion: (options: any) => Rule = (options: any) => {
     return chain([
         setupProject(options),
         checkVersions(),
+        updateLuxComponentsImports(options),
         updatePackageJson(),
         todosForUser()
     ]);
 };
+
+export function updateLuxComponentsImports(options: any): Rule {
+    return (tree: Tree, context: SchematicContext) => {
+        logInfoWithDescriptor('Ersetze "lux-components" durch "@ihk-gfi/lux-components" in TS-Dateien.');
+
+        iterateFilesAndModifyContent(tree, options.path, (filePath: string, content: string) => {
+            let modifiedContent = replaceAll(content, "from 'lux-components'", "from '@ihk-gfi/lux-components'");
+
+            if (content !== modifiedContent) {
+                tree.overwrite(filePath, modifiedContent);
+            }
+        }, '.ts');
+
+        return tree;
+    };
+}
 
 /**
  * Prüft, ob die Property "project" gesetzt ist und
@@ -26,7 +49,7 @@ export const luxVersion: (options: any) => Rule = (options: any) => {
  */
 export function setupProject(options: any): Rule {
     return (tree: Tree, context: SchematicContext) => {
-        logNewUpdate('<%= dasherize(name) %>');
+        logNewUpdate('1.8.4');
         logInfoWithDescriptor('Starte Konfiguration der Schematic.');
         return waitForTreeCallback(tree, () => {
             if (!options.project) {
@@ -53,10 +76,10 @@ export function checkVersions(): Rule {
     return (tree: Tree, context: SchematicContext) => {
         logInfoWithDescriptor('Starte die Versionsprüfung.');
         return waitForTreeCallback(tree, () => {
-            const minimumLuxComponentsVersion = '<%= dasherize(lastVersion) %>';
-            validateIhkGfiLuxComponentsVersion(tree, context, minimumLuxComponentsVersion);
+            const minimumLuxComponentsVersion = '1.8.3';
+            validateLuxComponentsVersion(tree, context, minimumLuxComponentsVersion);
 
-            const minimumNodeVersion = '<%= dasherize(nodeVersion) %>';
+            const minimumNodeVersion = '10.0.0';
             validateNodeVersion(context, minimumNodeVersion);
 
             logSuccess(`Versionen erfolgreich geprüft.`);
@@ -70,14 +93,24 @@ export function checkVersions(): Rule {
  */
 export function updatePackageJson(): Rule {
     return (tree: Tree, context: SchematicContext) => {
-        logInfoWithDescriptor('Aktualisiere LUX-Components Version auf <%= dasherize(name) %>.');
+        logInfoWithDescriptor('Aktualisiere LUX-Components Version auf 1.8.4.');
         return waitForTreeCallback(tree, () => {
-            const newDependency: NodeDependency = {
-                type: NodeDependencyType.Default,
-                version: '<%= dasherize(name) %>',
-                name: '@ihk-gfi/lux-components'
-            };
-            updatePackageJsonDependency(tree, context, newDependency);
+            const devDependencies: NodeDependency[] = [
+                { type: NodeDependencyType.Default, version: '', name: 'lux-components' },
+                { type: NodeDependencyType.Dev, version: '', name: 'lux-components-update' },
+            ];
+            devDependencies.forEach(dependency => {
+                deletePackageJsonDependency(tree, context, dependency);
+            });
+
+            const newDependency: NodeDependency[] = [
+                { type: NodeDependencyType.Default, version: '1.8.4', name: '@ihk-gfi/lux-components' },
+                { type: NodeDependencyType.Dev, version: '0.0.58', name: '@ihk-gfi/lux-components-update' },
+            ];
+            newDependency.forEach(dependency => {
+                updatePackageJsonDependency(tree, context, dependency);
+            });
+
             logSuccess(`package.json erfolgreich aktualisiert.`);
             return tree;
         });
@@ -91,7 +124,7 @@ export function todosForUser(): Rule {
     return (tree: Tree, context: SchematicContext) => {
         runInstallAndLogToDos(context,
             `Bitte starten Sie ${ chalk.redBright('npm run smoketest') } um möglichen Fehlern vorzugreifen.`,
-            `Weitere Informationen: https://confluence.gfi.ihk.de/display/AF/Update+Guide#UpdateGuide-UmstellungaufVersion<%= dasherize(name) %>`
+            `Weitere Informationen: https://confluence.gfi.ihk.de/display/AF/Update+Guide#UpdateGuide-UmstellungaufVersion1.8.4`
         );
         return tree;
     };
