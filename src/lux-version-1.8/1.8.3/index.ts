@@ -78,12 +78,15 @@ export function updatePackageJson(): Rule {
     return (tree: Tree, context: SchematicContext) => {
         logInfoWithDescriptor('Aktualisiere LUX-Components Version auf 1.8.3.');
         return waitForTreeCallback(tree, () => {
-            const newDependency: NodeDependency = {
-                type: NodeDependencyType.Default,
-                version: '1.8.3',
-                name: 'lux-components'
-            };
-            updatePackageJsonDependency(tree, context, newDependency);
+            const newDependency: NodeDependency[] = [
+                { type: NodeDependencyType.Default, version: '1.8.3', name: 'lux-components' },
+                { type: NodeDependencyType.Default, version: '6.0.2', name: 'ng2-pdf-viewer' }
+            ];
+
+            newDependency.forEach(dependency => {
+                updatePackageJsonDependency(tree, context, dependency);
+            });
+
             logSuccess(`package.json erfolgreich aktualisiert.`);
             return tree;
         });
