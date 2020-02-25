@@ -3,8 +3,7 @@ import { getProject } from '@schematics/angular/utility/project';
 import { validateIhkGfiLuxComponentsVersion, validateNodeVersion } from '../../utility/validation';
 import { NodeDependency, NodeDependencyType, updatePackageJsonDependency } from '../../utility/dependencies';
 import { formattedSchematicsException, logInfoWithDescriptor, logNewUpdate, logSuccess, } from '../../utility/logging';
-import chalk from 'chalk';
-import { checkSmoketestScriptExists, runInstallAndLogToDos, waitForTreeCallback } from '../../utility/util';
+import { replaceAll, runInstallAndLogToDos, waitForTreeCallback } from '../../utility/util';
 
 /**
  * Haupt-Rule für diesen Schematic-Generator.
@@ -37,8 +36,6 @@ export function setupProject(options: any): Rule {
             if (options.path === undefined) {
                 options.path = project.root;
             }
-
-            checkSmoketestScriptExists(tree, context);
 
             logSuccess(`Schematic-Konfiguration für Projekt "${ options.project }" erfolgreich.`);
             return tree;
@@ -89,9 +86,11 @@ export function updatePackageJson(): Rule {
  */
 export function todosForUser(): Rule {
     return (tree: Tree, context: SchematicContext) => {
+        let version = '<%= dasherize(name) %>';
+        version = replaceAll(version, "\.", "");
+
         runInstallAndLogToDos(context,
-            `Bitte starten Sie ${ chalk.redBright('npm run smoketest') } um möglichen Fehlern vorzugreifen.`,
-            `Weitere Informationen: https://confluence.gfi.ihk.de/display/AF/Update+Guide#UpdateGuide-UmstellungaufVersion<%= dasherize(name) %>`
+            `Manuelle Schritte aus dem Update Guide (https://github.com/IHK-GfI/lux-components/wiki/Upate-Guide#version-${version}) durchführen!`
         );
         return tree;
     };

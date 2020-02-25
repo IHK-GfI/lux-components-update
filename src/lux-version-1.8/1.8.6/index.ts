@@ -1,12 +1,9 @@
 import { chain, Rule, SchematicContext, Tree, } from '@angular-devkit/schematics';
 import { getProject } from '@schematics/angular/utility/project';
-import {
-    validateIhkGfiLuxComponentsVersion,
-    validateNodeVersion
-} from '../../utility/validation';
+import { validateIhkGfiLuxComponentsVersion, validateNodeVersion } from '../../utility/validation';
 import { NodeDependency, NodeDependencyType, updatePackageJsonDependency } from '../../utility/dependencies';
 import { formattedSchematicsException, logInfoWithDescriptor, logNewUpdate, logSuccess, } from '../../utility/logging';
-import { runInstallAndLogToDos, waitForTreeCallback } from '../../utility/util';
+import { replaceAll, runInstallAndLogToDos, waitForTreeCallback } from '../../utility/util';
 
 /**
  * Haupt-Rule für diesen Schematic-Generator.
@@ -28,7 +25,7 @@ export const luxVersion: (options: any) => Rule = (options: any) => {
  */
 export function setupProject(options: any): Rule {
     return (tree: Tree, context: SchematicContext) => {
-        logNewUpdate('1.8.5');
+        logNewUpdate('1.8.6');
         logInfoWithDescriptor('Starte Konfiguration der Schematic.');
         return waitForTreeCallback(tree, () => {
             if (!options.project) {
@@ -53,7 +50,7 @@ export function checkVersions(): Rule {
     return (tree: Tree, context: SchematicContext) => {
         logInfoWithDescriptor('Starte die Versionsprüfung.');
         return waitForTreeCallback(tree, () => {
-            const minimumLuxComponentsVersion = '1.8.4';
+            const minimumLuxComponentsVersion = '1.8.5';
             validateIhkGfiLuxComponentsVersion(tree, context, minimumLuxComponentsVersion);
 
             const minimumNodeVersion = '10.0.0';
@@ -70,11 +67,11 @@ export function checkVersions(): Rule {
  */
 export function updatePackageJson(): Rule {
     return (tree: Tree, context: SchematicContext) => {
-        logInfoWithDescriptor('Aktualisiere LUX-Components Version auf 1.8.5.');
+        logInfoWithDescriptor('Aktualisiere LUX-Components Version auf 1.8.6.');
         return waitForTreeCallback(tree, () => {
             const newDependency: NodeDependency = {
                 type: NodeDependencyType.Default,
-                version: '1.8.5',
+                version: '1.8.6',
                 name: '@ihk-gfi/lux-components'
             };
             updatePackageJsonDependency(tree, context, newDependency);
@@ -89,8 +86,11 @@ export function updatePackageJson(): Rule {
  */
 export function todosForUser(): Rule {
     return (tree: Tree, context: SchematicContext) => {
+        let version = '1.8.6';
+        version = replaceAll(version, "\.", "");
+
         runInstallAndLogToDos(context,
-            `Manuelle Schritte aus dem Update Guide (https://github.com/IHK-GfI/lux-components/wiki/Upate-Guide#version-185) ausführen!`
+            `Manuelle Schritte aus dem Update Guide (https://github.com/IHK-GfI/lux-components/wiki/Upate-Guide#version-${version}) durchführen!`
         );
         return tree;
     };
