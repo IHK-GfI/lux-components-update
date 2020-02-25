@@ -8,8 +8,7 @@ import {
     updatePackageJsonDependency
 } from '../../utility/dependencies';
 import { formattedSchematicsException, logInfoWithDescriptor, logNewUpdate, logSuccess, } from '../../utility/logging';
-import chalk from 'chalk';
-import {checkSmoketestScriptExists, replaceAll, runInstallAndLogToDos, waitForTreeCallback} from '../../utility/util';
+import {replaceAll, runInstallAndLogToDos, waitForTreeCallback} from '../../utility/util';
 import {iterateFilesAndModifyContent} from "../../utility/files";
 
 /**
@@ -60,8 +59,6 @@ export function setupProject(options: any): Rule {
             if (options.path === undefined) {
                 options.path = project.root;
             }
-
-            checkSmoketestScriptExists(tree, context);
 
             logSuccess(`Schematic-Konfiguration für Projekt "${ options.project }" erfolgreich.`);
             return tree;
@@ -123,8 +120,7 @@ export function updatePackageJson(): Rule {
 export function todosForUser(): Rule {
     return (tree: Tree, context: SchematicContext) => {
         runInstallAndLogToDos(context,
-            `Bitte starten Sie ${ chalk.redBright('npm run smoketest') } um möglichen Fehlern vorzugreifen.`,
-            `Weitere Informationen: https://confluence.gfi.ihk.de/display/AF/Update+Guide#UpdateGuide-UmstellungaufVersion1.8.4`
+            `Manuelle Schritte aus dem Update Guide (https://github.com/IHK-GfI/lux-components/wiki/Upate-Guide#version-184) ausführen!`
         );
         return tree;
     };

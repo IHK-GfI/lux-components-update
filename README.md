@@ -7,10 +7,9 @@ werden.
 ## Voraussetzungen 
 
 Stellen Sie zunächst sicher, dass Sie die Node-Version 6.9 oder höher installiert haben. 
-Installieren Sie anschließend die folgenden zwei NPM-Pakte global:
+Installieren Sie anschließend das folgende NPM-Paket global:
 
 ```bash
-npm install -g @angular/cli
 npm install -g @angular-devkit/schematics-cli
 ```
 
@@ -40,5 +39,5 @@ Um eine neue Version des Lux-Components-Updater anzulegen,
 kann der folgende Befehl verwendet werden: 
 
 ```bash
-schematics lux-components-update:lux-create-version
+schematics @ihk-gfi/lux-components-update:lux-create-version
 ```

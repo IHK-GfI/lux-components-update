@@ -115,6 +115,11 @@
       "description": "Aktualisiert die LUX-Applikation zur Version 1.8.5 der LUX-Components.",
       "factory": "./lux-version-1.8/1.8.5/index#luxVersion",
       "schema": "./lux-version-1.8/1.8.5/schema.json"
+    },
+    "lux-version-1.8.6": {
+      "description": "Aktualisiert die LUX-Applikation zur Version 1.8.6 der LUX-Components.",
+      "factory": "./lux-version-1.8/1.8.6/index#luxVersion",
+      "schema": "./lux-version-1.8/1.8.6/schema.json"
     }
   }
 }
