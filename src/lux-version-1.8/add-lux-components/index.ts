@@ -135,7 +135,7 @@ export function updatePackageJsonDependencies(): Rule {
                 { type: NodeDependencyType.Default, version: '0.10.2', name: 'zone.js' },
                 { type: NodeDependencyType.Default, version: '2.0.8', name: 'hammerjs' },
                 { type: NodeDependencyType.Default, version: '5.11.2', name: '@fortawesome/fontawesome-free' },
-                { type: NodeDependencyType.Default, version: '1.8.6', name: '@ihk-gfi/lux-components' },
+                { type: NodeDependencyType.Default, version: '1.8.7', name: '@ihk-gfi/lux-components' },
                 { type: NodeDependencyType.Default, version: '6.0.2', name: 'ng2-pdf-viewer' }
             ];
 
