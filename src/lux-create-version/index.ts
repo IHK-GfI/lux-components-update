@@ -41,8 +41,10 @@ export function setup(options: any): Rule {
     // Node-Version entsprechend der Versionsnummer setzen
     if(semver.cmp(options.name, '<', '1.8.0')) {
       options.nodeVersion = '8.0.0';
-    } else {
+    } else if(semver.cmp(options.name, '<', '1.9.0')) {
       options.nodeVersion = '10.0.0';
+    } else {
+      options.nodeVersion = '10.16.3';
     }
     // Vorgänger-Version bestimmen
     const latestLuxVersionFolder = tree.getDir('src/lux-version-' + semver.major(options.name) + "." + semver.minor(options.name)).subdirs.filter(element => element.indexOf('add-lux-components') < 0);

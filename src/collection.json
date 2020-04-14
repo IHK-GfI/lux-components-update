@@ -125,6 +125,16 @@
       "description": "Aktualisiert die LUX-Applikation zur Version 1.8.7 der LUX-Components.",
       "factory": "./lux-version-1.8/1.8.7/index#luxVersion",
       "schema": "./lux-version-1.8/1.8.7/schema.json"
+    },
+    "add-lux-components-1.9": {
+      "description": "Fügt die LUX-Components zur App (nur Angular 9) hinzu.",
+      "factory": "./lux-version-1.9/add-lux-components/index#addluxComponents",
+      "schema": "./lux-version-1.9/add-lux-components/schema.json"
+    },
+    "lux-version-1.9.0": {
+      "description": "Aktualisiert die LUX-Applikation zur Version 1.9.0 der LUX-Components.",
+      "factory": "./lux-version-1.9/1.9.0/index#luxVersion",
+      "schema": "./lux-version-1.9/1.9.0/schema.json"
     }
   }
 }

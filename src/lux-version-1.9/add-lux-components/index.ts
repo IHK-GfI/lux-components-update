@@ -1,6 +1,6 @@
 import { chain, Rule, SchematicContext, Tree, } from '@angular-devkit/schematics';
 import { getProject } from '@schematics/angular/utility/project';
-import { NodeDependency, NodeDependencyType, updatePackageJsonDependency } from '../../utility/dependencies';
+import { NodeDependency, NodeDependencyType, updatePackageJsonDependencyForceUpdate } from '../../utility/dependencies';
 import { iterateFilesAndModifyContent, moveFilesToDirectory } from '../../utility/files';
 import { formattedSchematicsException, logInfoWithDescriptor, logSuccess, } from '../../utility/logging';
 import { replaceAll, runInstallAndLogToDos, waitForTreeCallback } from '../../utility/util';
@@ -56,10 +56,10 @@ export function checkVersions(): Rule {
     return (tree: Tree, context: SchematicContext) => {
         logInfoWithDescriptor('Starte die Versionsprüfung.');
         return waitForTreeCallback(tree, () => {
-            const angularVersion = '8.';
+            const angularVersion = '9.';
             validateAngularVersion(tree, context, angularVersion);
 
-            const minimumNodeVersion = '10.0.0';
+            const minimumNodeVersion = '10.16.3';
             validateNodeVersion(context, minimumNodeVersion);
 
             logSuccess(`Versionen erfolgreich geprüft.`);
@@ -100,14 +100,14 @@ export function updateStylesScss(options: any): Rule {
  */
 export function updatePackageJson(): Rule {
     return (tree: Tree, context: SchematicContext) => {
-        logInfoWithDescriptor('Aktualisiere LUX-Components Version auf 1.8.7.');
+        logInfoWithDescriptor('Aktualisiere LUX-Components Version auf 1.9.0');
         return waitForTreeCallback(tree, () => {
             const newDependency: NodeDependency = {
                 type   : NodeDependencyType.Default,
-                version: '1.8.7',
+                version: '1.9.0',
                 name   : '@ihk-gfi/lux-components'
             };
-            updatePackageJsonDependency(tree, context, newDependency);
+            updatePackageJsonDependencyForceUpdate(tree, context, newDependency, true);
             logSuccess(`package.json erfolgreich aktualisiert.`);
             return tree;
         });
@@ -119,28 +119,30 @@ export function updatePackageJsonDependencies(): Rule {
         logInfoWithDescriptor('Füge neue Dependencies zu package.json hinzu.');
         return waitForTreeCallback(tree, () => {
             const dependencies: NodeDependency[] = [
-                { type: NodeDependencyType.Default, version: '8.2.7', name: '@angular/animations' },
-                { type: NodeDependencyType.Default, version: '8.2.7', name: '@angular/common' },
-                { type: NodeDependencyType.Default, version: '8.2.7', name: '@angular/core' },
-                { type: NodeDependencyType.Default, version: '8.0.0-beta.27', name: '@angular/flex-layout' },
-                { type: NodeDependencyType.Default, version: '8.2.7', name: '@angular/forms' },
-                { type: NodeDependencyType.Default, version: '8.2.7', name: '@angular/platform-browser' },
-                { type: NodeDependencyType.Default, version: '8.2.7', name: '@angular/platform-browser-dynamic' },
-                { type: NodeDependencyType.Default, version: '8.2.7', name: '@angular/router' },
-                { type: NodeDependencyType.Default, version: '8.2.0', name: '@angular/cdk' },
-                { type: NodeDependencyType.Default, version: '8.2.0', name: '@angular/material' },
-                { type: NodeDependencyType.Default, version: '3.2.1', name: 'core-js' },
+                { type: NodeDependencyType.Default, version: '9.1.0', name: '@angular/animations' },
+                { type: NodeDependencyType.Default, version: '9.1.0', name: '@angular/common' },
+                { type: NodeDependencyType.Default, version: '9.1.0', name: '@angular/core' },
+                { type: NodeDependencyType.Default, version: '9.1.0', name: '@angular/compiler' },
+                { type: NodeDependencyType.Default, version: '9.0.0-beta.29', name: '@angular/flex-layout' },
+                { type: NodeDependencyType.Default, version: '9.1.0', name: '@angular/forms' },
+                { type: NodeDependencyType.Default, version: '9.1.0', name: '@angular/platform-browser' },
+                { type: NodeDependencyType.Default, version: '9.1.0', name: '@angular/platform-browser-dynamic' },
+                { type: NodeDependencyType.Default, version: '9.1.0', name: '@angular/router' },
+                { type: NodeDependencyType.Default, version: '9.1.0', name: '@angular/cdk' },
+                { type: NodeDependencyType.Default, version: '9.1.0', name: '@angular/material' },
+                { type: NodeDependencyType.Default, version: '3.6.4', name: 'core-js' },
                 { type: NodeDependencyType.Default, version: '5.0.1', name: 'material-design-icons-iconfont' },
-                { type: NodeDependencyType.Default, version: '6.5.3', name: 'rxjs' },
-                { type: NodeDependencyType.Default, version: '0.10.2', name: 'zone.js' },
+                { type: NodeDependencyType.Default, version: '6.5.4', name: 'rxjs' },
+                { type: NodeDependencyType.Default, version: '0.10.3', name: 'zone.js' },
+                { type: NodeDependencyType.Default, version: '1.10.0', name: 'tslib' },
                 { type: NodeDependencyType.Default, version: '2.0.8', name: 'hammerjs' },
-                { type: NodeDependencyType.Default, version: '5.11.2', name: '@fortawesome/fontawesome-free' },
-                { type: NodeDependencyType.Default, version: '1.8.7', name: '@ihk-gfi/lux-components' },
-                { type: NodeDependencyType.Default, version: '6.0.2', name: 'ng2-pdf-viewer' }
+                { type: NodeDependencyType.Default, version: '5.13.0', name: '@fortawesome/fontawesome-free' },
+                { type: NodeDependencyType.Default, version: '1.9.0', name: '@ihk-gfi/lux-components' },
+                { type: NodeDependencyType.Default, version: '6.1.1', name: 'ng2-pdf-viewer' }
             ];
 
             dependencies.forEach(dependency => {
-                updatePackageJsonDependency(tree, context, dependency);
+                updatePackageJsonDependencyForceUpdate(tree, context, dependency, true);
             });
             logSuccess('Dependencies aktualisiert.');
             return tree;
@@ -156,40 +158,38 @@ export function updatePackageJsonDevDependencies(): Rule {
         logInfoWithDescriptor('Füge neue DevDependencies zu package.json hinzu.');
         return waitForTreeCallback(tree, () => {
             const devDependencies: NodeDependency[] = [
-                { type: NodeDependencyType.Dev, version: '0.803.5', name: '@angular-devkit/build-angular' },
-                { type: NodeDependencyType.Dev, version: '8.2.7', name: '@angular/compiler' },
-                { type: NodeDependencyType.Dev, version: '8.2.7', name: '@angular/compiler-cli' },
-                { type: NodeDependencyType.Dev, version: '8.3.5', name: '@angular/cli' },
-                { type: NodeDependencyType.Dev, version: '8.2.7', name: '@angular/language-service' },
-                { type: NodeDependencyType.Dev, version: '1.1.10', name: '@compodoc/compodoc' },
-                { type: NodeDependencyType.Dev, version: '3.4.0', name: '@types/jasmine' },
-                { type: NodeDependencyType.Dev, version: '2.0.6', name: '@types/jasminewd2' },
-                { type: NodeDependencyType.Dev, version: '12.7.5', name: '@types/node' },
-                { type: NodeDependencyType.Dev, version: '5.1.1', name: 'codelyzer' },
+                { type: NodeDependencyType.Dev, version: '0.901.0', name: '@angular-devkit/build-angular' },
+                { type: NodeDependencyType.Dev, version: '9.1.0', name: '@angular/compiler-cli' },
+                { type: NodeDependencyType.Dev, version: '9.1.0', name: '@angular/cli' },
+                { type: NodeDependencyType.Dev, version: '9.1.0', name: '@angular/language-service' },
+                { type: NodeDependencyType.Dev, version: '1.1.11', name: '@compodoc/compodoc' },
+                { type: NodeDependencyType.Dev, version: '3.5.7', name: '@types/jasmine' },
+                { type: NodeDependencyType.Dev, version: '2.0.8', name: '@types/jasminewd2' },
+                { type: NodeDependencyType.Dev, version: '13.7.7', name: '@types/node' },
+                { type: NodeDependencyType.Dev, version: '5.2.1', name: 'codelyzer' },
                 { type: NodeDependencyType.Dev, version: '3.5.0', name: 'jasmine-core' },
                 { type: NodeDependencyType.Dev, version: '4.2.1', name: 'jasmine-spec-reporter' },
-                { type: NodeDependencyType.Dev, version: '4.3.0', name: 'karma' },
+                { type: NodeDependencyType.Dev, version: '4.4.1', name: 'karma' },
                 { type: NodeDependencyType.Dev, version: '3.1.0', name: 'karma-chrome-launcher' },
                 { type: NodeDependencyType.Dev, version: '2.0.0', name: 'karma-cli' },
-                { type: NodeDependencyType.Dev, version: '2.1.0', name: 'karma-coverage-istanbul-reporter' },
+                { type: NodeDependencyType.Dev, version: '2.1.1', name: 'karma-coverage-istanbul-reporter' },
                 { type: NodeDependencyType.Dev, version: '0.4.2', name: 'karma-edge-launcher' },
-                { type: NodeDependencyType.Dev, version: '1.2.0', name: 'karma-firefox-launcher' },
+                { type: NodeDependencyType.Dev, version: '1.3.0', name: 'karma-firefox-launcher' },
                 { type: NodeDependencyType.Dev, version: '1.0.0', name: 'karma-ie-launcher' },
-                { type: NodeDependencyType.Dev, version: '2.0.1', name: 'karma-jasmine' },
-                { type: NodeDependencyType.Dev, version: '1.4.2', name: 'karma-jasmine-html-reporter' },
+                { type: NodeDependencyType.Dev, version: '3.1.1', name: 'karma-jasmine' },
+                { type: NodeDependencyType.Dev, version: '1.5.2', name: 'karma-jasmine-html-reporter' },
                 { type: NodeDependencyType.Dev, version: '1.0.0', name: 'karma-safari-launcher' },
-                { type: NodeDependencyType.Dev, version: '5.4.2', name: 'protractor' },
-                { type: NodeDependencyType.Dev, version: '2.0.3', name: 'retire' },
-                { type: NodeDependencyType.Dev, version: '4.12.0', name: 'node-sass' },
-                { type: NodeDependencyType.Dev, version: '8.4.1', name: 'ts-node' },
-                { type: NodeDependencyType.Dev, version: '5.20.0', name: 'tslint' },
+                { type: NodeDependencyType.Dev, version: '4.13.1', name: 'node-sass' },
+                { type: NodeDependencyType.Dev, version: '5.4.3', name: 'protractor' },
+                { type: NodeDependencyType.Dev, version: '8.6.2', name: 'ts-node' },
+                { type: NodeDependencyType.Dev, version: '5.20.1', name: 'tslint' },
                 { type: NodeDependencyType.Dev, version: '3.0.2', name: 'tslint-angular' },
-                { type: NodeDependencyType.Dev, version: '3.4.5', name: 'typescript' },
-                { type: NodeDependencyType.Dev, version: '0.0.61', name: '@ihk-gfi/lux-components-update' },
+                { type: NodeDependencyType.Dev, version: '3.7.5', name: 'typescript' },
+                { type: NodeDependencyType.Dev, version: '^0.0.62', name: '@ihk-gfi/lux-components-update' },
             ];
 
             devDependencies.forEach(devDependency => {
-                updatePackageJsonDependency(tree, context, devDependency);
+                updatePackageJsonDependencyForceUpdate(tree, context, devDependency, true);
             });
             logSuccess('DevDependencies aktualisiert.');
             return tree;

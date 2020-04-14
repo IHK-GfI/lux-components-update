@@ -140,7 +140,7 @@ describe('lux-create-version', () => {
             let testOptions = { name: '1.9.0', nodeVersion: '', lastVersion: '' };
             callRule(setup(testOptions), observableOf(appTree), context).subscribe(() => {
                 expect(testOptions.name).toEqual('1.9.0');
-                expect(testOptions.nodeVersion).toEqual('10.0.0');
+                expect(testOptions.nodeVersion).toEqual('10.16.3');
                 expect(testOptions.lastVersion).toEqual('1.8.2');
                 done();
             }, (reason) => expect(reason).toBeUndefined());
@@ -155,7 +155,7 @@ describe('lux-create-version', () => {
             let testOptions = { name: '1.11.0', nodeVersion: '', lastVersion: '' };
             callRule(setup(testOptions), observableOf(appTree), context).subscribe(() => {
                 expect(testOptions.name).toEqual('1.11.0');
-                expect(testOptions.nodeVersion).toEqual('10.0.0');
+                expect(testOptions.nodeVersion).toEqual('10.16.3');
                 expect(testOptions.lastVersion).toEqual('1.10.15');
                 done();
             }, (reason) => expect(reason).toBeUndefined());
@@ -169,7 +169,7 @@ describe('lux-create-version', () => {
             let testOptions = { name: '2.0.1', nodeVersion: '', lastVersion: '' };
             callRule(setup(testOptions), observableOf(appTree), context).subscribe(() => {
                 expect(testOptions.name).toEqual('2.0.1');
-                expect(testOptions.nodeVersion).toEqual('10.0.0');
+                expect(testOptions.nodeVersion).toEqual('10.16.3');
                 expect(testOptions.lastVersion).toEqual('1.10.15');
                 done();
             }, (reason) => expect(reason).toBeUndefined());
