@@ -32,6 +32,17 @@ export interface NodeDependency {
  * @param dependency
  */
 export function updatePackageJsonDependency(tree: Tree, context: SchematicContext, dependency: NodeDependency): void {
+    updatePackageJsonDependencyForceUpdate(tree, context, dependency, false);
+}
+
+/**
+ * Aktualisiert eine Dependency in der package.json bzw. fügt diese hinzu, falls sie noch nicht vorhanden ist.
+ * @param tree
+ * @param context
+ * @param dependency
+ * @param forceUpate Gibt an, ob die Dependencies auch überschrieben werden, wenn diese älter als die vorhandenden Dependencies sind.
+ */
+export function updatePackageJsonDependencyForceUpdate(tree: Tree, context: SchematicContext, dependency: NodeDependency, forceUpate: boolean): void {
     const packageJson: JsonAstObject = readPackageJson(tree);
     const dependencyTypeNode: JsonAstNode | null = findPropertyInAstObject(packageJson, dependency.type);
     const recorder: UpdateRecorder = tree.beginUpdate(packageJsonPath);
@@ -72,7 +83,16 @@ export function updatePackageJsonDependency(tree: Tree, context: SchematicContex
                     logInfo(`Dependency ` + chalk.greenBright(`${dependency.name}`) + ` gefunden. ^ oder ~ entfernt.`);
                 }
             } else if(semver.cmp(packageJsonDependency.version.replace(/([\^~])/g, ''), ">", dependency.version)) {
-                logWarn(`Dependency ` + chalk.greenBright(`${dependency.name}`) + ` gefunden. Die aktuelle Version ` + packageJsonDependency.version + ` ist größer als ` + dependency.version + `. Die Version bestehende Version wurde nicht aktualisiert.`);
+                if (forceUpate) {
+                    const {end, start} = dependencyNode;
+                    // Die neuere Version entfernen
+                    recorder.remove(start.offset, end.offset - start.offset);
+                    // Die gewollte Version hinzufügen
+                    recorder.insertRight(start.offset, JSON.stringify(dependency.version));
+                    logInfo(`Dependency ` + chalk.greenBright(`${dependency.name}`) + ` gefunden. ^ oder ~ entfernt.`);
+                } else {
+                    logWarn(`Dependency ` + chalk.greenBright(`${dependency.name}`) + ` gefunden. Die aktuelle Version ` + packageJsonDependency.version + ` ist größer als ` + dependency.version + `. Die Version bestehende Version wurde nicht aktualisiert.`);
+                }
             }
             else {
                 logInfo(`Dependency ` + chalk.greenBright(`${dependency.name}`) + ` gefunden. Die Version ist i.O.`);

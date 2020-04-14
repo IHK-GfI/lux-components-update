@@ -1,0 +1,8 @@
+@import '~@angular/material/theming';
+
+// Temp. Workaround, weil der Name der App sonst falsch positioniert dargestellt wird, wenn kein Sidenav vorhanden ist.
+::ng-deep {
+  .lux-header-side-nav {
+    display: flex;
+  }
+}
