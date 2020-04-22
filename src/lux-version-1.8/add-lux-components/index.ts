@@ -185,7 +185,7 @@ export function updatePackageJsonDevDependencies(): Rule {
                 { type: NodeDependencyType.Dev, version: '5.20.0', name: 'tslint' },
                 { type: NodeDependencyType.Dev, version: '3.0.2', name: 'tslint-angular' },
                 { type: NodeDependencyType.Dev, version: '3.4.5', name: 'typescript' },
-                { type: NodeDependencyType.Dev, version: '0.0.61', name: '@ihk-gfi/lux-components-update' },
+                { type: NodeDependencyType.Dev, version: '^0.0.64', name: '@ihk-gfi/lux-components-update' },
             ];
 
             devDependencies.forEach(devDependency => {

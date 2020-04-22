@@ -97,7 +97,7 @@ export function updatePackageJsonDependencies(): Rule {
                 { type: NodeDependencyType.Dev, version: '5.20.1', name: 'tslint' },
                 { type: NodeDependencyType.Dev, version: '3.0.2', name: 'tslint-angular' },
                 { type: NodeDependencyType.Dev, version: '3.7.5', name: 'typescript' },
-                { type: NodeDependencyType.Dev, version: '0.0.61', name: '@ihk-gfi/lux-components-update' },
+                { type: NodeDependencyType.Dev, version: '^0.0.64', name: '@ihk-gfi/lux-components-update' },
             ];
 
             dependencies.forEach(dependency => {
@@ -175,12 +175,11 @@ export function checkVersions(): Rule {
  */
 export function deactivateDirectiveClassSuffix(): Rule {
     return (tree: Tree, context: SchematicContext) => {
-
-        logInfoWithDescriptor('Deaktiviere "directive-class-suffix" in der "tslint.json".');
         return waitForTreeCallback(tree, () => {
             const tsLintJsonFile = tree.read('tslint.json');
 
             if (tsLintJsonFile) {
+                logInfoWithDescriptor('Deaktiviere "directive-class-suffix" in der "tslint.json".');
                 const tsLintJsonFileObject = JSON.parse(tsLintJsonFile.toString('utf-8'));
 
                 tsLintJsonFileObject.rules = {
@@ -189,11 +188,9 @@ export function deactivateDirectiveClassSuffix(): Rule {
                 };
 
                 tree.overwrite('tslint.json', JSON.stringify(tsLintJsonFileObject, null, 2));
-            } else {
-                throw formattedSchematicsException('tslint.json konnte nicht gelesen werden.');
+                logSuccess(`"directive-class-suffix" wurde deaktiviert.`);
             }
 
-            logSuccess(`"directive-class-suffix" wurde deaktiviert.`);
             return tree;
         });
 
