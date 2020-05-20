@@ -5,6 +5,7 @@ import { addDependencyToPackageJson, appOptions, workspaceOptions } from '../../
 import { callRule, SchematicContext, SchematicsException, Tree } from '@angular-devkit/schematics';
 import { checkVersions, updatePackageJson } from './index';
 import { UtilConfig } from '../../utility/util';
+import {activateIvy} from "../../lux-version-1.9/1.9.0/index";
 
 const collectionPath = path.join(__dirname, '../../collection.json');
 
@@ -106,6 +107,43 @@ describe('lux-version-1.8.4', () => {
                 () => {
                     expect(appTree.readContent('/package.json'))
                         .toContain('"@ihk-gfi/lux-components": "1.8.4"');
+                    done();
+                },
+                (reason) => expect(reason).toBeUndefined());
+        }));
+
+        it('Die package.json sollte nach dem Löschen des letzten Eintrags eines Depencency-Abschnitts (z.B.  "devDependencies") valide sein.', (async (done) => {
+            const packageJson = `
+{
+  "name": "BP",
+  "version": "0.0.1",
+  "license": "MIT",
+  "scripts": {
+    "ng": "ng",
+    "start": "ng serve --public-host=http://localhost:4200"
+  },
+  "private": true,
+  "dependencies": {
+    "@angular/common": "9.1.0",
+    "@angular/animations": "9.1.0",
+    "lux-components": "1.8.3"
+  }, 
+  "devDependencies": {
+    "typescript": "3.7.5",
+    "lux-components-update": "0.0.42"
+  } 
+}`;
+
+            appTree.overwrite('/package.json', packageJson);
+
+            callRule(updatePackageJson(), observableOf(appTree), context).subscribe(
+                () => {
+                    expect(appTree.readContent('/package.json')).toContain('"@angular/common": "9.1.0",');
+                    expect(appTree.readContent('/package.json')).toContain('"@angular/animations": "9.1.0"');
+                    expect(appTree.readContent('/package.json')).not.toContain('"lux-components"');
+
+                    expect(appTree.readContent('/package.json')).toContain('"typescript": "3.7.5"');
+                    expect(appTree.readContent('/package.json')).not.toContain('"lux-components-update"');
                     done();
                 },
                 (reason) => expect(reason).toBeUndefined());

@@ -102,7 +102,7 @@ export function updatePackageJson(): Rule {
 
             const newDependency: NodeDependency[] = [
                 { type: NodeDependencyType.Default, version: '1.8.4', name: '@ihk-gfi/lux-components' },
-                { type: NodeDependencyType.Dev, version: '0.0.58', name: '@ihk-gfi/lux-components-update' },
+                { type: NodeDependencyType.Dev, version: '^0.0.65', name: '@ihk-gfi/lux-components-update' },
             ];
             newDependency.forEach(dependency => {
                 updatePackageJsonDependency(tree, context, dependency);
@@ -120,7 +120,7 @@ export function updatePackageJson(): Rule {
 export function todosForUser(): Rule {
     return (tree: Tree, context: SchematicContext) => {
         runInstallAndLogToDos(context,
-            `Manuelle Schritte aus dem Update Guide (https://github.com/IHK-GfI/lux-components/wiki/Upate-Guide#version-184) ausführen!`
+            `Manuelle Schritte aus dem Update Guide (https://github.com/IHK-GfI/lux-components/wiki/update-guide#version-184) ausführen!`
         );
         return tree;
     };
