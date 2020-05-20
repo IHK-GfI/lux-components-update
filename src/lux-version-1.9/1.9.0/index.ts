@@ -96,8 +96,7 @@ export function updatePackageJsonDependencies(): Rule {
                 { type: NodeDependencyType.Dev, version: '8.6.2', name: 'ts-node' },
                 { type: NodeDependencyType.Dev, version: '5.20.1', name: 'tslint' },
                 { type: NodeDependencyType.Dev, version: '3.0.2', name: 'tslint-angular' },
-                { type: NodeDependencyType.Dev, version: '3.7.5', name: 'typescript' },
-                { type: NodeDependencyType.Dev, version: '^0.0.64', name: '@ihk-gfi/lux-components-update' },
+                { type: NodeDependencyType.Dev, version: '3.7.5', name: 'typescript' }
             ];
 
             dependencies.forEach(dependency => {
@@ -236,7 +235,7 @@ export function todosForUser(): Rule {
         version = replaceAll(version, "\.", "");
 
         runInstallAndLogToDos(context,
-            `Manuelle Schritte aus dem Update Guide (https://github.com/IHK-GfI/lux-components/wiki/Upate-Guide#version-${version}) durchführen!`
+            `Manuelle Schritte aus dem Update Guide (https://github.com/IHK-GfI/lux-components/wiki/update-guide#version-${version}) durchführen!`
         );
         return tree;
     };

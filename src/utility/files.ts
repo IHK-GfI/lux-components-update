@@ -40,10 +40,27 @@ export function deleteLineFromFile(tree: Tree, context: SchematicContext, filePa
             const lines: string[] = content.split(separator);
 
             // Lines iterieren und nach der dependency suchen
-            for (let line of lines) {
+            for (let i = 0; i < lines.length; i++) {
                 // Wenn gefunden, die Zeile entfernen
-                if (line.indexOf(searchString) > -1) {
-                    content = content.replace(line, '');
+                if (lines[i].indexOf(searchString) > -1) {
+                    content = content.replace(lines[i], '');
+
+                    // Sonderbehandlung für die .json-Dateien
+                    // Wenn man aus einem Block die letzte Zeile entfernt,
+                    // muss in der Zeile davor das Komma entfernt werden.
+                    // Beispiel:
+                    // "dependencies": {
+                    //     "@angular/common": "9.1.0",
+                    //     "lux-components": "1.8.3"
+                    //   },
+                    // Entfernt man die Zeile "lux-components...",
+                    // muss das Komma aus der Zeile "@angular/common..." ebenfalls
+                    // entfernt werden, sonst ist dsa Json ungültig.
+                    if (filePath.endsWith('.json') && (i + 1) < lines.length) {
+                        if (i > 0 && (lines[i + 1].trim() === '}' || lines[i + 1].trim() === '},')) {
+                            content = content.replace(lines[i - 1], lines[i - 1].substring(0, lines[i - 1].lastIndexOf(',')));
+                        }
+                    }
                 }
             }
             // Doppelte Zeilenumbrüche entfernen
