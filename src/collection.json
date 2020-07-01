@@ -145,6 +145,11 @@
       "description": "Aktualisiert die LUX-Applikation zur Version 1.9.2 der LUX-Components.",
       "factory": "./lux-version-1.9/1.9.2/index#luxVersion",
       "schema": "./lux-version-1.9/1.9.2/schema.json"
+    },
+    "lux-version-1.9.3": {
+      "description": "Aktualisiert die LUX-Applikation zur Version 1.9.3 der LUX-Components.",
+      "factory": "./lux-version-1.9/1.9.3/index#luxVersion",
+      "schema": "./lux-version-1.9/1.9.3/schema.json"
     }
   }
 }
