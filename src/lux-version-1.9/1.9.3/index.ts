@@ -4,7 +4,7 @@ import {validateIhkGfiLuxComponentsVersion, validateNodeVersion} from '../../uti
 import {NodeDependency, NodeDependencyType, updatePackageJsonDependency} from '../../utility/dependencies';
 import {formattedSchematicsException, logInfoWithDescriptor, logNewUpdate, logSuccess,} from '../../utility/logging';
 import {replaceAll, runInstallAndLogToDos, waitForTreeCallback} from '../../utility/util';
-import {iterateFilesAndModifyContent} from "../../utility/files";
+import {iterateFilesAndModifyContent, moveFilesToDirectory} from "../../utility/files";
 
 /**
  * Haupt-Rule für diesen Schematic-Generator.
@@ -15,10 +15,15 @@ export const luxVersion: (options: any) => Rule = (options: any) => {
         setupProject(options),
         checkVersions(),
         updateAppModuleTs(options),
+        updateTheming(options),
         updatePackageJson(),
         todosForUser()
     ]);
 };
+
+export function updateTheming(options: any): Rule {
+    return moveFilesToDirectory(options, 'files/theming', 'src/theming');
+}
 
 export function updateAppModuleTs(options: any): Rule {
     return (tree: Tree, context: SchematicContext) => {
