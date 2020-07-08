@@ -104,7 +104,7 @@ export function updatePackageJson(): Rule {
         return waitForTreeCallback(tree, () => {
             const newDependency: NodeDependency = {
                 type   : NodeDependencyType.Default,
-                version: '1.9.0',
+                version: '1.9.3',
                 name   : '@ihk-gfi/lux-components'
             };
             updatePackageJsonDependencyForceUpdate(tree, context, newDependency, true);
@@ -137,8 +137,8 @@ export function updatePackageJsonDependencies(): Rule {
                 { type: NodeDependencyType.Default, version: '1.10.0', name: 'tslib' },
                 { type: NodeDependencyType.Default, version: '2.0.8', name: 'hammerjs' },
                 { type: NodeDependencyType.Default, version: '5.13.0', name: '@fortawesome/fontawesome-free' },
-                { type: NodeDependencyType.Default, version: '1.9.0', name: '@ihk-gfi/lux-components' },
-                { type: NodeDependencyType.Default, version: '6.1.1', name: 'ng2-pdf-viewer' }
+                { type: NodeDependencyType.Default, version: '6.1.1', name: 'ng2-pdf-viewer'},
+                { type: NodeDependencyType.Default, version: '2.2.228', name: 'pdfjs-dist'}
             ];
 
             dependencies.forEach(dependency => {

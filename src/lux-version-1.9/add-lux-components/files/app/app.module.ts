@@ -28,6 +28,13 @@ import { ErrorComponent } from './error/error.component';
 import { HomeComponent } from './home/home.component';
 import { ProfilComponent } from './profil/profil.component';
 
+import { registerLocaleData } from '@angular/common';
+import localeDE from '@angular/common/locales/de';
+import localeDeExtra from '@angular/common/locales/extra/de';
+import { LOCALE_ID } from '@angular/core';
+
+registerLocaleData(localeDE, localeDeExtra);
+
 const luxComponentsConfig: LuxComponentsConfigParameters = {
   generateLuxTagIds : true,
   labelConfiguration: {
@@ -67,6 +74,7 @@ const luxComponentsConfig: LuxComponentsConfigParameters = {
     LuxErrorService,
     LuxMasterDetailMobileHelperService,
     LuxConsoleService,
+    { provide: LOCALE_ID, useValue: 'de-DE' }
   ],
   bootstrap   : [AppComponent]
 })
