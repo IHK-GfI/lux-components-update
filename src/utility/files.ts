@@ -1,15 +1,15 @@
 import { join, Path, strings } from '@angular-devkit/core';
 import {
-    apply,
-    DirEntry,
-    forEach,
-    MergeStrategy,
-    mergeWith,
-    Rule,
-    SchematicContext,
-    template,
-    Tree,
-    url
+  apply,
+  DirEntry,
+  forEach,
+  MergeStrategy,
+  mergeWith,
+  Rule,
+  SchematicContext,
+  template,
+  Tree,
+  url
 } from '@angular-devkit/schematics';
 import { logInfo, logInfoWithDescriptor, logSuccess } from './logging';
 
@@ -22,58 +22,58 @@ import { logInfo, logInfoWithDescriptor, logSuccess } from './logging';
  * @param searchString
  */
 export function deleteLineFromFile(tree: Tree, context: SchematicContext, filePath: string, searchString: string) {
-    const fileContent: Buffer | null = tree.read(filePath);
-    if (fileContent) {
-        // String der Datei erhalten
-        let content: string = fileContent.toString();
+  const fileContent: Buffer | null = tree.read(filePath);
+  if (fileContent) {
+    // String der Datei erhalten
+    let content: string = fileContent.toString();
 
-        if (content.indexOf(searchString) !== -1) {
-            // Standard-Separator
-            let separator = '\r\n';
+    if (content.indexOf(searchString) !== -1) {
+      // Standard-Separator
+      let separator = '\r\n';
 
-            // Wenn nicht gefunden, nur \n als Separator nutzen
-            if (content.indexOf(separator) === -1) {
-                separator = '\n';
+      // Wenn nicht gefunden, nur \n als Separator nutzen
+      if (content.indexOf(separator) === -1) {
+        separator = '\n';
+      }
+
+      // Alle Zeilen der Datei erhalten
+      const lines: string[] = content.split(separator);
+
+      // Lines iterieren und nach der dependency suchen
+      for (let i = 0; i < lines.length; i++) {
+        // Wenn gefunden, die Zeile entfernen
+        if (lines[i].indexOf(searchString) > -1) {
+          content = content.replace(lines[i], '');
+
+          // Sonderbehandlung für die .json-Dateien
+          // Wenn man aus einem Block die letzte Zeile entfernt,
+          // muss in der Zeile davor das Komma entfernt werden.
+          // Beispiel:
+          // "dependencies": {
+          //     "@angular/common": "9.1.0",
+          //     "lux-components": "1.8.3"
+          //   },
+          // Entfernt man die Zeile "lux-components...",
+          // muss das Komma aus der Zeile "@angular/common..." ebenfalls
+          // entfernt werden, sonst ist dsa Json ungültig.
+          if (filePath.endsWith('.json') && i + 1 < lines.length) {
+            if (i > 0 && (lines[i + 1].trim() === '}' || lines[i + 1].trim() === '},')) {
+              content = content.replace(lines[i - 1], lines[i - 1].substring(0, lines[i - 1].lastIndexOf(',')));
             }
-
-            // Alle Zeilen der Datei erhalten
-            const lines: string[] = content.split(separator);
-
-            // Lines iterieren und nach der dependency suchen
-            for (let i = 0; i < lines.length; i++) {
-                // Wenn gefunden, die Zeile entfernen
-                if (lines[i].indexOf(searchString) > -1) {
-                    content = content.replace(lines[i], '');
-
-                    // Sonderbehandlung für die .json-Dateien
-                    // Wenn man aus einem Block die letzte Zeile entfernt,
-                    // muss in der Zeile davor das Komma entfernt werden.
-                    // Beispiel:
-                    // "dependencies": {
-                    //     "@angular/common": "9.1.0",
-                    //     "lux-components": "1.8.3"
-                    //   },
-                    // Entfernt man die Zeile "lux-components...",
-                    // muss das Komma aus der Zeile "@angular/common..." ebenfalls
-                    // entfernt werden, sonst ist dsa Json ungültig.
-                    if (filePath.endsWith('.json') && (i + 1) < lines.length) {
-                        if (i > 0 && (lines[i + 1].trim() === '}' || lines[i + 1].trim() === '},')) {
-                            content = content.replace(lines[i - 1], lines[i - 1].substring(0, lines[i - 1].lastIndexOf(',')));
-                        }
-                    }
-                }
-            }
-            // Doppelte Zeilenumbrüche entfernen
-            content = content.replace(new RegExp('\r\n', 'g'), '\r\n');
-            content = content.replace(new RegExp('\r\n\r\n', 'g'), '\r\n');
-
-            tree.overwrite(filePath, content);
-        } else {
-            logInfo(`Die Datei "${ filePath }" enthält den String "${ searchString }" nicht.`);
+          }
         }
+      }
+      // Doppelte Zeilenumbrüche entfernen
+      content = content.replace(new RegExp('\r\n', 'g'), '\r\n');
+      content = content.replace(new RegExp('\r\n\r\n', 'g'), '\r\n');
+
+      tree.overwrite(filePath, content);
     } else {
-        logInfo(`Die Datei "${ filePath }" wurde nicht gefunden.`);
+      logInfo(`Die Datei "${filePath}" enthält den String "${searchString}" nicht.`);
     }
+  } else {
+    logInfo(`Die Datei "${filePath}" wurde nicht gefunden.`);
+  }
 }
 
 /**
@@ -86,22 +86,22 @@ export function deleteLineFromFile(tree: Tree, context: SchematicContext, filePa
  * @param lines
  */
 export function writeLinesToFile(tree: Tree, context: SchematicContext, filePath: string, ...lines: string[]) {
-    const fileContent: Buffer | null = tree.read(filePath);
-    let content: string              = '';
+  const fileContent: Buffer | null = tree.read(filePath);
+  let content: string = '';
 
-    lines.forEach((line: string) => {
-        if (fileContent && fileContent.toString().indexOf(line) === -1) {
-            content += line + '\r\n';
-        }
-    });
-
-    if (fileContent !== null) {
-        tree.overwrite(filePath, fileContent.toString() + '\r\n' + content);
-        logInfo(`Überschreibe die Datei "${ filePath }".`);
-    } else {
-        tree.create(filePath, content);
-        logInfo(`Erstelle die Datei "${ filePath }" und füge Inhalt hinzu.`);
+  lines.forEach((line: string) => {
+    if (fileContent && fileContent.toString().indexOf(line) === -1) {
+      content += line + '\r\n';
     }
+  });
+
+  if (fileContent !== null) {
+    tree.overwrite(filePath, fileContent.toString() + '\r\n' + content);
+    logInfo(`Überschreibe die Datei "${filePath}".`);
+  } else {
+    tree.create(filePath, content);
+    logInfo(`Erstelle die Datei "${filePath}" und füge Inhalt hinzu.`);
+  }
 }
 
 /**
@@ -113,39 +113,45 @@ export function writeLinesToFile(tree: Tree, context: SchematicContext, filePath
  * @param callback(filePath, content)
  * @param filePathEndings Z.B. .html, .ts, src/styles.scss,...
  */
-export function iterateFilesAndModifyContent(tree: Tree, rootPath: string, callback: Function, ...filePathEndings: string[]) {
-    tree.getDir(rootPath)
-        .visit((filePath: string) => {
-            // Ignoriere folende Odner
-            if (filePath.startsWith('/node_modules/') ||
-                filePath.startsWith('/.idea/') ||
-                filePath.startsWith('/coverage/') ||
-                filePath.startsWith('/dist/')) {
-                return;
-            }
+export function iterateFilesAndModifyContent(
+  tree: Tree,
+  rootPath: string,
+  callback: Function,
+  ...filePathEndings: string[]
+) {
+  tree.getDir(rootPath).visit((filePath: string) => {
+    // Ignoriere folende Odner
+    if (
+      filePath.startsWith('/node_modules/') ||
+      filePath.startsWith('/.idea/') ||
+      filePath.startsWith('/coverage/') ||
+      filePath.startsWith('/dist/')
+    ) {
+      return;
+    }
 
-            // Endung der Datei mit erlaubten Endungen abgleichen
-            let modifyFile: boolean = false;
-            for (let fileEnding of filePathEndings) {
-                if (filePath.endsWith(fileEnding)) {
-                    modifyFile = true;
-                    break;
-                }
-            }
-            // Besitzt die Datei die richtige Endung?
-            if (!modifyFile) {
-                return;
-            }
-            // Inhalt auslesen
-            const content = tree.read(filePath);
-            // Wenn die Datei keinen Inhalt hat, die nächste Datei aufrufen
-            if (!content) {
-                return;
-            }
+    // Endung der Datei mit erlaubten Endungen abgleichen
+    let modifyFile: boolean = false;
+    for (let fileEnding of filePathEndings) {
+      if (filePath.endsWith(fileEnding)) {
+        modifyFile = true;
+        break;
+      }
+    }
+    // Besitzt die Datei die richtige Endung?
+    if (!modifyFile) {
+      return;
+    }
+    // Inhalt auslesen
+    const content = tree.read(filePath);
+    // Wenn die Datei keinen Inhalt hat, die nächste Datei aufrufen
+    if (!content) {
+      return;
+    }
 
-            // Callback mit aktuellem Pfad + Inhalt der Datei aufrufen
-            callback(filePath, content.toString());
-        });
+    // Callback mit aktuellem Pfad + Inhalt der Datei aufrufen
+    callback(filePath, content.toString());
+  });
 }
 
 /**
@@ -156,88 +162,95 @@ export function iterateFilesAndModifyContent(tree: Tree, rootPath: string, callb
  * @param targetPath Ein Zielpfad (z.B. src/theming/).
  */
 export function moveFilesToDirectory(options: any, sourcePath: string, targetPath: string): Rule {
-    return (tree: Tree, context: SchematicContext) => {
-        logInfoWithDescriptor('Aktualisiere Dateien in ' + targetPath);
-        if (!targetPath.startsWith('/')) {
-            targetPath = '/' + targetPath;
+  return (tree: Tree, context: SchematicContext) => {
+    logInfoWithDescriptor('Aktualisiere Dateien in ' + targetPath);
+    if (!targetPath.startsWith('/')) {
+      targetPath = '/' + targetPath;
+    }
+    if (!sourcePath.startsWith('/')) {
+      sourcePath = '/' + sourcePath;
+    }
+
+    targetPath = options.path + targetPath;
+
+    const templateSource = apply(url('.' + sourcePath), [
+      template({
+        ...strings,
+        ...options
+      }),
+      forEach((file) => {
+        if (tree.exists(targetPath + file.path)) {
+          tree.overwrite(targetPath + file.path, file.content);
+        } else {
+          tree.create(targetPath + file.path, file.content);
         }
-        if (!sourcePath.startsWith('/')) {
-            sourcePath = '/' + sourcePath;
-        }
+        return null;
+      })
+    ]);
 
-        targetPath = options.path + targetPath;
-
-        const templateSource = apply(url('.' + sourcePath), [
-            template({
-                ...strings,
-                ...options,
-            }),
-            forEach((file) => {
-                if (tree.exists(targetPath + file.path)) {
-                    tree.overwrite(targetPath + file.path, file.content);
-                } else {
-                    tree.create(targetPath + file.path, file.content);
-                }
-                return null;
-            })
-        ]);
-
-        logSuccess(targetPath + ' erfolgreich aktualisiert.');
-        return mergeWith(templateSource, MergeStrategy.Overwrite);
-    };
+    logSuccess(targetPath + ' erfolgreich aktualisiert.');
+    return mergeWith(templateSource, MergeStrategy.Overwrite);
+  };
 }
 
-export function searchInComponentAndModifyModule(tree: Tree, rootPath: string, searchStrings: string[], callback: Function, ...filePathEndings: string[]) {
-    tree.getDir(rootPath)
-        .visit((filePath: string) => {
-            // Ignoriere folende Odner
-            if (filePath.startsWith('/node_modules/') ||
-                filePath.startsWith('/.idea/') ||
-                filePath.startsWith('/coverage/') ||
-                filePath.startsWith('/dist/') ||
-                filePath.endsWith('.spec.ts')) {
-                return;
-            }
+export function searchInComponentAndModifyModule(
+  tree: Tree,
+  rootPath: string,
+  searchStrings: string[],
+  callback: Function,
+  ...filePathEndings: string[]
+) {
+  tree.getDir(rootPath).visit((filePath: string) => {
+    // Ignoriere folende Odner
+    if (
+      filePath.startsWith('/node_modules/') ||
+      filePath.startsWith('/.idea/') ||
+      filePath.startsWith('/coverage/') ||
+      filePath.startsWith('/dist/') ||
+      filePath.endsWith('.spec.ts')
+    ) {
+      return;
+    }
 
-            // Endung der Datei mit erlaubten Endungen abgleichen
-            let modifyFile: boolean = false;
-            for (let fileEnding of filePathEndings) {
-                if (filePath.endsWith(fileEnding)) {
-                    modifyFile = true;
-                    break;
-                }
-            }
-            // Besitzt die Datei die richtige Endung?
-            if (!modifyFile) {
-                return;
-            }
-            // Inhalt auslesen
-            const content = tree.read(filePath);
-            // Wenn die Datei keinen Inhalt hat, die nächste Datei aufrufen
-            if (!content) {
-                return;
-            }
+    // Endung der Datei mit erlaubten Endungen abgleichen
+    let modifyFile: boolean = false;
+    for (let fileEnding of filePathEndings) {
+      if (filePath.endsWith(fileEnding)) {
+        modifyFile = true;
+        break;
+      }
+    }
+    // Besitzt die Datei die richtige Endung?
+    if (!modifyFile) {
+      return;
+    }
+    // Inhalt auslesen
+    const content = tree.read(filePath);
+    // Wenn die Datei keinen Inhalt hat, die nächste Datei aufrufen
+    if (!content) {
+      return;
+    }
 
-            let foundSearchString: string = '';
-            searchStrings.forEach((searchString: string) => {
-                if (!foundSearchString && content.toString().indexOf(searchString) > -1) {
-                    foundSearchString = searchString;
-                }
-            });
+    let foundSearchString: string = '';
+    searchStrings.forEach((searchString: string) => {
+      if (!foundSearchString && content.toString().indexOf(searchString) > -1) {
+        foundSearchString = searchString;
+      }
+    });
 
-            if (!foundSearchString) {
-                return;
-            }
+    if (!foundSearchString) {
+      return;
+    }
 
-            // den Ordner der gefundenen Datei nehmen
-            const fileDir          = filePath.substring(0, filePath.lastIndexOf('/'));
-            const modulePath: Path = findModule(tree, fileDir);
-            let moduleContent      = tree.read(modulePath);
-            if (moduleContent) {
-                // Callback mit aktuellem Pfad + Inhalt der Datei aufrufen
-                callback(modulePath, moduleContent.toString());
-            }
-        });
+    // den Ordner der gefundenen Datei nehmen
+    const fileDir = filePath.substring(0, filePath.lastIndexOf('/'));
+    const modulePath: Path = findModule(tree, fileDir);
+    let moduleContent = tree.read(modulePath);
+    if (moduleContent) {
+      // Callback mit aktuellem Pfad + Inhalt der Datei aufrufen
+      callback(modulePath, moduleContent.toString());
+    }
+  });
 }
 
 /**
@@ -245,34 +258,40 @@ export function searchInComponentAndModifyModule(tree: Tree, rootPath: string, s
  *
  * Source: https://github.com/angular/angular-cli/blob/master/packages/schematics/angular/utility/find-module.ts
  */
-export function findModule(host: Tree, generateDir: string,
-                           moduleExt = '.module.ts', routingModuleExt = '-routing.module.ts'): Path {
+export function findModule(
+  host: Tree,
+  generateDir: string,
+  moduleExt = '.module.ts',
+  routingModuleExt = '-routing.module.ts'
+): Path {
+  let dir: DirEntry | null = host.getDir('/' + generateDir);
+  let foundRoutingModule = false;
 
-    let dir: DirEntry | null = host.getDir('/' + generateDir);
-    let foundRoutingModule   = false;
+  while (dir) {
+    const allMatches = dir.subfiles.filter((p) => p.endsWith(moduleExt));
+    const filteredMatches = allMatches.filter((p) => !p.endsWith(routingModuleExt));
 
-    while (dir) {
-        const allMatches      = dir.subfiles.filter(p => p.endsWith(moduleExt));
-        const filteredMatches = allMatches.filter(p => !p.endsWith(routingModuleExt));
+    foundRoutingModule = foundRoutingModule || allMatches.length !== filteredMatches.length;
 
-        foundRoutingModule = foundRoutingModule || allMatches.length !== filteredMatches.length;
-
-        if (filteredMatches.length == 1) {
-            return join(dir.path, filteredMatches[ 0 ]);
-        } else if (filteredMatches.length > 1) {
-            throw new Error('More than one module matches. Use skip-import option to skip importing '
-                            + 'the component into the closest module.');
-        }
-
-        dir = dir.parent;
+    if (filteredMatches.length == 1) {
+      return join(dir.path, filteredMatches[0]);
+    } else if (filteredMatches.length > 1) {
+      throw new Error(
+        'More than one module matches. Use skip-import option to skip importing ' +
+          'the component into the closest module.'
+      );
     }
 
-    const errorMsg = foundRoutingModule ? 'Could not find a non Routing NgModule.'
-                                          + `\nModules with suffix '${ routingModuleExt }' are strictly reserved for routing.`
-                                          + '\nUse the skip-import option to skip importing in NgModule.'
-        : 'Could not find an NgModule. Use the skip-import option to skip importing in NgModule.';
+    dir = dir.parent;
+  }
 
-    throw new Error(errorMsg);
+  const errorMsg = foundRoutingModule
+    ? 'Could not find a non Routing NgModule.' +
+      `\nModules with suffix '${routingModuleExt}' are strictly reserved for routing.` +
+      '\nUse the skip-import option to skip importing in NgModule.'
+    : 'Could not find an NgModule. Use the skip-import option to skip importing in NgModule.';
+
+  throw new Error(errorMsg);
 }
 
 /**
@@ -281,20 +300,20 @@ export function findModule(host: Tree, generateDir: string,
  * @param targetPath
  */
 export function deleteFile(options: any, targetPath: string): Rule {
-    return (tree: Tree, context: SchematicContext) => {
-        logInfoWithDescriptor('Lösche Datei ' + targetPath + '.');
-        if (!targetPath.startsWith('/')) {
-            targetPath = '/' + targetPath;
-        }
+  return (tree: Tree, context: SchematicContext) => {
+    logInfoWithDescriptor('Lösche Datei ' + targetPath + '.');
+    if (!targetPath.startsWith('/')) {
+      targetPath = '/' + targetPath;
+    }
 
-        targetPath = options.path + targetPath;
+    targetPath = options.path + targetPath;
 
-        if (tree.exists(targetPath)) {
-            tree.delete(targetPath);
-            logSuccess(targetPath + ' erfolgreich gelöscht.');
-        } else {
-            logSuccess(targetPath + ' konnte nicht gefunden werden.');
-        }
-        return tree;
-    };
+    if (tree.exists(targetPath)) {
+      tree.delete(targetPath);
+      logSuccess(targetPath + ' erfolgreich gelöscht.');
+    } else {
+      logSuccess(targetPath + ' konnte nicht gefunden werden.');
+    }
+    return tree;
+  };
 }

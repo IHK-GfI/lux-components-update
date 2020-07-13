@@ -1,28 +1,28 @@
 import { SchematicContext, Tree, UpdateRecorder } from '@angular-devkit/schematics';
 import { JsonAstNode, JsonAstObject, JsonParseMode, parseJsonAst } from '@angular-devkit/core';
 import {
-    appendPropertyInAstObject,
-    findPropertyInAstObject,
-    insertPropertyInAstObjectInOrder
+  appendPropertyInAstObject,
+  findPropertyInAstObject,
+  insertPropertyInAstObjectInOrder
 } from '@schematics/angular/utility/json-utils';
 import * as semver from 'semver';
-import chalk from 'chalk';
+import * as chalk from 'chalk';
 import { formattedSchematicsException, logInfo, logWarn } from './logging';
 import { deleteLineFromFile } from './files';
 
 const packageJsonPath = '/package.json';
 
 export enum NodeDependencyType {
-    Default = 'dependencies',
-    Dev = 'devDependencies',
-    Peer = 'peerDependencies',
-    Optional = 'optionalDependencies'
+  Default = 'dependencies',
+  Dev = 'devDependencies',
+  Peer = 'peerDependencies',
+  Optional = 'optionalDependencies'
 }
 
 export interface NodeDependency {
-    type: NodeDependencyType;
-    name: string;
-    version: string;
+  type: NodeDependencyType;
+  name: string;
+  version: string;
 }
 
 /**
@@ -32,7 +32,7 @@ export interface NodeDependency {
  * @param dependency
  */
 export function updatePackageJsonDependency(tree: Tree, context: SchematicContext, dependency: NodeDependency): void {
-    updatePackageJsonDependencyForceUpdate(tree, context, dependency, false);
+  updatePackageJsonDependencyForceUpdate(tree, context, dependency, false);
 }
 
 /**
@@ -42,65 +42,87 @@ export function updatePackageJsonDependency(tree: Tree, context: SchematicContex
  * @param dependency
  * @param forceUpate Gibt an, ob die Dependencies auch überschrieben werden, wenn diese älter als die vorhandenden Dependencies sind.
  */
-export function updatePackageJsonDependencyForceUpdate(tree: Tree, context: SchematicContext, dependency: NodeDependency, forceUpate: boolean): void {
-    const packageJson: JsonAstObject = readPackageJson(tree);
-    const dependencyTypeNode: JsonAstNode | null = findPropertyInAstObject(packageJson, dependency.type);
-    const recorder: UpdateRecorder = tree.beginUpdate(packageJsonPath);
-    // Dependency-Typ existiert noch nicht (z.B. devDependencies oder peerDependencies)
-    if (!dependencyTypeNode) {
-        // Den Dependency-Typ und die Dependency hinzufügen
-        appendPropertyInAstObject(recorder, packageJson, dependency.type, {
-            [dependency.name]: dependency.version
-        }, 2);
+export function updatePackageJsonDependencyForceUpdate(
+  tree: Tree,
+  context: SchematicContext,
+  dependency: NodeDependency,
+  forceUpate: boolean
+): void {
+  const packageJson: JsonAstObject = readPackageJson(tree);
+  const dependencyTypeNode: JsonAstNode | null = findPropertyInAstObject(packageJson, dependency.type);
+  const recorder: UpdateRecorder = tree.beginUpdate(packageJsonPath);
+  // Dependency-Typ existiert noch nicht (z.B. devDependencies oder peerDependencies)
+  if (!dependencyTypeNode) {
+    // Den Dependency-Typ und die Dependency hinzufügen
+    appendPropertyInAstObject(
+      recorder,
+      packageJson,
+      dependency.type,
+      {
+        [dependency.name]: dependency.version
+      },
+      2
+    );
+  }
+  // Der Dependency-Typ existiert bereits
+  else if (dependencyTypeNode.kind === 'object') {
+    // Prüfen ob die Dependency bereits darin vorhanden ist
+    const dependencyNode = findPropertyInAstObject(dependencyTypeNode, dependency.name);
+    // Diese Dependency gibt es noch nicht
+    if (!dependencyNode) {
+      insertPropertyInAstObjectInOrder(recorder, dependencyTypeNode, dependency.name, dependency.version, 4);
+      logInfo(
+        `Dependency ` +
+          chalk.greenBright(`${dependency.name}`) +
+          ` nicht gefunden. Füge Sie zum Typ "${dependency.type}" hinzu.`
+      );
     }
-    // Der Dependency-Typ existiert bereits
-    else if (dependencyTypeNode.kind === 'object') {
-        // Prüfen ob die Dependency bereits darin vorhanden ist
-        const dependencyNode = findPropertyInAstObject(dependencyTypeNode, dependency.name);
-        // Diese Dependency gibt es noch nicht
-        if (!dependencyNode) {
-            insertPropertyInAstObjectInOrder(recorder, dependencyTypeNode, dependency.name, dependency.version, 4);
-            logInfo(`Dependency ` + chalk.greenBright(`${dependency.name}`) + ` nicht gefunden. Füge Sie zum Typ "${dependency.type}" hinzu.`);
+    // Diese Dependency existiert bereits
+    else {
+      const packageJsonDependency = getPackageJsonDependency(tree, dependency.name);
+      // Die Dependency ist in einer älteren Version vorhanden
+      if (semver.cmp(packageJsonDependency.version.replace(/([\^~])/g, ''), '<', dependency.version)) {
+        const { end, start } = dependencyNode;
+        // Die alte Version entfernen
+        recorder.remove(start.offset, end.offset - start.offset);
+        // Die neue hinzufügen
+        recorder.insertRight(start.offset, JSON.stringify(dependency.version));
+        logInfo(`Dependency ` + chalk.greenBright(`${dependency.name}`) + ` gefunden. Aktualisiere die Version.`);
+      } else if (semver.cmp(packageJsonDependency.version.replace(/([\^~])/g, ''), '===', dependency.version)) {
+        if (packageJsonDependency.version !== dependency.version) {
+          const { end, start } = dependencyNode;
+          // Die alte Version entfernen
+          recorder.remove(start.offset, end.offset - start.offset);
+          // Die neue hinzufügen
+          recorder.insertRight(start.offset, JSON.stringify(dependency.version));
+          logInfo(`Dependency ` + chalk.greenBright(`${dependency.name}`) + ` gefunden. ^ oder ~ entfernt.`);
         }
-        // Diese Dependency existiert bereits
-        else {
-            const packageJsonDependency = getPackageJsonDependency(tree, dependency.name);
-            // Die Dependency ist in einer älteren Version vorhanden
-            if (semver.cmp(packageJsonDependency.version.replace(/([\^~])/g, ''), "<", dependency.version)) {
-                const {end, start} = dependencyNode;
-                // Die alte Version entfernen
-                recorder.remove(start.offset, end.offset - start.offset);
-                // Die neue hinzufügen
-                recorder.insertRight(start.offset, JSON.stringify(dependency.version));
-                logInfo(`Dependency ` + chalk.greenBright(`${dependency.name}`) + ` gefunden. Aktualisiere die Version.`);
-            } else if(semver.cmp(packageJsonDependency.version.replace(/([\^~])/g, ''), "===", dependency.version)) {
-                if (packageJsonDependency.version !== dependency.version) {
-                    const {end, start} = dependencyNode;
-                    // Die alte Version entfernen
-                    recorder.remove(start.offset, end.offset - start.offset);
-                    // Die neue hinzufügen
-                    recorder.insertRight(start.offset, JSON.stringify(dependency.version));
-                    logInfo(`Dependency ` + chalk.greenBright(`${dependency.name}`) + ` gefunden. ^ oder ~ entfernt.`);
-                }
-            } else if(semver.cmp(packageJsonDependency.version.replace(/([\^~])/g, ''), ">", dependency.version)) {
-                if (forceUpate) {
-                    const {end, start} = dependencyNode;
-                    // Die neuere Version entfernen
-                    recorder.remove(start.offset, end.offset - start.offset);
-                    // Die gewollte Version hinzufügen
-                    recorder.insertRight(start.offset, JSON.stringify(dependency.version));
-                    logInfo(`Dependency ` + chalk.greenBright(`${dependency.name}`) + ` gefunden. ^ oder ~ entfernt.`);
-                } else {
-                    logWarn(`Dependency ` + chalk.greenBright(`${dependency.name}`) + ` gefunden. Die aktuelle Version ` + packageJsonDependency.version + ` ist größer als ` + dependency.version + `. Die Version bestehende Version wurde nicht aktualisiert.`);
-                }
-            }
-            else {
-                logInfo(`Dependency ` + chalk.greenBright(`${dependency.name}`) + ` gefunden. Die Version ist i.O.`);
-            }
+      } else if (semver.cmp(packageJsonDependency.version.replace(/([\^~])/g, ''), '>', dependency.version)) {
+        if (forceUpate) {
+          const { end, start } = dependencyNode;
+          // Die neuere Version entfernen
+          recorder.remove(start.offset, end.offset - start.offset);
+          // Die gewollte Version hinzufügen
+          recorder.insertRight(start.offset, JSON.stringify(dependency.version));
+          logInfo(`Dependency ` + chalk.greenBright(`${dependency.name}`) + ` gefunden. ^ oder ~ entfernt.`);
+        } else {
+          logWarn(
+            `Dependency ` +
+              chalk.greenBright(`${dependency.name}`) +
+              ` gefunden. Die aktuelle Version ` +
+              packageJsonDependency.version +
+              ` ist größer als ` +
+              dependency.version +
+              `. Die Version bestehende Version wurde nicht aktualisiert.`
+          );
         }
+      } else {
+        logInfo(`Dependency ` + chalk.greenBright(`${dependency.name}`) + ` gefunden. Die Version ist i.O.`);
+      }
     }
+  }
 
-    tree.commitUpdate(recorder);
+  tree.commitUpdate(recorder);
 }
 
 /**
@@ -110,7 +132,7 @@ export function updatePackageJsonDependencyForceUpdate(tree: Tree, context: Sche
  * @param dependency
  */
 export function deletePackageJsonDependency(tree: Tree, context: SchematicContext, dependency: NodeDependency) {
-    deleteLineFromFile(tree, context, packageJsonPath, dependency.name);
+  deleteLineFromFile(tree, context, packageJsonPath, dependency.name);
 }
 
 /**
@@ -119,29 +141,32 @@ export function deletePackageJsonDependency(tree: Tree, context: SchematicContex
  * @param name
  */
 export function getPackageJsonDependency(tree: Tree, name: string): NodeDependency {
-    const packageJson = readPackageJson(tree);
-    let dependency: NodeDependency | null = null;
+  const packageJson = readPackageJson(tree);
+  let dependency: NodeDependency | null = null;
 
-    [NodeDependencyType.Default, NodeDependencyType.Dev, NodeDependencyType.Optional, NodeDependencyType.Peer].forEach(depType => {
-        const depsNode = findPropertyInAstObject(packageJson, depType);
-        if (depsNode !== null && depsNode.kind === 'object') {
-            const depNode = findPropertyInAstObject(depsNode, name);
-            if (depNode !== null && depNode.kind === 'string') {
-                dependency = {
-                    type: depType,
-                    name: name,
-                    version: depNode.value
-                };
-            }
+  [NodeDependencyType.Default, NodeDependencyType.Dev, NodeDependencyType.Optional, NodeDependencyType.Peer].forEach(
+    (depType) => {
+      const depsNode = findPropertyInAstObject(packageJson, depType);
+      if (depsNode !== null && depsNode.kind === 'object') {
+        const depNode = findPropertyInAstObject(depsNode, name);
+        if (depNode !== null && depNode.kind === 'string') {
+          dependency = {
+            type: depType,
+            name: name,
+            version: depNode.value
+          };
         }
-    });
+      }
+    }
+  );
 
-    if (dependency) {
-        return dependency;
-    }
-    else {
-        throw formattedSchematicsException(`Dependency ${name ? '"' + name + '"' : ''} nicht in der package.json gefunden.`);
-    }
+  if (dependency) {
+    return dependency;
+  } else {
+    throw formattedSchematicsException(
+      `Dependency ${name ? '"' + name + '"' : ''} nicht in der package.json gefunden.`
+    );
+  }
 }
 
 /**
@@ -151,16 +176,16 @@ export function getPackageJsonDependency(tree: Tree, name: string): NodeDependen
  * @param tree
  */
 function readPackageJson(tree: Tree): JsonAstObject {
-    const buffer = tree.read(packageJsonPath);
-    if (buffer === null) {
-        throw formattedSchematicsException('Konnte die package.json nicht lesen.')
-    }
-    const content = buffer.toString();
+  const buffer = tree.read(packageJsonPath);
+  if (buffer === null) {
+    throw formattedSchematicsException('Konnte die package.json nicht lesen.');
+  }
+  const content = buffer.toString();
 
-    const packageJson = parseJsonAst(content, JsonParseMode.Strict);
-    if (packageJson.kind != 'object') {
-        throw formattedSchematicsException('Ungültige package.json, ein Object wurde erwartet.')
-    }
+  const packageJson = parseJsonAst(content, JsonParseMode.Strict);
+  if (packageJson.kind != 'object') {
+    throw formattedSchematicsException('Ungültige package.json, ein Object wurde erwartet.');
+  }
 
-    return packageJson;
+  return packageJson;
 }

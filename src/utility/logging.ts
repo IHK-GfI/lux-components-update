@@ -1,5 +1,5 @@
 import { SchematicsException } from '@angular-devkit/schematics';
-import chalk from 'chalk';
+import * as chalk from 'chalk';
 
 export const TAB = '\t   ';
 
@@ -9,7 +9,7 @@ export const TAB = '\t   ';
  * @param version
  */
 export const logNewUpdate = (version: string) => {
-    console.log(chalk.whiteBright(`###### Update auf LUX-Components v${version} ######\n`));
+  console.log(chalk.whiteBright(`###### Update auf LUX-Components v${version} ######\n`));
 };
 
 /**
@@ -17,8 +17,8 @@ export const logNewUpdate = (version: string) => {
  * @param messages
  */
 export const logInfoWithDescriptor = (...messages: string[]) => {
-    let message = generateLogMessage(...messages);
-    console.log(chalk.blueBright(`[INFO]${TAB}${message}`));
+  let message = generateLogMessage(...messages);
+  console.log(chalk.blueBright(`[INFO]${TAB}${message}`));
 };
 
 /**
@@ -26,8 +26,8 @@ export const logInfoWithDescriptor = (...messages: string[]) => {
  * @param messages
  */
 export const logInfo = (...messages: string[]) => {
-    let message = generateLogMessage(...messages);
-    console.log(chalk.whiteBright(`${TAB}${message}`));
+  let message = generateLogMessage(...messages);
+  console.log(chalk.whiteBright(`${TAB}${message}`));
 };
 
 /**
@@ -35,8 +35,8 @@ export const logInfo = (...messages: string[]) => {
  * @param messages
  */
 export const logSuccess = (...messages: string[]) => {
-    let message = generateLogMessage(...messages);
-    console.log(chalk.greenBright(`[SUCCESS]  ${message}`));
+  let message = generateLogMessage(...messages);
+  console.log(chalk.greenBright(`[SUCCESS]  ${message}`));
 };
 
 /**
@@ -44,8 +44,8 @@ export const logSuccess = (...messages: string[]) => {
  * @param messages
  */
 export const logWarn = (...messages: string[]) => {
-    let message = generateLogMessage(...messages);
-    console.log(chalk.yellowBright(`[WARN]     ${message}`));
+  let message = generateLogMessage(...messages);
+  console.log(chalk.yellowBright(`[WARN]     ${message}`));
 };
 
 /**
@@ -53,10 +53,10 @@ export const logWarn = (...messages: string[]) => {
  * @param messages
  */
 export const logError = (...messages: string[]) => {
-    let message = generateLogMessage(...messages);
-    // Für den Fall, dass ein weitergereichter Fehler hier ankommt [ERROR] preventiv entfernen
-    message = message.replace('[ERROR]    ', '');
-    console.log(chalk.redBright(`[ERROR]    ${message}`));
+  let message = generateLogMessage(...messages);
+  // Für den Fall, dass ein weitergereichter Fehler hier ankommt [ERROR] preventiv entfernen
+  message = message.replace('[ERROR]    ', '');
+  console.log(chalk.redBright(`[ERROR]    ${message}`));
 };
 
 /**
@@ -64,9 +64,9 @@ export const logError = (...messages: string[]) => {
  * @constructor
  */
 export const formattedSchematicsException: (...messages: string[]) => SchematicsException = (...messages: string[]) => {
-    let message = generateLogMessage(...messages);
-    // Die eigentliche Exception zum Aufrufer zurückgeben '
-    return new SchematicsException(`[ERROR]    ${message}`);
+  let message = generateLogMessage(...messages);
+  // Die eigentliche Exception zum Aufrufer zurückgeben '
+  return new SchematicsException(`[ERROR]    ${message}`);
 };
 
 /**
@@ -75,15 +75,15 @@ export const formattedSchematicsException: (...messages: string[]) => Schematics
  * @param messages
  */
 function generateLogMessage(...messages: string[]): string {
-    let fullMessage: string = '';
-    for (let i = 0; i < messages.length; i++) {
-        if (i !== 0) {
-            fullMessage += TAB;
-        }
-        fullMessage += messages[i];
-        if (i !== messages.length - 1) {
-            fullMessage += '\r\n';
-        }
+  let fullMessage: string = '';
+  for (let i = 0; i < messages.length; i++) {
+    if (i !== 0) {
+      fullMessage += TAB;
     }
-    return fullMessage;
+    fullMessage += messages[i];
+    if (i !== messages.length - 1) {
+      fullMessage += '\r\n';
+    }
+  }
+  return fullMessage;
 }
