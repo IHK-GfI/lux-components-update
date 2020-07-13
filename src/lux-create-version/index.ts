@@ -11,9 +11,9 @@ import {
   Tree,
   UpdateRecorder,
   url
-} from "@angular-devkit/schematics";
-import {JsonAstObject, JsonValue, normalize, parseJsonAst, Path, strings} from "@angular-devkit/core";
-import {formattedSchematicsException} from "../utility/logging";
+} from '@angular-devkit/schematics';
+import { JsonAstObject, JsonValue, normalize, parseJsonAst, Path, strings } from '@angular-devkit/core';
+import { formattedSchematicsException } from '../utility/logging';
 import * as semver from 'semver';
 
 /**
@@ -21,16 +21,12 @@ import * as semver from 'semver';
  * @param options
  */
 export const luxCreateVersion: (options: any) => Rule = (options: any) => {
-  return chain([
-    setup(options),
-    createFiles(options),
-    addSchematicToCollectionJson(options)
-  ]);
+  return chain([setup(options), createFiles(options), addSchematicToCollectionJson(options)]);
 };
 
 /**
  * Vorbereitungen zur Generierung
- * @param options 
+ * @param options
  */
 export function setup(options: any): Rule {
   return (tree: Tree, _context: SchematicContext) => {
@@ -39,45 +35,51 @@ export function setup(options: any): Rule {
       throw formattedSchematicsException('Versionsnummer nicht angegeben!');
     }
     // Node-Version entsprechend der Versionsnummer setzen
-    if(semver.cmp(options.name, '<', '1.8.0')) {
+    if (semver.cmp(options.name, '<', '1.8.0')) {
       options.nodeVersion = '8.0.0';
-    } else if(semver.cmp(options.name, '<', '1.9.0')) {
+    } else if (semver.cmp(options.name, '<', '1.9.0')) {
       options.nodeVersion = '10.0.0';
     } else {
       options.nodeVersion = '10.16.3';
     }
     // Vorgänger-Version bestimmen
-    const latestLuxVersionFolder = tree.getDir('src/lux-version-' + semver.major(options.name) + "." + semver.minor(options.name)).subdirs.filter(element => element.indexOf('add-lux-components') < 0);
-    if(latestLuxVersionFolder.length !== 0){
-      options.lastVersion = semver.sort(latestLuxVersionFolder)[latestLuxVersionFolder.length-1];
-    } else {     
-      let luxVersionFolders = tree.getDir('./src').subdirs.filter(dirName => dirName.toString().includes('lux-version'));
-      let VersionFolder : any[] = [];
-      luxVersionFolders.forEach(element => {
+    const latestLuxVersionFolder = tree
+      .getDir('src/lux-version-' + semver.major(options.name) + '.' + semver.minor(options.name))
+      .subdirs.filter((element) => element.indexOf('add-lux-components') < 0);
+    if (latestLuxVersionFolder.length !== 0) {
+      options.lastVersion = semver.sort(latestLuxVersionFolder)[latestLuxVersionFolder.length - 1];
+    } else {
+      let luxVersionFolders = tree
+        .getDir('./src')
+        .subdirs.filter((dirName) => dirName.toString().includes('lux-version'));
+      let VersionFolder: any[] = [];
+      luxVersionFolders.forEach((element) => {
         if (element.indexOf('add-lux-components') < 0) {
           VersionFolder.push(element.substring(12) + '.0');
         }
       });
-      const lastestLuxVersionFolder = semver.sort(VersionFolder)[VersionFolder.length-1];
-      const latestLuxVersions = tree.getDir('src/lux-version-' + semver.major(lastestLuxVersionFolder) + '.' + semver.minor(lastestLuxVersionFolder)).subdirs;
-      options.lastVersion = semver.sort(latestLuxVersions)[latestLuxVersions.length-1];;
+      const lastestLuxVersionFolder = semver.sort(VersionFolder)[VersionFolder.length - 1];
+      const latestLuxVersions = tree.getDir(
+        'src/lux-version-' + semver.major(lastestLuxVersionFolder) + '.' + semver.minor(lastestLuxVersionFolder)
+      ).subdirs;
+      options.lastVersion = semver.sort(latestLuxVersions)[latestLuxVersions.length - 1];
     }
     return tree;
-  }
+  };
 }
 
 /**
  * Erzeugt ein Ordner inklusive aller Dateien aus den Templates in ./files.
- * @param options 
+ * @param options
  */
 export function createFiles(options: any): Rule {
   return (tree: Tree, _context: SchematicContext) => {
     const templateSource: Source = apply(url('./files'), [
-        template({
-          ...strings,
-          ...options,
-        }),
-        move("src/lux-version-" + semver.major(options.name) + "." + semver.minor(options.name))
+      template({
+        ...strings,
+        ...options
+      }),
+      move('src/lux-version-' + semver.major(options.name) + '.' + semver.minor(options.name))
     ]);
 
     return mergeWith(templateSource, MergeStrategy.Default);
@@ -86,17 +88,17 @@ export function createFiles(options: any): Rule {
 
 /**
  * Sucht nach der collection.json und fügt den Schematic-Eintrag hinzu.
- * @param options 
+ * @param options
  */
 export function addSchematicToCollectionJson(options: any): Rule {
   return (tree: Tree, _context: SchematicContext) => {
     let collectionPath = findCollectionPath(tree);
-    if(collectionPath) {
+    if (collectionPath) {
       const collectionJsonContent = tree.read(collectionPath);
       if (!collectionJsonContent) {
         throw formattedSchematicsException('Invalid collection path: ' + collectionPath);
       }
-      
+
       const collectionJsonAst = parseJsonAst(collectionJsonContent.toString('utf-8'));
       if (collectionJsonAst.kind !== 'object') {
         throw formattedSchematicsException('Invalid collection content.');
@@ -109,28 +111,44 @@ export function addSchematicToCollectionJson(options: any): Rule {
           }
 
           const recorder = tree.beginUpdate(collectionPath);
-          appendPropertyInAstObject(recorder, property.value, 
-            "lux-version-" + options.name, 
-            {
-              description: "Aktualisiert die LUX-Applikation zur Version " + options.name + " der LUX-Components.", 
-              factory: "./lux-version-" + semver.major(options.name) + "." + semver.minor(options.name) + "/" + options.name + "/index#luxVersion",
-              schema: "./lux-version-" + semver.major(options.name) + "." + semver.minor(options.name) + "/" + options.name + "/schema.json"
-            }
-          );
+          appendPropertyInAstObject(recorder, property.value, 'lux-version-' + options.name, {
+            description: 'Aktualisiert die LUX-Applikation zur Version ' + options.name + ' der LUX-Components.',
+            factory:
+              './lux-version-' +
+              semver.major(options.name) +
+              '.' +
+              semver.minor(options.name) +
+              '/' +
+              options.name +
+              '/index#luxVersion',
+            schema:
+              './lux-version-' +
+              semver.major(options.name) +
+              '.' +
+              semver.minor(options.name) +
+              '/' +
+              options.name +
+              '/schema.json'
+          });
           tree.commitUpdate(recorder);
 
           return tree;
         }
       }
     }
-
   };
 }
 
 /**
  * Source: https://github.com/angular/angular-cli/blob/master/packages/schematics/schematics/blank/factory.ts
  */
-function appendPropertyInAstObject(recorder: UpdateRecorder, node: JsonAstObject, propertyName: string, value: JsonValue, indent = 4) {
+function appendPropertyInAstObject(
+  recorder: UpdateRecorder,
+  node: JsonAstObject,
+  propertyName: string,
+  value: JsonValue,
+  indent = 4
+) {
   const indentStr = '\n' + new Array(indent + 1).join(' ');
 
   if (node.properties.length > 0) {
@@ -141,15 +159,13 @@ function appendPropertyInAstObject(recorder: UpdateRecorder, node: JsonAstObject
 
   recorder.insertLeft(
     node.end.offset - 1,
-    '  '
-    + `"${propertyName}": ${JSON.stringify(value, null, 2).replace(/\n/g, indentStr)}`
-    + indentStr.slice(0, -2),
+    '  ' + `"${propertyName}": ${JSON.stringify(value, null, 2).replace(/\n/g, indentStr)}` + indentStr.slice(0, -2)
   );
 }
 
 /**
  * Sucht nach dem Path der collection.json
- * @param tree 
+ * @param tree
  */
 function findCollectionPath(tree: Tree): Path | undefined {
   try {
@@ -165,5 +181,5 @@ function findCollectionPath(tree: Tree): Path | undefined {
     }
   } catch (ex) {
     throw formattedSchematicsException('Could not find collection path.');
-  }  
+  }
 }
