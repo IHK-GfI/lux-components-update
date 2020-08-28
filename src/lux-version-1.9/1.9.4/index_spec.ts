@@ -8,7 +8,7 @@ import { UtilConfig } from '../../utility/util';
 
 const collectionPath = path.join(__dirname, '../../collection.json');
 
-describe('lux-version-<%= dasherize(name) %>', () => {
+describe('lux-version-1.9.4', () => {
     let appTree: UnitTestTree;
     let runner: SchematicTestRunner;
     let context: SchematicContext;
@@ -22,7 +22,7 @@ describe('lux-version-<%= dasherize(name) %>', () => {
             .toPromise();
 
         const collection = runner.engine.createCollection(collectionPath);
-        const schematic = runner.engine.createSchematic('lux-version-<%= dasherize(name) %>', collection);
+        const schematic = runner.engine.createSchematic('lux-version-1.9.4', collection);
         context = runner.engine.createContext(schematic);
     });
 
@@ -31,33 +31,33 @@ describe('lux-version-<%= dasherize(name) %>', () => {
         it('Sollte einen Fehler werfen, wenn Version < n - 1', () => {
             addDependencyToPackageJson(appTree, '@ihk-gfi/lux-components', '1.7.8');
             Object.defineProperty(process.versions, 'node', {
-                get: () => '<%= dasherize(nodeVersion) %>'
+                get: () => '10.16.3'
             });
 
             callRule(checkVersions(), observableOf(appTree), context).subscribe(
                 (success) => expect(success).toBeUndefined(),
                 (reason) =>
-                    expect(reason.toString()).toContain('Dieser Generator benötigt allerdings die (neuere) Version <%= dasherize(lastVersion) %>.')
+                    expect(reason.toString()).toContain('Dieser Generator benötigt allerdings die (neuere) Version 1.9.3.')
             );
         });
 
         it('Sollte einen Fehler werfen, wenn Version > n - 1', () => {
-            addDependencyToPackageJson(appTree, '@ihk-gfi/lux-components', '<%= dasherize(name) %>');
+            addDependencyToPackageJson(appTree, '@ihk-gfi/lux-components', '1.9.4');
             Object.defineProperty(process.versions, 'node', {
-                get: () => '<%= dasherize(nodeVersion) %>'
+                get: () => '10.16.3'
             });
 
             callRule(checkVersions(), observableOf(appTree), context).subscribe(
                 (success) => expect(success).toBeUndefined(),
                 (reason) =>
-                    expect(reason.toString()).toContain('Dieser Generator benötigt allerdings die (ältere) Version <%= dasherize(lastVersion) %>.')
+                    expect(reason.toString()).toContain('Dieser Generator benötigt allerdings die (ältere) Version 1.9.3.')
             );
         });
 
         it('Sollte keinen Fehler werfen, wenn Version === n - 1', () => {
-            addDependencyToPackageJson(appTree, '@ihk-gfi/lux-components', '<%= dasherize(lastVersion) %>');
+            addDependencyToPackageJson(appTree, '@ihk-gfi/lux-components', '1.9.3');
             Object.defineProperty(process.versions, 'node', {
-                get: () => '<%= dasherize(nodeVersion) %>'
+                get: () => '10.16.3'
             });
 
             callRule(checkVersions(), observableOf(appTree), context).subscribe(
@@ -66,22 +66,22 @@ describe('lux-version-<%= dasherize(name) %>', () => {
             );
         });
 
-        it('Sollte einen Fehler werfen, wenn Node-Version < <%= dasherize(nodeVersion) %>', () => {
-            addDependencyToPackageJson(appTree, '@ihk-gfi/lux-components', '<%= dasherize(lastVersion) %>');
+        it('Sollte einen Fehler werfen, wenn Node-Version < 10.16.3', () => {
+            addDependencyToPackageJson(appTree, '@ihk-gfi/lux-components', '1.9.3');
             Object.defineProperty(process.versions, 'node', {
                 get: () => '7.9.9'
             });
 
             callRule(checkVersions(), observableOf(appTree), context).subscribe(
                 (success) => expect(success).toBeUndefined(),
-                (reason) => expect(reason.toString()).toContain('LUX benötigt allerdings die Version <%= dasherize(nodeVersion) %>.')
+                (reason) => expect(reason.toString()).toContain('LUX benötigt allerdings die Version 10.16.3.')
             );
         });
 
-        it('Sollte keinen Fehler werfen, wenn Node-Version >= <%= dasherize(nodeVersion) %>', () => {
-            addDependencyToPackageJson(appTree, '@ihk-gfi/lux-components', '<%= dasherize(lastVersion) %>');
+        it('Sollte keinen Fehler werfen, wenn Node-Version >= 10.16.3', () => {
+            addDependencyToPackageJson(appTree, '@ihk-gfi/lux-components', '1.9.3');
             Object.defineProperty(process.versions, 'node', {
-                get: () => '<%= dasherize(nodeVersion) %>'
+                get: () => '10.16.3'
             });
             callRule(checkVersions(), observableOf(appTree), context).subscribe(
                 (success) => expect(success).toBeDefined(),
@@ -93,14 +93,14 @@ describe('lux-version-<%= dasherize(name) %>', () => {
     describe('[Rule] updatePackageJson', () => {
 
         beforeEach(() => {
-            addDependencyToPackageJson(appTree, '@ihk-gfi/lux-components', '<%= dasherize(name) %>');
+            addDependencyToPackageJson(appTree, '@ihk-gfi/lux-components', '1.9.4');
         });
 
         // Muss über async laufen, da sonst eine package.json geprüft wird, welche bereits wieder resettet wurde
-        it('Sollte die Dependency "lux-components" auf Version <%= dasherize(name) %> setzen', async (done) => {
+        it('Sollte die Dependency "lux-components" auf Version 1.9.4 setzen', async (done) => {
             callRule(updatePackageJson(), observableOf(appTree), context).subscribe(
                 () => {
-                    expect(appTree.readContent('/package.json')).toContain('"@ihk-gfi/lux-components": "<%= dasherize(name) %>"');
+                    expect(appTree.readContent('/package.json')).toContain('"@ihk-gfi/lux-components": "1.9.4"');
                     done();
                 },
                 (reason) => expect(reason).toBeUndefined()

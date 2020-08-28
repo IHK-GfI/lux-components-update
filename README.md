@@ -39,5 +39,5 @@ Um eine neue Version des Lux-Components-Updater anzulegen,
 kann der folgende Befehl verwendet werden: 
 
 ```bash
-schematics @ihk-gfi/lux-components-update:lux-create-version
+schematics .:lux-create-version --dry-run=false
 ```
