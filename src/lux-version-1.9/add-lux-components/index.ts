@@ -108,7 +108,7 @@ export function updatePackageJson(): Rule {
     return waitForTreeCallback(tree, () => {
       const newDependency: NodeDependency = {
         type: NodeDependencyType.Default,
-        version: '1.9.3',
+        version: '1.9.4',
         name: '@ihk-gfi/lux-components'
       };
       updatePackageJsonDependencyForceUpdate(tree, context, newDependency, true);
