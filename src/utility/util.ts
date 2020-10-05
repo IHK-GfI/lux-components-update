@@ -1,8 +1,8 @@
 import { Observable, of } from 'rxjs';
 import { delay } from 'rxjs/operators';
-import { SchematicContext, Tree } from '@angular-devkit/schematics';
+import {Rule, SchematicContext, Tree} from '@angular-devkit/schematics';
 import { controlPackageJsonScript, NodeScript } from './scripts';
-import { logInfo, logSuccess, logWarn } from './logging';
+import {logInfo, logInfoWithDescriptor, logSuccess, logWarn} from './logging';
 import * as chalk from 'chalk';
 import { NodePackageInstallTask } from '@angular-devkit/schematics/tasks';
 
@@ -90,3 +90,21 @@ export const runInstallAndLogToDos: (context, ...toDoMessages) => void = (
   // npm install starten
   context.addTask(new NodePackageInstallTask());
 };
+
+export function messageInfoRule(message: any): Rule {
+  return (tree: Tree, _context: SchematicContext) => {
+    logInfoWithDescriptor(message);
+  };
+}
+
+export function messageInfoInternRule(message: any): Rule {
+  return (tree: Tree, _context: SchematicContext) => {
+    logInfo(message);
+  };
+}
+
+export function messageSuccessRule(message: any): Rule {
+  return (tree: Tree, _context: SchematicContext) => {
+    logSuccess(message);
+  };
+}

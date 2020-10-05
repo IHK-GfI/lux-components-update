@@ -33,7 +33,16 @@ ist es möglich den Aufruf mit dem Flag "--dry-run" zu versehen:
 ng generate @ihk-gfi/lux-components-update:lux-version-x.y.z --dry-run
 ```
 
-## Ein neuen Lux-Components-Updater erstellen
+## LUX-Theme aktualisieren
+
+Dieses Updateskript liest die LUX-Componentsversion aus der package.json 
+und aktualisiert das LUX-Theme entsprechend.
+
+```bash
+ng generate @ihk-gfi/lux-components-update:lux-update-theme
+```
+
+## Ein neuen LUX-Components-Updater erstellen
 
 Um eine neue Version des Lux-Components-Updater anzulegen, 
 kann der folgende Befehl verwendet werden: 

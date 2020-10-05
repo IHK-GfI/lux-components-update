@@ -163,7 +163,6 @@ export function iterateFilesAndModifyContent(
  */
 export function moveFilesToDirectory(options: any, sourcePath: string, targetPath: string): Rule {
   return (tree: Tree, context: SchematicContext) => {
-    logInfoWithDescriptor('Aktualisiere Dateien in ' + targetPath);
     if (!targetPath.startsWith('/')) {
       targetPath = '/' + targetPath;
     }
@@ -181,15 +180,49 @@ export function moveFilesToDirectory(options: any, sourcePath: string, targetPat
       forEach((file) => {
         if (tree.exists(targetPath + file.path)) {
           tree.overwrite(targetPath + file.path, file.content);
+          logInfo(`Datei '${file.path}' aktualisiert.`);
         } else {
           tree.create(targetPath + file.path, file.content);
+          logInfo(`Datei '${file.path}' angelegt.`);
         }
         return null;
       })
     ]);
 
-    logSuccess(targetPath + ' erfolgreich aktualisiert.');
     return mergeWith(templateSource, MergeStrategy.Overwrite);
+  };
+}
+
+/**
+ * Diese Methode löscht die Dateien in dem angegebenen Ordner.
+ *
+ * @param options Die Optionen.
+ * @param path Der Pfad.
+ * @param exclude Ein Array mit Dateinamen, die nicht gelöscht werden sollen.
+ */
+export function deleteFilesInDirectory(options: any, path: string, exclude: string[]): Rule {
+  return (tree: Tree, context: SchematicContext) => {
+    if (!path.startsWith('/')) {
+      path = '/' + path;
+    }
+
+    if (!path.endsWith('/')) {
+      path = path + '/';
+    }
+
+    path = options.path + path;
+
+    const dir = tree.getDir(path);
+    if (dir) {
+      dir.subfiles.forEach((filePath) => {
+        if (!exclude.find((excludeFilePath) => excludeFilePath === filePath)) {
+          tree.delete(path + filePath);
+          logInfo(filePath + ' gelöscht.');
+        }
+      });
+    }
+
+    return tree;
   };
 }
 
