@@ -73,7 +73,7 @@ export function updatePackageJsonDependencyForceUpdate(
       insertPropertyInAstObjectInOrder(recorder, dependencyTypeNode, dependency.name, dependency.version, 4);
       logInfo(
         `Dependency ` +
-          chalk.greenBright(`${dependency.name}`) +
+          chalk.yellowBright(`${dependency.name}`) +
           ` nicht gefunden. Füge Sie zum Typ "${dependency.type}" hinzu.`
       );
     }
@@ -81,34 +81,52 @@ export function updatePackageJsonDependencyForceUpdate(
     else {
       const packageJsonDependency = getPackageJsonDependency(tree, dependency.name);
       // Die Dependency ist in einer älteren Version vorhanden
-      if (semver.cmp(packageJsonDependency.version.replace(/([\^~])/g, ''), '<', dependency.version)) {
+      if (
+        semver.cmp(
+          packageJsonDependency.version.replace(/([\^~])/g, ''),
+          '<',
+          dependency.version.replace(/([\^~])/g, '')
+        )
+      ) {
         const { end, start } = dependencyNode;
         // Die alte Version entfernen
         recorder.remove(start.offset, end.offset - start.offset);
         // Die neue hinzufügen
         recorder.insertRight(start.offset, JSON.stringify(dependency.version));
-        logInfo(`Dependency ` + chalk.greenBright(`${dependency.name}`) + ` gefunden. Aktualisiere die Version.`);
-      } else if (semver.cmp(packageJsonDependency.version.replace(/([\^~])/g, ''), '===', dependency.version)) {
+        logInfo(`Dependency ` + chalk.yellowBright(`${dependency.name}`) + ` gefunden. Aktualisiere die Version.`);
+      } else if (
+        semver.cmp(
+          packageJsonDependency.version.replace(/([\^~])/g, ''),
+          '===',
+          dependency.version.replace(/([\^~])/g, '')
+        )
+      ) {
         if (packageJsonDependency.version !== dependency.version) {
           const { end, start } = dependencyNode;
           // Die alte Version entfernen
           recorder.remove(start.offset, end.offset - start.offset);
           // Die neue hinzufügen
           recorder.insertRight(start.offset, JSON.stringify(dependency.version));
-          logInfo(`Dependency ` + chalk.greenBright(`${dependency.name}`) + ` gefunden. ^ oder ~ entfernt.`);
+          logInfo(`Dependency ` + chalk.yellowBright(`${dependency.name}`) + ` gefunden. ^ oder ~ entfernt.`);
         }
-      } else if (semver.cmp(packageJsonDependency.version.replace(/([\^~])/g, ''), '>', dependency.version)) {
+      } else if (
+        semver.cmp(
+          packageJsonDependency.version.replace(/([\^~])/g, ''),
+          '>',
+          dependency.version.replace(/([\^~])/g, '')
+        )
+      ) {
         if (forceUpate) {
           const { end, start } = dependencyNode;
           // Die neuere Version entfernen
           recorder.remove(start.offset, end.offset - start.offset);
           // Die gewollte Version hinzufügen
           recorder.insertRight(start.offset, JSON.stringify(dependency.version));
-          logInfo(`Dependency ` + chalk.greenBright(`${dependency.name}`) + ` gefunden. ^ oder ~ entfernt.`);
+          logInfo(`Dependency ` + chalk.yellowBright(`${dependency.name}`) + ` gefunden. ^ oder ~ entfernt.`);
         } else {
           logWarn(
             `Dependency ` +
-              chalk.greenBright(`${dependency.name}`) +
+              chalk.yellowBright(`${dependency.name}`) +
               ` gefunden. Die aktuelle Version ` +
               packageJsonDependency.version +
               ` ist größer als ` +
@@ -117,7 +135,7 @@ export function updatePackageJsonDependencyForceUpdate(
           );
         }
       } else {
-        logInfo(`Dependency ` + chalk.greenBright(`${dependency.name}`) + ` gefunden. Die Version ist i.O.`);
+        logInfo(`Dependency ` + chalk.yellowBright(`${dependency.name}`) + ` gefunden. Die Version ist i.O.`);
       }
     }
   }

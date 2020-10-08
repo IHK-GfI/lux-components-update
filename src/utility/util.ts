@@ -1,10 +1,11 @@
 import { Observable, of } from 'rxjs';
 import { delay } from 'rxjs/operators';
-import {Rule, SchematicContext, Tree} from '@angular-devkit/schematics';
-import { controlPackageJsonScript, NodeScript } from './scripts';
-import {logInfo, logInfoWithDescriptor, logSuccess, logWarn} from './logging';
-import * as chalk from 'chalk';
+import { Rule, SchematicContext, Tree } from '@angular-devkit/schematics';
+import { logInfo, logInfoWithDescriptor, logSuccess } from './logging';
 import { NodePackageInstallTask } from '@angular-devkit/schematics/tasks';
+import { getProject } from '@schematics/angular/utility/project';
+import { getPackageJsonDependency } from './dependencies';
+import * as semver from 'semver';
 
 /**
  * Konfig-Objekt für einige Util-Methoden.
@@ -53,43 +54,50 @@ export const waitForTreeCallback = (tree, callback, waitMS: number = UtilConfig.
 };
 
 /**
- * Prüft, ob das smoketest-Skript in der package.json enthalten ist.
- * Wenn nicht, wird dieses hinzugefügt.
- */
-export const checkSmoketestScriptExists = (tree: Tree, context: SchematicContext) => {
-  logInfo(`Prüfe, ob das ${chalk.redBright('smoketest')}-Skript bereits existiert.`);
-  const script: NodeScript = {
-    name: 'smoketest',
-    command: 'npm run test_single_run && npm run build-aot && npm run lint --bailOnLintError true',
-    overwrite: true
-  };
-  controlPackageJsonScript(tree, context, script);
-  logSuccess('Prüfung abgeschlossen.');
-};
-
-/**
  * Führt npm install aus und wartet auf den Abschluss des Prozess für diese Schematic.
  * Wenn dieses eintritt, werden die Hinweise und ToDos ausgegeben.
  * @param context
- * @param toDoMessages
+ * @param messages
  */
-export const runInstallAndLogToDos: (context, ...toDoMessages) => void = (
-  context: SchematicContext,
-  ...toDoMessages
-) => {
+export const runInstallAndLogToDos: (context, messages) => void = (context: SchematicContext, messages) => {
   // diese log-Ausgaben werden erst ganz zum Schluss ausgeführt (nach Update und npm-install logs)
   process.addListener('exit', () => {
-    logInfo('\r\n');
-    logWarn('WICHTIGE HINWEISE ZUM UPDATE: \r\n');
-
-    toDoMessages.forEach((message: string) => {
-      logInfo(message + '\r\n');
-    });
+    if (messages) {
+      messages.forEach((message: string) => {
+        logInfo(message);
+      });
+    }
   });
 
   // npm install starten
   context.addTask(new NodePackageInstallTask());
 };
+
+export function applyRuleIf(minVersion: string, rule: Rule): Rule {
+  return (tree: Tree, _context: SchematicContext) => {
+    let version = getPackageJsonDependency(tree, '@ihk-gfi/lux-components').version;
+
+    if (semver.satisfies(minVersion, version)) {
+      return rule;
+    } else {
+      return tree;
+    }
+  };
+}
+
+export function setupPath(options: any, tree: Tree) {
+  if (options.path === undefined) {
+    options.path = getProject(tree, options.project).root;
+  }
+}
+
+export function messageDebugRule(message: any, options: any): Rule {
+  return (tree: Tree, _context: SchematicContext) => {
+    if (options && options.verbose) {
+      logInfo(message);
+    }
+  };
+}
 
 export function messageInfoRule(message: any): Rule {
   return (tree: Tree, _context: SchematicContext) => {
@@ -106,5 +114,12 @@ export function messageInfoInternRule(message: any): Rule {
 export function messageSuccessRule(message: any): Rule {
   return (tree: Tree, _context: SchematicContext) => {
     logSuccess(message);
+  };
+}
+
+export function finish(...messages: string[]): Rule {
+  return (tree: Tree, context: SchematicContext) => {
+    runInstallAndLogToDos(context, messages);
+    return tree;
   };
 }
