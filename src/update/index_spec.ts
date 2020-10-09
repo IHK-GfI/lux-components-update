@@ -9,7 +9,7 @@ import {
   NodeDependencyType,
   updatePackageJsonDependencyForceUpdate
 } from '../utility/dependencies';
-import { update, updatePolyfills } from './index';
+import { update, updateLocale, updatePolyfills } from './index';
 
 const collectionPath = path.join(__dirname, '../collection.json');
 
@@ -124,6 +124,98 @@ import "core-js/es/reflect";
         (success) => {
           const content = success.read(testOptions.path + '/src/polyfills.ts')?.toString();
           expect(content).toContain('import "core-js/es/weak-set";');
+          done();
+        },
+        (reason) => expect(reason).toBeNull()
+      );
+    });
+  });
+
+  describe('[Rule] updateLocale', () => {
+    it('Sollte die Locale aktualisieren', async (done) => {
+      appTree.overwrite(
+        testOptions.path + '/src/app/app.module.ts',
+        `
+import { registerLocaleData } from '@angular/common';
+import localeDE from '@angular/common/locales/de';
+import localeDeExtra from '@angular/common/locales/extra/de';
+import { LOCALE_ID } from '@angular/core';
+import { PlaceholderComponent } from './demo/abstract/placeholder/placeholder.component';
+import { RedirectComponent } from './demo/abstract/redirect/redirect.component';
+
+registerLocaleData(localeDE, localeDeExtra);
+import '@angular/common/locales/global/de';
+
+@NgModule({
+  declarations: [AppComponent, PlaceholderComponent, RedirectComponent],
+  imports: [
+    BrowserModule,
+    BrowserAnimationsModule,
+    AppRoutingModule,
+    HammerModule
+  ],
+  entryComponents: [LuxSnackbarComponent, LuxFilePreviewComponent],
+  providers: [
+    { provide: LOCALE_ID, useValue: 'de-DE' },
+    LuxAppFooterButtonService,
+    LuxStorageService
+  ],
+  bootstrap: [AppComponent]
+})
+export class AppModule {}
+        `
+      );
+
+      callRule(updateLocale(testOptions), observableOf(appTree), context).subscribe(
+        (success) => {
+          const content = success.read(testOptions.path + '/src/app/app.module.ts')?.toString();
+          expect(content).toContain("import '@angular/common/locales/global/de';");
+          expect(content).not.toContain('registerLocaleData');
+          expect(content).not.toContain('@angular/common/locales/de');
+          expect(content).not.toContain('@angular/common/locales/extra/de');
+          done();
+        },
+        (reason) => expect(reason).toBeNull()
+      );
+    });
+
+    it('Sollte die Locale hinzufügen', async (done) => {
+      appTree.overwrite(
+        testOptions.path + '/src/app/app.module.ts',
+        `
+import { registerLocaleData } from '@angular/common';
+import localeDE from '@angular/common/locales/de';
+import localeDeExtra from '@angular/common/locales/extra/de';
+import { LOCALE_ID } from '@angular/core';
+import { PlaceholderComponent } from './demo/abstract/placeholder/placeholder.component';
+import { RedirectComponent } from './demo/abstract/redirect/redirect.component';
+
+registerLocaleData(localeDE, localeDeExtra);
+import '@angular/common/locales/global/de';
+
+@NgModule({
+  declarations: [AppComponent, PlaceholderComponent, RedirectComponent],
+  imports: [
+    BrowserModule,
+    BrowserAnimationsModule,
+    AppRoutingModule,
+    HammerModule
+  ],
+  entryComponents: [LuxSnackbarComponent, LuxFilePreviewComponent],
+  providers: [
+    LuxAppFooterButtonService,
+    LuxStorageService
+  ],
+  bootstrap: [AppComponent]
+})
+export class AppModule {}
+        `
+      );
+
+      callRule(updateLocale(testOptions), observableOf(appTree), context).subscribe(
+        (success) => {
+          const content = success.read(testOptions.path + '/src/app/app.module.ts')?.toString();
+          expect(content).toContain("{ provide: LOCALE_ID, useValue: 'de-DE' },");
           done();
         },
         (reason) => expect(reason).toBeNull()

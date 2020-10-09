@@ -1,21 +1,11 @@
 import { chain, Rule, SchematicContext, Tree } from '@angular-devkit/schematics';
-import {
-  applyRuleIf,
-  finish,
-  messageDebugRule,
-  messageInfoInternRule,
-  messageInfoRule,
-  messageSuccessRule,
-  replaceAll,
-  setupPath
-} from '../utility/util';
+import { applyRuleIf, finish, messageInfoRule, messageSuccessRule, setupPath } from '../utility/util';
 import { validateLuxComponentsVersion, validateNodeVersion } from '../utility/validation';
-import { logInfo, logInfoWithDescriptor, logSuccess } from '../utility/logging';
+import { logInfoWithDescriptor, logSuccess } from '../utility/logging';
 import { updateDependencies } from '../update-dependencies';
-import { findThemeDir, updateTheme } from '../update-theme/index';
+import { updateTheme } from '../update-theme/index';
 import * as chalk from 'chalk';
-import { getPackageJsonDependency } from '../utility/dependencies';
-import { deleteFilesInDirectory, iterateFilesAndModifyContent, moveFilesToDirectory } from '../utility/files';
+import { iterateFilesAndModifyContent } from '../utility/files';
 
 export const updateMajorVersion = '10';
 export const updateMinVersion = '1.9.5';
@@ -55,6 +45,7 @@ function updateProject(options: any): Rule {
     return chain([
       messageInfoRule(`LUX-Components ${updateMajorVersion} werden eingerichtet...`),
       updatePolyfills(options),
+      updateLocale(options),
       updateDependencies(),
       updateTheme(options),
       messageSuccessRule(`LUX-Components ${updateMajorVersion} wurden eingerichtet.`)
@@ -85,6 +76,46 @@ export function updatePolyfills(options: any): Rule {
           }
         },
         'polyfills.ts'
+      );
+    }
+  ]);
+}
+
+export function updateLocale(options: any): Rule {
+  return chain([
+    (tree: Tree, context: SchematicContext) => {
+      iterateFilesAndModifyContent(
+        tree,
+        options.path,
+        (filePath: string, content: string) => {
+          let modifiedContent = content;
+
+          if (modifiedContent.indexOf('provide: LOCALE_ID') < 0) {
+            modifiedContent = content.replace(
+              /providers:.*\[/g,
+              "providers: [\n{ provide: LOCALE_ID, useValue: 'de-DE' },"
+            );
+          }
+
+          if (modifiedContent.indexOf('@angular/common/locales/global/de') < 0) {
+            modifiedContent = "import '@angular/common/locales/global/de';\n" + modifiedContent;
+          }
+
+          modifiedContent = modifiedContent.replace(/import \{ registerLocaleData \} from .@angular\/common.;/g, '');
+          modifiedContent = modifiedContent.replace(/import localeDE from .@angular\/common\/locales\/de.;/g, '');
+          modifiedContent = modifiedContent.replace(
+            /import localeDeExtra from .@angular\/common\/locales\/extra\/de.;/g,
+            ''
+          );
+          modifiedContent = modifiedContent.replace(/registerLocaleData\(localeDE, localeDeExtra\);/g, '');
+
+          if (content !== modifiedContent) {
+            logInfoWithDescriptor(`Locale wird aktualisiert...`);
+            tree.overwrite(filePath, modifiedContent);
+            logSuccess(`Locale wurde aktualisiert.`);
+          }
+        },
+        'app.module.ts'
       );
     }
   ]);
