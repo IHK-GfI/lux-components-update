@@ -9,7 +9,7 @@ import {
   NodeDependencyType,
   updatePackageJsonDependencyForceUpdate
 } from '../utility/dependencies';
-import { update } from './index';
+import { update, updatePolyfills } from './index';
 
 const collectionPath = path.join(__dirname, '../collection.json');
 
@@ -85,6 +85,48 @@ describe('update', () => {
           done();
         },
         (reason) => expect(reason).toBeUndefined()
+      );
+    });
+  });
+
+  describe('[Rule] updatePolyfill', () => {
+    it('Sollte die polyfill.ts aktualisieren (Single Quote)', async (done) => {
+      appTree.overwrite(
+        testOptions.path + '/src/polyfills.ts',
+        `
+import 'core-js/es/symbol';
+import 'core-js/es/weak-map';
+import 'core-js/es/reflect';
+        `
+      );
+
+      callRule(updatePolyfills(testOptions), observableOf(appTree), context).subscribe(
+        (success) => {
+          const content = success.read(testOptions.path + '/src/polyfills.ts')?.toString();
+          expect(content).toContain("import 'core-js/es/weak-set';");
+          done();
+        },
+        (reason) => expect(reason).toBeNull()
+      );
+    });
+
+    it('Sollte die polyfill.ts aktualisieren (Double Quote)', async (done) => {
+      appTree.overwrite(
+        testOptions.path + '/src/polyfills.ts',
+        `
+import "core-js/es/symbol";
+import "core-js/es/weak-map";
+import "core-js/es/reflect";
+        `
+      );
+
+      callRule(updatePolyfills(testOptions), observableOf(appTree), context).subscribe(
+        (success) => {
+          const content = success.read(testOptions.path + '/src/polyfills.ts')?.toString();
+          expect(content).toContain('import "core-js/es/weak-set";');
+          done();
+        },
+        (reason) => expect(reason).toBeNull()
       );
     });
   });
