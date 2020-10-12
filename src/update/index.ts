@@ -21,7 +21,7 @@ export function update(options: any): Rule {
       finish(
         `${chalk.yellowBright(
           'Wichtig!!!'
-        )} Hinweise im Update Guide beachten -> https://github.com/IHK-GfI/lux-components/wiki/update-guide#version-${updateMajorVersion}`
+        )} Hinweise im Update Guide beachten -> https://github.com/IHK-GfI/lux-components/wiki/update-guide-10`
       )
     ]);
   };
