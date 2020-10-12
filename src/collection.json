@@ -1,170 +1,25 @@
 {
   "$schema": "../node_modules/@angular-devkit/schematics/collection-schema.json",
   "schematics": {
-    "lux-create-version": {
-      "description": "Generiert eine neue Version im LUX-Components-Updater.",
-      "factory": "./lux-create-version/index#luxCreateVersion",
-      "schema": "./lux-create-version/schema.json"
+    "update": {
+      "description": "Aktualisiert das LUX-Componentsprojekt",
+      "factory": "./update/index#update",
+      "schema": "./update/schema.json"
     },
-    "lux-version-1.7.0": {
-      "description": "Aktualisiert die LUX-Applikation zur Version 1.7.0 der LUX-Components.",
-      "factory": "./lux-version-1.7/1.7.0/index#luxVersion",
-      "schema": "./lux-version-1.7/1.7.0/schema.json"
+    "update-theme": {
+      "description": "Aktualisiert das LUX-Theme im LUX-Componentsprojekt",
+      "factory": "./update-theme/index#updateTheme",
+      "schema": "./update-theme/schema.json"
     },
-    "lux-version-1.7.8": {
-      "description": "Aktualisiert die LUX-Applikation zur Version 1.7.8 der LUX-Components.",
-      "factory": "./lux-version-1.7/1.7.8/index#luxVersion",
-      "schema": "./lux-version-1.7/1.7.8/schema.json"
+    "update-dependencies": {
+      "description": "Aktualisiert die Abhängigkeiten im LUX-Componentsprojekt",
+      "factory": "./update-dependencies/index#updateDependencies",
+      "schema": "./update-dependencies/schema.json"
     },
-    "lux-version-1.7.9": {
-      "description": "Aktualisiert die LUX-Applikation zur Version 1.7.9 der LUX-Components.",
-      "factory": "./lux-version-1.7/1.7.9/index#luxVersion",
-      "schema": "./lux-version-1.7/1.7.9/schema.json"
-    },
-    "lux-version-1.7.10": {
-      "description": "Aktualisiert die LUX-Applikation zur Version 1.7.10 der LUX-Components.",
-      "factory": "./lux-version-1.7/1.7.10/index#luxVersion",
-      "schema": "./lux-version-1.7/1.7.10/schema.json"
-    },
-    "lux-version-1.7.11": {
-      "description": "Aktualisiert die LUX-Applikation zur Version 1.7.11 der LUX-Components.",
-      "factory": "./lux-version-1.7/1.7.11/index#luxVersion",
-      "schema": "./lux-version-1.7/1.7.11/schema.json"
-    },
-    "lux-version-1.7.12": {
-      "description": "Aktualisiert die LUX-Applikation zur Version 1.7.12 der LUX-Components.",
-      "factory": "./lux-version-1.7/1.7.12/index#luxVersion",
-      "schema": "./lux-version-1.7/1.7.12/schema.json"
-    },
-    "lux-version-1.7.13": {
-      "description": "Aktualisiert die LUX-Applikation zur Version 1.7.13 der LUX-Components.",
-      "factory": "./lux-version-1.7/1.7.13/index#luxVersion",
-      "schema": "./lux-version-1.7/1.7.13/schema.json"
-    },
-    "lux-version-1.7.14": {
-      "description": "Aktualisiert die LUX-Applikation zur Version 1.7.14 der LUX-Components.",
-      "factory": "./lux-version-1.7/1.7.14/index#luxVersion",
-      "schema": "./lux-version-1.7/1.7.14/schema.json"
-    },
-    "lux-version-1.7.15": {
-      "description": "Aktualisiert die LUX-Applikation zur Version 1.7.15 der LUX-Components.",
-      "factory": "./lux-version-1.7/1.7.15/index#luxVersion",
-      "schema": "./lux-version-1.7/1.7.15/schema.json"
-    },
-    "lux-version-1.7.16": {
-      "description": "Aktualisiert die LUX-Applikation zur Version 1.7.16 der LUX-Components.",
-      "factory": "./lux-version-1.7/1.7.16/index#luxVersion",
-      "schema": "./lux-version-1.7/1.7.16/schema.json"
-    },
-    "lux-version-1.7.17": {
-      "description": "Aktualisiert die LUX-Applikation zur Version 1.7.17 der LUX-Components.",
-      "factory": "./lux-version-1.7/1.7.17/index#luxVersion",
-      "schema": "./lux-version-1.7/1.7.17/schema.json"
-    },
-    "lux-version-1.7.18": {
-      "description": "Aktualisiert die LUX-Applikation zur Version 1.7.18 der LUX-Components.",
-      "factory": "./lux-version-1.7/1.7.18/index#luxVersion",
-      "schema": "./lux-version-1.7/1.7.18/schema.json"
-    },
-    "lux-version-1.7.19": {
-      "description": "Aktualisiert die LUX-Applikation zur Version 1.7.19 der LUX-Components.",
-      "factory": "./lux-version-1.7/1.7.19/index#luxVersion",
-      "schema": "./lux-version-1.7/1.7.19/schema.json"
-    },
-    "lux-version-1.7.20": {
-      "description": "Aktualisiert die LUX-Applikation zur Version 1.7.20 der LUX-Components.",
-      "factory": "./lux-version-1.7/1.7.20/index#luxVersion",
-      "schema": "./lux-version-1.7/1.7.20/schema.json"
-    },
-    "lux-version-1.7.21": {
-      "description": "Aktualisiert die LUX-Applikation zur Version 1.7.21 der LUX-Components.",
-      "factory": "./lux-version-1.7/1.7.21/index#luxVersion",
-      "schema": "./lux-version-1.7/1.7.21/schema.json"
-    },
-    "lux-version-1.8.0": {
-      "description": "Aktualisiert die LUX-Applikation zur Version 1.8.0 der LUX-Components.",
-      "factory": "./lux-version-1.8/1.8.0/index#luxVersion",
-      "schema": "./lux-version-1.8/1.8.0/schema.json"
-    },
-    "lux-version-1.8.1": {
-      "description": "Aktualisiert die LUX-Applikation zur Version 1.8.1 der LUX-Components.",
-      "factory": "./lux-version-1.8/1.8.1/index#luxVersion",
-      "schema": "./lux-version-1.8/1.8.1/schema.json"
-    },
-    "lux-version-1.8.2": {
-      "description": "Aktualisiert die LUX-Applikation zur Version 1.8.2 der LUX-Components.",
-      "factory": "./lux-version-1.8/1.8.2/index#luxVersion",
-      "schema": "./lux-version-1.8/1.8.2/schema.json"
-    },
-    "add-lux-components-1.8": {
-      "description": "Fügt die LUX-Components zur App (nur Angular 8) hinzu.",
-      "factory": "./lux-version-1.8/add-lux-components/index#addluxComponents",
-      "schema": "./lux-version-1.8/add-lux-components/schema.json"
-    },
-    "lux-version-1.8.3": {
-      "description": "Aktualisiert die LUX-Applikation zur Version 1.8.3 der LUX-Components.",
-      "factory": "./lux-version-1.8/1.8.3/index#luxVersion",
-      "schema": "./lux-version-1.8/1.8.3/schema.json"
-    },
-    "lux-version-1.8.4": {
-      "description": "Aktualisiert die LUX-Applikation zur Version 1.8.4 der LUX-Components.",
-      "factory": "./lux-version-1.8/1.8.4/index#luxVersion",
-      "schema": "./lux-version-1.8/1.8.4/schema.json"
-    },
-    "lux-version-1.8.5": {
-      "description": "Aktualisiert die LUX-Applikation zur Version 1.8.5 der LUX-Components.",
-      "factory": "./lux-version-1.8/1.8.5/index#luxVersion",
-      "schema": "./lux-version-1.8/1.8.5/schema.json"
-    },
-    "lux-version-1.8.6": {
-      "description": "Aktualisiert die LUX-Applikation zur Version 1.8.6 der LUX-Components.",
-      "factory": "./lux-version-1.8/1.8.6/index#luxVersion",
-      "schema": "./lux-version-1.8/1.8.6/schema.json"
-    },
-    "lux-version-1.8.7": {
-      "description": "Aktualisiert die LUX-Applikation zur Version 1.8.7 der LUX-Components.",
-      "factory": "./lux-version-1.8/1.8.7/index#luxVersion",
-      "schema": "./lux-version-1.8/1.8.7/schema.json"
-    },
-    "add-lux-components-1.9": {
-      "description": "Fügt die LUX-Components zur App (nur Angular 9) hinzu.",
-      "factory": "./lux-version-1.9/add-lux-components/index#addluxComponents",
-      "schema": "./lux-version-1.9/add-lux-components/schema.json"
-    },
-    "lux-version-1.9.0": {
-      "description": "Aktualisiert die LUX-Applikation zur Version 1.9.0 der LUX-Components.",
-      "factory": "./lux-version-1.9/1.9.0/index#luxVersion",
-      "schema": "./lux-version-1.9/1.9.0/schema.json"
-    },
-    "lux-version-1.9.1": {
-      "description": "Aktualisiert die LUX-Applikation zur Version 1.9.1 der LUX-Components.",
-      "factory": "./lux-version-1.9/1.9.1/index#luxVersion",
-      "schema": "./lux-version-1.9/1.9.1/schema.json"
-    },
-    "lux-version-1.9.2": {
-      "description": "Aktualisiert die LUX-Applikation zur Version 1.9.2 der LUX-Components.",
-      "factory": "./lux-version-1.9/1.9.2/index#luxVersion",
-      "schema": "./lux-version-1.9/1.9.2/schema.json"
-    },
-    "lux-version-1.9.3": {
-      "description": "Aktualisiert die LUX-Applikation zur Version 1.9.3 der LUX-Components.",
-      "factory": "./lux-version-1.9/1.9.3/index#luxVersion",
-      "schema": "./lux-version-1.9/1.9.3/schema.json"
-    },
-    "lux-version-1.9.4": {
-      "description": "Aktualisiert die LUX-Applikation zur Version 1.9.4 der LUX-Components.",
-      "factory": "./lux-version-1.9/1.9.4/index#luxVersion",
-      "schema": "./lux-version-1.9/1.9.4/schema.json"
-    },
-    "lux-update-theme": {
-      "description": "Aktualisiert das Theme für die LUX-Components",
-      "factory": "./lux-update-theme/index#luxUpdateTheme",
-      "schema": "./lux-update-theme/schema.json"
-    },
-    "lux-version-1.9.5": {
-      "description": "Aktualisiert die LUX-Applikation zur Version 1.9.5 der LUX-Components.",
-      "factory": "./lux-version-1.9/1.9.5/index#luxVersion",
-      "schema": "./lux-version-1.9/1.9.5/schema.json"
+    "add-lux-components": {
+      "description": "Fügt die LUX-Components zum Projekt hinzu",
+      "factory": "./add-lux-components/index#addLuxComponents",
+      "schema": "./add-lux-components/schema.json"
     }
   }
 }
