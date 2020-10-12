@@ -4,15 +4,6 @@ import * as chalk from 'chalk';
 export const TAB = '\t   ';
 
 /**
- * Erzeugt eine Log-Ausgabe für den Start eines neuen Generators in hellem Weiß mit #-Symbolen auf der rechten und
- * linken Seite sowie einer Newline am Ende.
- * @param version
- */
-export const logNewUpdate = (version: string) => {
-  console.log(chalk.whiteBright(`###### Update auf LUX-Components v${version} ######\n`));
-};
-
-/**
  * Erzeugt eine Info-Log-Ausgabe in hellem Blau mit einem [INFO] an der linken Seite.
  * @param messages
  */
@@ -36,7 +27,7 @@ export const logInfo = (...messages: string[]) => {
  */
 export const logSuccess = (...messages: string[]) => {
   let message = generateLogMessage(...messages);
-  console.log(chalk.greenBright(`[SUCCESS]  ${message}`));
+  console.log(chalk.yellowBright(`[SUCCESS]  ${message}`));
 };
 
 /**
