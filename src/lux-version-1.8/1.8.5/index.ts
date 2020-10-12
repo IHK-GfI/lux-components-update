@@ -83,7 +83,7 @@ export function todosForUser(): Rule {
   return (tree: Tree, context: SchematicContext) => {
     runInstallAndLogToDos(
       context,
-      `Manuelle Schritte aus dem Update Guide (https://github.com/IHK-GfI/lux-components/wiki/update-guide#version-185) ausführen!`
+      `Manuelle Schritte aus dem Update Guide (https://github.com/IHK-GfI/lux-components/wiki/update-guide-1.8#version-185) ausführen!`
     );
     return tree;
   };
