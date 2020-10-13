@@ -9,7 +9,7 @@ import {
   NodeDependencyType,
   updatePackageJsonDependencyForceUpdate
 } from '../utility/dependencies';
-import { update, updateLocale, updatePolyfills } from './index';
+import { update, updateLocale, updatePolyfills, updateTsConfig } from './index';
 
 const collectionPath = path.join(__dirname, '../collection.json');
 
@@ -219,6 +219,56 @@ export class AppModule {}
           done();
         },
         (reason) => expect(reason).toBeNull()
+      );
+    });
+  });
+
+  describe('[Rule] updateTsConfig', () => {
+    it('Sollte die tsconfig.json aktualisieren (es2020)', async (done) => {
+      appTree.overwrite(
+        '/tsconfig.json',
+        `
+{
+    "experimentalDecorators": true,
+    "target": "es2020",
+    "typeRoots": [
+      "node_modules/@types"
+    ]
+}
+        `
+      );
+
+      callRule(updateTsConfig(testOptions), observableOf(appTree), context).subscribe(
+        (success) => {
+          const content = success.read('/tsconfig.json')?.toString();
+          expect(content).toContain('"target": "es2015",');
+          done();
+        },
+        (reason) => expect(reason).toBeNull()
+      );
+    });
+
+    it('Sollte die tsconfig.json aktualisieren (es5)', async (done) => {
+      appTree.overwrite(
+          '/tsconfig.json',
+          `
+{
+    "experimentalDecorators": true,
+    "target": "es5",
+    "typeRoots": [
+      "node_modules/@types"
+    ]
+}
+        `
+      );
+
+      callRule(updateTsConfig(testOptions), observableOf(appTree), context).subscribe(
+          (success) => {
+            const content = success.read('/tsconfig.json')?.toString();
+            expect(content).toContain('"target": "es2015",');
+            done();
+          },
+          (reason) => expect(reason).toBeNull()
       );
     });
   });

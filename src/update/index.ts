@@ -46,6 +46,7 @@ function updateProject(options: any): Rule {
       messageInfoRule(`LUX-Components ${updateMajorVersion} werden eingerichtet...`),
       updatePolyfills(options),
       updateLocale(options),
+      updateTsConfig(options),
       updateDependencies(),
       updateTheme(options),
       messageSuccessRule(`LUX-Components ${updateMajorVersion} wurden eingerichtet.`)
@@ -77,6 +78,25 @@ export function updatePolyfills(options: any): Rule {
         },
         'polyfills.ts'
       );
+    }
+  ]);
+}
+
+export function updateTsConfig(options: any): Rule {
+  return chain([
+    (tree: Tree, context: SchematicContext) => {
+      const filePath = '/tsconfig.json';
+      const content = tree.read(filePath)?.toString();
+
+      if (content) {
+        let modifiedContent = content.replace(/"target": "es\d+"/g, '"target": "es2015"');
+
+        if (content !== modifiedContent) {
+          logInfoWithDescriptor(`tsconfig.json wird aktualisiert...`);
+          tree.overwrite(filePath, modifiedContent);
+          logSuccess(`tsconfig.json wurde aktualisiert.`);
+        }
+      }
     }
   ]);
 }
