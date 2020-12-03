@@ -7,7 +7,7 @@ import { Router } from '@angular/router';
   styleUrls: ['./error.component.scss']
 })
 export class ErrorComponent implements OnInit {
-  url404: String = '';
+  url404 = '';
 
   constructor(private readonly router: Router) {}
 
