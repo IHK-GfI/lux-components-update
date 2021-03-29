@@ -38,6 +38,8 @@ export function updateDefaultDependencies(): Rule {
         { type: NodeDependencyType.Default, version: '2.0.8', name: 'hammerjs' },
         { type: NodeDependencyType.Default, version: '5.14.0', name: '@fortawesome/fontawesome-free' },
         { type: NodeDependencyType.Default, version: '6.2.0', name: 'ng2-pdf-viewer' },
+        { type: NodeDependencyType.Default, version: '2.2.228', name: 'pdfjs-dist' },
+        { type: NodeDependencyType.Default, version: '2.1.5', name: '@types/pdfjs-dist' },
         { type: NodeDependencyType.Default, version: '2.2.228', name: 'pdfjs-dist' }
       ];
 
