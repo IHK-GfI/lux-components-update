@@ -1,15 +1,11 @@
-import * as path from 'path';
-import { SchematicTestRunner, UnitTestTree } from '@angular-devkit/schematics/testing';
 import { callRule, SchematicContext } from '@angular-devkit/schematics';
+import { SchematicTestRunner, UnitTestTree } from '@angular-devkit/schematics/testing';
+import * as path from 'path';
 import { of as observableOf } from 'rxjs';
-import { UtilConfig } from '../utility/util';
+import { getPackageJsonDependency, NodeDependencyType, updatePackageJsonDependencyForceUpdate } from '../utility/dependencies';
 import { appOptions, workspaceOptions } from '../utility/test-helper';
-import {
-  getPackageJsonDependency,
-  NodeDependencyType,
-  updatePackageJsonDependencyForceUpdate
-} from '../utility/dependencies';
-import { update, updateLocale, updatePolyfills, updateTsConfig } from './index';
+import { UtilConfig } from '../utility/util';
+import { deleteOldThemeDir, update, updateLocale, updatePolyfills, updateTsConfig } from './index';
 
 const collectionPath = path.join(__dirname, '../collection.json');
 
@@ -268,6 +264,34 @@ export class AppModule {}
             done();
           },
           (reason) => expect(reason).toBeNull()
+      );
+    });
+  });
+
+  describe('[Rule] deleteOldThemeDir', () => {
+    it('Sollte das alte Theming-Verzeichnis löschen.',  (done) => {
+      const oldThemePath = testOptions.path + '/src/theming/';
+      appTree.create(oldThemePath + '_luxcommon.scss', `---`);
+      appTree.create(oldThemePath + '_luxfocus.scss', `---`);
+      appTree.create(oldThemePath + '_luxpalette.scss', `---`);
+      appTree.create(oldThemePath + '_luxstyles.scss', `---`);
+      appTree.create(oldThemePath + 'luxtheme.scss', `---`);
+      expect(appTree.exists(oldThemePath + '_luxcommon.scss')).toBeTrue();
+      expect(appTree.exists(oldThemePath + '_luxfocus.scss')).toBeTrue();
+      expect(appTree.exists(oldThemePath + '_luxpalette.scss')).toBeTrue();
+      expect(appTree.exists(oldThemePath + '_luxstyles.scss')).toBeTrue();
+      expect(appTree.exists(oldThemePath + 'luxtheme.scss')).toBeTrue();
+
+      callRule(deleteOldThemeDir(testOptions), observableOf(appTree), context).subscribe(
+        (success) => {
+          expect(appTree.exists(oldThemePath + '_luxcommon.scss')).toBeFalse();
+          expect(appTree.exists(oldThemePath + '_luxfocus.scss')).toBeFalse();
+          expect(appTree.exists(oldThemePath + '_luxpalette.scss')).toBeFalse();
+          expect(appTree.exists(oldThemePath + '_luxstyles.scss')).toBeFalse();
+          expect(appTree.exists(oldThemePath + 'luxtheme.scss')).toBeFalse();
+          done();
+        },
+        (reason) => expect(reason).toBeNull()
       );
     });
   });

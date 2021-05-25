@@ -8,7 +8,6 @@ import {
   waitForTreeCallback
 } from '../utility/util';
 import { validateAngularVersion, validateNodeVersion } from '../utility/validation';
-import { updateTheme } from '../update-theme';
 import { updateDependencies } from '../update-dependencies/index';
 import * as chalk from 'chalk';
 import { updateMajorVersion, updateNodeMinVersion } from '../update/index';
@@ -21,7 +20,6 @@ export function addLuxComponents(options: any): Rule {
       updateApp(options),
       updateStylesScss(options),
       updateIndexHtml(options),
-      updateTheme(options),
       finish(
         `Die LUX-Components ${updateMajorVersion} wurden erfolgreich eingerichtet.`,
         `${chalk.yellowBright('Fertig!')}`

@@ -51,10 +51,6 @@ describe('add-lux-components', () => {
       callRule(addLuxComponents(testOptions), observableOf(appTree), context).subscribe(
         () => {
           expect(getPackageJsonDependency(appTree, '@ihk-gfi/lux-components').version).toContain(updateMajorVersion);
-          expect(appTree.files).toContain('/projects/bar/src/theming/_luxfocusable.scss');
-          expect(appTree.files).toContain('/projects/bar/src/theming/_luxpalette.scss');
-          expect(appTree.files).toContain('/projects/bar/src/theming/_luxstyles.scss');
-          expect(appTree.files).toContain('/projects/bar/src/theming/luxtheme.scss');
           done();
         },
         (reason) => expect(reason).toBeUndefined()

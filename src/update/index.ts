@@ -1,11 +1,10 @@
 import { chain, Rule, SchematicContext, Tree } from '@angular-devkit/schematics';
 import { applyRuleIf, finish, messageInfoRule, messageSuccessRule } from '../utility/util';
 import { validateLuxComponentsVersion, validateNodeVersion } from '../utility/validation';
-import { logInfoWithDescriptor, logSuccess } from '../utility/logging';
+import { logInfo, logInfoWithDescriptor, logSuccess, logWarn } from '../utility/logging';
 import { updateDependencies } from '../update-dependencies';
-import { updateTheme } from '../update-theme/index';
 import * as chalk from 'chalk';
-import { iterateFilesAndModifyContent } from '../utility/files';
+import { deleteFilesInDirectory, iterateFilesAndModifyContent } from '../utility/files';
 
 export const updateMajorVersion = '10';
 export const updateMinVersion = '1.9.5';
@@ -42,14 +41,22 @@ function updateProject(options: any): Rule {
   return (tree: Tree, _context: SchematicContext) => {
     return chain([
       messageInfoRule(`LUX-Components ${updateMajorVersion} werden eingerichtet...`),
+      deleteOldThemeDir(options),
       updatePolyfills(options),
       updateLocale(options),
       updateTsConfig(options),
       updateDependencies(),
-      updateTheme(options),
       messageSuccessRule(`LUX-Components ${updateMajorVersion} wurden eingerichtet.`)
     ]);
   };
+}
+
+export function deleteOldThemeDir(options: any): Rule {
+  return chain([
+    messageInfoRule(`Altes Theming-Verzeichnis '/src/theming/' wird gelöscht...`),
+    deleteFilesInDirectory(options, '/src/theming/', []),
+    messageSuccessRule(`Altes Theming-Verzeichnis wurde gelöscht.`),
+  ]);
 }
 
 export function updatePolyfills(options: any): Rule {

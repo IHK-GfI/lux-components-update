@@ -6,11 +6,6 @@
       "factory": "./update/index#update",
       "schema": "./update/schema.json"
     },
-    "update-theme": {
-      "description": "Aktualisiert das LUX-Theme im LUX-Componentsprojekt",
-      "factory": "./update-theme/index#updateTheme",
-      "schema": "./update-theme/schema.json"
-    },
     "update-dependencies": {
       "description": "Aktualisiert die Abhängigkeiten im LUX-Componentsprojekt",
       "factory": "./update-dependencies/index#updateDependencies",
