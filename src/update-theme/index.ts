@@ -8,13 +8,10 @@ import {
   messageInfoInternRule,
   messageInfoRule,
   messageSuccessRule,
-  setupPath
 } from '../utility/util';
 
 export function updateTheme(options: any): Rule {
   return (tree: Tree, _context: SchematicContext) => {
-    setupPath(options, tree);
-
     const version = getPackageJsonDependency(tree, '@ihk-gfi/lux-components').version;
     const themeDir = findThemeDir(getThemeDirs(), version);
     const themeFiles = getThemeFiles(themeDir);

@@ -1,5 +1,5 @@
 import { chain, Rule, SchematicContext, Tree } from '@angular-devkit/schematics';
-import { applyRuleIf, finish, messageInfoRule, messageSuccessRule, setupPath } from '../utility/util';
+import { applyRuleIf, finish, messageInfoRule, messageSuccessRule } from '../utility/util';
 import { validateLuxComponentsVersion, validateNodeVersion } from '../utility/validation';
 import { logInfoWithDescriptor, logSuccess } from '../utility/logging';
 import { updateDependencies } from '../update-dependencies';
@@ -13,8 +13,6 @@ export const updateNodeMinVersion = '12.0.0';
 
 export function update(options: any): Rule {
   return (tree: Tree, _context: SchematicContext) => {
-    setupPath(options, tree);
-
     return chain([
       check(options),
       applyRuleIf(updateMinVersion, updateProject(options)),

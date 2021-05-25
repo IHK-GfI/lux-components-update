@@ -37,7 +37,7 @@ describe('update-theme', () => {
   });
 
   describe('[Rule] copyThemeFiles', () => {
-    it('Sollte die richtigen Themedateien kopieren', async (done) => {
+    it('Sollte die richtigen Themedateien kopieren', (done) => {
       appTree.overwrite(
         '/package.json',
         `

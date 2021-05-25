@@ -5,7 +5,6 @@ import {
   messageInfoRule,
   messageSuccessRule,
   replaceAll,
-  setupPath,
   waitForTreeCallback
 } from '../utility/util';
 import { validateAngularVersion, validateNodeVersion } from '../utility/validation';
@@ -16,8 +15,6 @@ import { updateMajorVersion, updateNodeMinVersion } from '../update/index';
 
 export function addLuxComponents(options: any): Rule {
   return (tree: Tree, _context: SchematicContext) => {
-    setupPath(options, tree);
-
     return chain([
       check(),
       updateDependencies(),

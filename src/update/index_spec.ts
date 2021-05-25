@@ -44,8 +44,7 @@ describe('update', () => {
       updatePackageJsonDependencyForceUpdate(
         appTree,
         context,
-        { type: NodeDependencyType.Default, version: '1.9.3', name: '@ihk-gfi/lux-components' },
-        true
+        { type: NodeDependencyType.Default, version: '1.9.3', name: '@ihk-gfi/lux-components' }
       );
       Object.defineProperty(process.versions, 'node', {
         get: () => '12.16.3'
@@ -57,7 +56,7 @@ describe('update', () => {
       );
     });
 
-    it('Sollte LUX-Components 10 einrichten', async (done) => {
+    it('Sollte LUX-Components 10 einrichten',  (done) => {
       appTree.overwrite(
         '/package.json',
         `
@@ -90,7 +89,7 @@ describe('update', () => {
   });
 
   describe('[Rule] updatePolyfill', () => {
-    it('Sollte die polyfill.ts aktualisieren (Single Quote)', async (done) => {
+    it('Sollte die polyfill.ts aktualisieren (Single Quote)',  (done) => {
       appTree.overwrite(
         testOptions.path + '/src/polyfills.ts',
         `
@@ -110,7 +109,7 @@ import 'core-js/es/reflect';
       );
     });
 
-    it('Sollte die polyfill.ts aktualisieren (Double Quote)', async (done) => {
+    it('Sollte die polyfill.ts aktualisieren (Double Quote)',  (done) => {
       appTree.overwrite(
         testOptions.path + '/src/polyfills.ts',
         `
@@ -132,7 +131,7 @@ import "core-js/es/reflect";
   });
 
   describe('[Rule] updateLocale', () => {
-    it('Sollte die Locale aktualisieren', async (done) => {
+    it('Sollte die Locale aktualisieren',  (done) => {
       appTree.overwrite(
         testOptions.path + '/src/app/app.module.ts',
         `
@@ -179,7 +178,7 @@ export class AppModule {}
       );
     });
 
-    it('Sollte die Locale hinzufügen', async (done) => {
+    it('Sollte die Locale hinzufügen',  (done) => {
       appTree.overwrite(
         testOptions.path + '/src/app/app.module.ts',
         `
@@ -224,7 +223,7 @@ export class AppModule {}
   });
 
   describe('[Rule] updateTsConfig', () => {
-    it('Sollte die tsconfig.json aktualisieren (es2020)', async (done) => {
+    it('Sollte die tsconfig.json aktualisieren (es2020)',  (done) => {
       appTree.overwrite(
         '/tsconfig.json',
         `
@@ -248,7 +247,7 @@ export class AppModule {}
       );
     });
 
-    it('Sollte die tsconfig.json aktualisieren (es5)', async (done) => {
+    it('Sollte die tsconfig.json aktualisieren (es5)',  (done) => {
       appTree.overwrite(
           '/tsconfig.json',
           `

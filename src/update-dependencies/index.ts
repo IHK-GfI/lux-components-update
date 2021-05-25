@@ -44,7 +44,7 @@ export function updateDefaultDependencies(): Rule {
       ];
 
       dependencies.forEach((dependency) => {
-        updatePackageJsonDependencyForceUpdate(tree, context, dependency, true);
+        updatePackageJsonDependencyForceUpdate(tree, context, dependency);
       });
       return tree;
     });
@@ -84,7 +84,7 @@ export function updateDevDependencies(): Rule {
       ];
 
       devDependencies.forEach((devDependency) => {
-        updatePackageJsonDependencyForceUpdate(tree, context, devDependency, true);
+        updatePackageJsonDependencyForceUpdate(tree, context, devDependency);
       });
       return tree;
     });

@@ -41,12 +41,11 @@ describe('add-lux-components', () => {
   });
 
   describe('[Rule] addLuxComponents', () => {
-    it('Sollte die LUX-Components im Projekt eingerichtet haben', async (done) => {
+    it('Sollte die LUX-Components im Projekt eingerichtet haben', (done) => {
       updatePackageJsonDependencyForceUpdate(
         appTree,
         context,
-        { type: NodeDependencyType.Default, version: '10.0.0', name: '@angular/common' },
-        true
+        { type: NodeDependencyType.Default, version: '10.0.0', name: '@angular/common' }
       );
 
       callRule(addLuxComponents(testOptions), observableOf(appTree), context).subscribe(

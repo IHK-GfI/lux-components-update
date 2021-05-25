@@ -1,14 +1,8 @@
-import { SchematicContext, Tree, UpdateRecorder } from '@angular-devkit/schematics';
-import { JsonAstNode, JsonAstObject, JsonParseMode, parseJsonAst } from '@angular-devkit/core';
-import {
-  appendPropertyInAstObject,
-  findPropertyInAstObject,
-  insertPropertyInAstObjectInOrder
-} from '@schematics/angular/utility/json-utils';
-import * as semver from 'semver';
+import { SchematicContext, Tree } from '@angular-devkit/schematics';
 import * as chalk from 'chalk';
-import { formattedSchematicsException, logInfo, logWarn } from './logging';
+import { applyEdits, findNodeAtLocation, modify, Node, parseTree } from 'jsonc-parser';
 import { deleteLineFromFile } from './files';
+import { formattedSchematicsException, logInfo } from './logging';
 
 const packageJsonPath = '/package.json';
 
@@ -26,13 +20,35 @@ export interface NodeDependency {
 }
 
 /**
- * Aktualisiert eine Dependency in der package.json bzw. fügt diese hinzu, falls sie noch nicht vorhanden ist.
+ * Versucht eine Dependency aus der package.json auslesen und gibt diese zurück.
  * @param tree
- * @param context
- * @param dependency
+ * @param name
  */
-export function updatePackageJsonDependency(tree: Tree, context: SchematicContext, dependency: NodeDependency): void {
-  updatePackageJsonDependencyForceUpdate(tree, context, dependency, false);
+export function getPackageJsonDependency(tree: Tree, name: string): NodeDependency {
+  const packageJsonNode = readPackageJson(tree);
+  let dependency: NodeDependency | null = null;
+
+  [NodeDependencyType.Default, NodeDependencyType.Dev, NodeDependencyType.Optional, NodeDependencyType.Peer].forEach(
+    (depType) => {
+
+      let node = findNodeAtLocation(packageJsonNode, [depType.toString(), name]);
+      if (node) {
+        dependency = {
+          type   : depType,
+          name   : name,
+          version: node.value
+        };
+      }
+    }
+  );
+
+  if (dependency) {
+    return dependency;
+  } else {
+    throw formattedSchematicsException(
+      `Dependency ${name} nicht in der package.json gefunden.`
+    );
+  }
 }
 
 /**
@@ -40,107 +56,51 @@ export function updatePackageJsonDependency(tree: Tree, context: SchematicContex
  * @param tree
  * @param context
  * @param dependency
- * @param forceUpate Gibt an, ob die Dependencies auch überschrieben werden, wenn diese älter als die vorhandenden Dependencies sind.
+ */
+export function updatePackageJsonDependency(tree: Tree, context: SchematicContext, dependency: NodeDependency): void {
+  updatePackageJsonDependencyForceUpdate(tree, context, dependency);
+}
+
+/**
+ * Aktualisiert eine Dependency in der package.json bzw. fügt diese hinzu, falls sie noch nicht vorhanden ist.
+ * @param tree
+ * @param context
+ * @param dependency
  */
 export function updatePackageJsonDependencyForceUpdate(
   tree: Tree,
   context: SchematicContext,
-  dependency: NodeDependency,
-  forceUpate: boolean
+  dependency: NodeDependency
 ): void {
-  const packageJson: JsonAstObject = readPackageJson(tree);
-  const dependencyTypeNode: JsonAstNode | null = findPropertyInAstObject(packageJson, dependency.type);
-  const recorder: UpdateRecorder = tree.beginUpdate(packageJsonPath);
-  // Dependency-Typ existiert noch nicht (z.B. devDependencies oder peerDependencies)
-  if (!dependencyTypeNode) {
-    // Den Dependency-Typ und die Dependency hinzufügen
-    appendPropertyInAstObject(
-      recorder,
-      packageJson,
-      dependency.type,
-      {
-        [dependency.name]: dependency.version
-      },
-      2
-    );
-  }
-  // Der Dependency-Typ existiert bereits
-  else if (dependencyTypeNode.kind === 'object') {
-    // Prüfen ob die Dependency bereits darin vorhanden ist
-    const dependencyNode = findPropertyInAstObject(dependencyTypeNode, dependency.name);
-    // Diese Dependency gibt es noch nicht
-    if (!dependencyNode) {
-      insertPropertyInAstObjectInOrder(recorder, dependencyTypeNode, dependency.name, dependency.version, 4);
+  const packageJsonAsNode = readPackageJson(tree);
+  let node = findNodeAtLocation(packageJsonAsNode, [dependency.type.toString(), dependency.name]);
+  if (node) {
+    if (node && node.value !== dependency.version) {
       logInfo(
         `Dependency ` +
-          chalk.yellowBright(`${dependency.name}`) +
-          ` nicht gefunden. Füge Sie zum Typ "${dependency.type}" hinzu.`
+        chalk.yellowBright(`${ dependency.name }`) +
+        ` ${ node.value } wird ersetzt durch ${ dependency.version }.`
       );
     }
-    // Diese Dependency existiert bereits
-    else {
-      const packageJsonDependency = getPackageJsonDependency(tree, dependency.name);
-      // Die Dependency ist in einer älteren Version vorhanden
-      if (
-        semver.cmp(
-          packageJsonDependency.version.replace(/([\^~])/g, ''),
-          '<',
-          dependency.version.replace(/([\^~])/g, '')
-        )
-      ) {
-        const { end, start } = dependencyNode;
-        // Die alte Version entfernen
-        recorder.remove(start.offset, end.offset - start.offset);
-        // Die neue hinzufügen
-        recorder.insertRight(start.offset, JSON.stringify(dependency.version));
-        logInfo(`Dependency ` + chalk.yellowBright(`${dependency.name}`) + ` gefunden. Aktualisiere die Version.`);
-      } else if (
-        semver.cmp(
-          packageJsonDependency.version.replace(/([\^~])/g, ''),
-          '===',
-          dependency.version.replace(/([\^~])/g, '')
-        )
-      ) {
-        if (packageJsonDependency.version !== dependency.version) {
-          const { end, start } = dependencyNode;
-          // Die alte Version entfernen
-          recorder.remove(start.offset, end.offset - start.offset);
-          // Die neue hinzufügen
-          recorder.insertRight(start.offset, JSON.stringify(dependency.version));
-          logInfo(`Dependency ` + chalk.yellowBright(`${dependency.name}`) + ` gefunden. ^ oder ~ entfernt.`);
-        }
-      } else if (
-        semver.cmp(
-          packageJsonDependency.version.replace(/([\^~])/g, ''),
-          '>',
-          dependency.version.replace(/([\^~])/g, '')
-        )
-      ) {
-        if (forceUpate) {
-          const { end, start } = dependencyNode;
-          // Die neuere Version entfernen
-          recorder.remove(start.offset, end.offset - start.offset);
-          // Die gewollte Version hinzufügen
-          recorder.insertRight(start.offset, JSON.stringify(dependency.version));
-          logInfo(`Dependency ` + chalk.yellowBright(`${dependency.name}`) + ` gefunden. ^ oder ~ entfernt.`);
-        } else {
-          logWarn(
-            `Dependency ` +
-              chalk.yellowBright(`${dependency.name}`) +
-              ` gefunden. Die aktuelle Version ` +
-              packageJsonDependency.version +
-              ` ist größer als ` +
-              dependency.version +
-              `. Die Version bestehende Version wurde nicht aktualisiert.`
-          );
-        }
-      } else {
-        logInfo(`Dependency ` + chalk.yellowBright(`${dependency.name}`) + ` gefunden. Die Version ist i.O.`);
-      }
-    }
+  } else {
+    logInfo(
+      `Dependency ` +
+      chalk.yellowBright(`${ dependency.name }`) +
+      ` ${ dependency.version } wird im Abschnitt ${ dependency.type } hinzugefügt.`
+    );
   }
 
-  tree.commitUpdate(recorder);
+  if (!node || node.value !== dependency.version) {
+    const packageJonsAsString = readPackageJsonAsString(tree);
+    const edits = modify(packageJonsAsString, [dependency.type.toString(), dependency.name], dependency.version, {});
+
+    if (edits) {
+      tree.overwrite(
+        packageJsonPath,
+        applyEdits(packageJonsAsString, edits)
+      );
+    }
+  }
 }
 
 /**
@@ -154,37 +114,20 @@ export function deletePackageJsonDependency(tree: Tree, context: SchematicContex
 }
 
 /**
- * Versucht eine Dependency aus der package.json auslesen und gibt diese zurück.
+ * Liest die package.json des Projekts aus und wirft Fehlermeldungen, sollte die package.json nicht gefunden oder
+ * in einem falschen Format sein.
+ * @param context
  * @param tree
- * @param name
  */
-export function getPackageJsonDependency(tree: Tree, name: string): NodeDependency {
-  const packageJson = readPackageJson(tree);
-  let dependency: NodeDependency | null = null;
-
-  [NodeDependencyType.Default, NodeDependencyType.Dev, NodeDependencyType.Optional, NodeDependencyType.Peer].forEach(
-    (depType) => {
-      const depsNode = findPropertyInAstObject(packageJson, depType);
-      if (depsNode !== null && depsNode.kind === 'object') {
-        const depNode = findPropertyInAstObject(depsNode, name);
-        if (depNode !== null && depNode.kind === 'string') {
-          dependency = {
-            type: depType,
-            name: name,
-            version: depNode.value
-          };
-        }
-      }
-    }
-  );
-
-  if (dependency) {
-    return dependency;
-  } else {
-    throw formattedSchematicsException(
-      `Dependency ${name ? '"' + name + '"' : ''} nicht in der package.json gefunden.`
-    );
+function readPackageJson(tree: Tree): Node {
+  const buffer = tree.read(packageJsonPath);
+  if (buffer === null) {
+    throw formattedSchematicsException('Konnte die package.json nicht lesen.');
   }
+  const content = buffer.toString();
+
+  let result = parseTree(content) as Node;
+  return result;
 }
 
 /**
@@ -193,17 +136,10 @@ export function getPackageJsonDependency(tree: Tree, name: string): NodeDependen
  * @param context
  * @param tree
  */
-function readPackageJson(tree: Tree): JsonAstObject {
+function readPackageJsonAsString(tree: Tree): string {
   const buffer = tree.read(packageJsonPath);
   if (buffer === null) {
     throw formattedSchematicsException('Konnte die package.json nicht lesen.');
   }
-  const content = buffer.toString();
-
-  const packageJson = parseJsonAst(content, JsonParseMode.Strict);
-  if (packageJson.kind != 'object') {
-    throw formattedSchematicsException('Ungültige package.json, ein Object wurde erwartet.');
-  }
-
-  return packageJson;
+  return buffer.toString();
 }
