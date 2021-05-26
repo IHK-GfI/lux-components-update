@@ -45,7 +45,7 @@ describe('add-lux-components', () => {
       updatePackageJsonDependencyForceUpdate(
         appTree,
         context,
-        { type: NodeDependencyType.Default, version: '10.0.0', name: '@angular/common' }
+        { type: NodeDependencyType.Default, version: updateMajorVersion + '.0.0', name: '@angular/common' }
       );
 
       callRule(addLuxComponents(testOptions), observableOf(appTree), context).subscribe(

@@ -1,13 +1,13 @@
 import { chain, Rule, SchematicContext, Tree } from '@angular-devkit/schematics';
 import { applyRuleIf, finish, messageInfoRule, messageSuccessRule } from '../utility/util';
 import { validateLuxComponentsVersion, validateNodeVersion } from '../utility/validation';
-import { logInfo, logInfoWithDescriptor, logSuccess, logWarn } from '../utility/logging';
+import { logInfoWithDescriptor, logSuccess } from '../utility/logging';
 import { updateDependencies } from '../update-dependencies';
 import * as chalk from 'chalk';
 import { deleteFilesInDirectory, iterateFilesAndModifyContent } from '../utility/files';
 
-export const updateMajorVersion = '10';
-export const updateMinVersion = '1.9.5';
+export const updateMajorVersion = '11';
+export const updateMinVersion = '10.8.1';
 export const updateNodeMinVersion = '12.0.0';
 
 export function update(options: any): Rule {
@@ -18,7 +18,7 @@ export function update(options: any): Rule {
       finish(
         `${chalk.yellowBright(
           'Wichtig!!!'
-        )} Hinweise im Update Guide beachten -> https://github.com/IHK-GfI/lux-components/wiki/update-guide-10`
+        )} Hinweise im Update Guide beachten -> https://github.com/IHK-GfI/lux-components/wiki/update-guide-${updateMajorVersion}`
       )
     ]);
   };
@@ -42,9 +42,9 @@ function updateProject(options: any): Rule {
     return chain([
       messageInfoRule(`LUX-Components ${updateMajorVersion} werden eingerichtet...`),
       deleteOldThemeDir(options),
-      updatePolyfills(options),
-      updateLocale(options),
-      updateTsConfig(options),
+      // updatePolyfills(options),
+      // updateLocale(options),
+      // updateTsConfig(options),
       updateDependencies(),
       messageSuccessRule(`LUX-Components ${updateMajorVersion} wurden eingerichtet.`)
     ]);

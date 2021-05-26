@@ -5,7 +5,7 @@ import { of as observableOf } from 'rxjs';
 import { getPackageJsonDependency, NodeDependencyType, updatePackageJsonDependencyForceUpdate } from '../utility/dependencies';
 import { appOptions, workspaceOptions } from '../utility/test-helper';
 import { UtilConfig } from '../utility/util';
-import { deleteOldThemeDir, update, updateLocale, updatePolyfills, updateTsConfig } from './index';
+import { deleteOldThemeDir, update, updateLocale, updateMajorVersion, updatePolyfills, updateTsConfig } from './index';
 
 const collectionPath = path.join(__dirname, '../collection.json');
 
@@ -68,7 +68,7 @@ describe('update', () => {
                 "lux-components"
               ],
               "dependencies": {
-                "@ihk-gfi/lux-components": "1.9.5"
+                "@ihk-gfi/lux-components": "10.8.1"
               }
             }
         `
@@ -76,7 +76,7 @@ describe('update', () => {
 
       callRule(update(testOptions), observableOf(appTree), context).subscribe(
         () => {
-          expect(getPackageJsonDependency(appTree, '@ihk-gfi/lux-components').version).toEqual('~10.0.0');
+          expect(getPackageJsonDependency(appTree, '@ihk-gfi/lux-components').version).toEqual('~' + updateMajorVersion + '.0.0');
           done();
         },
         (reason) => expect(reason).toBeUndefined()
