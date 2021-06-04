@@ -210,7 +210,7 @@ export function deleteFilesInDirectory(options: any, path: string, exclude: stri
       path = path + '/';
     }
 
-    path = options.path + path;
+    path = (options.path ? options.path : '') + path;
 
     const dir = tree.getDir(path);
     if (dir) {

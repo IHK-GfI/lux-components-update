@@ -1,7 +1,7 @@
 import { chain, Rule, SchematicContext, Tree } from '@angular-devkit/schematics';
 import { updateMajorVersion } from '../update/index';
+import { deletePackageJsonDependency, NodeDependency, NodeDependencyType, updatePackageJsonDependency } from '../utility/dependencies';
 import { messageInfoRule, messageSuccessRule, waitForTreeCallback } from '../utility/util';
-import { NodeDependency, NodeDependencyType, updatePackageJsonDependencyForceUpdate } from '../utility/dependencies';
 
 export function updateDependencies(): Rule {
   return chain([
@@ -11,7 +11,11 @@ export function updateDependencies(): Rule {
 
     messageInfoRule(`Abhängigkeiten im 'devDependencies'-Abschnitt (package.json) werden aktualisiert...`),
     updateDevDependencies(),
-    messageSuccessRule(`Abhängigkeiten im 'devDependencies'-Abschnitt (package.json) wurden aktualisiert.`)
+    messageSuccessRule(`Abhängigkeiten im 'devDependencies'-Abschnitt (package.json) wurden aktualisiert.`),
+
+    messageInfoRule(`Abhängigkeiten im 'devDependencies'-Abschnitt (package.json) werden gelöscht...`),
+    deleteDevDependencies(),
+    messageSuccessRule(`Abhängigkeiten im 'devDependencies'-Abschnitt (package.json) wurden gelöscht.`)
   ]);
 }
 
@@ -25,6 +29,7 @@ export function updateDefaultDependencies(): Rule {
         { type: NodeDependencyType.Default, version: '11.2.11', name: '@angular/common' },
         { type: NodeDependencyType.Default, version: '11.2.11', name: '@angular/core' },
         { type: NodeDependencyType.Default, version: '11.2.11', name: '@angular/compiler' },
+        { type: NodeDependencyType.Default, version: '11.2.11', name: '@angular/localize' },
         { type: NodeDependencyType.Default, version: '11.0.0-beta.33', name: '@angular/flex-layout' },
         { type: NodeDependencyType.Default, version: '11.2.11', name: '@angular/forms' },
         { type: NodeDependencyType.Default, version: '11.2.11', name: '@angular/platform-browser' },
@@ -44,7 +49,7 @@ export function updateDefaultDependencies(): Rule {
       ];
 
       dependencies.forEach((dependency) => {
-        updatePackageJsonDependencyForceUpdate(tree, context, dependency);
+        updatePackageJsonDependency(tree, context, dependency);
       });
       return tree;
     });
@@ -82,7 +87,22 @@ export function updateDevDependencies(): Rule {
       ];
 
       devDependencies.forEach((devDependency) => {
-        updatePackageJsonDependencyForceUpdate(tree, context, devDependency);
+        updatePackageJsonDependency(tree, context, devDependency);
+      });
+      return tree;
+    });
+  };
+}
+
+export function deleteDevDependencies(): Rule {
+  return (tree: Tree, context: SchematicContext) => {
+    return waitForTreeCallback(tree, () => {
+      const dependencies: NodeDependency[] = [
+        { type: NodeDependencyType.Dev, name: 'node-sass', version: '' },
+      ];
+
+      dependencies.forEach((dependency) => {
+        deletePackageJsonDependency(tree, context, dependency);
       });
       return tree;
     });

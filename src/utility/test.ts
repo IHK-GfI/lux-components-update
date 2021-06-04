@@ -1,5 +1,3 @@
-import { MergeStrategy, SchematicContext } from '@angular-devkit/schematics';
-
 import { Schema as WorkspaceOptions } from '@schematics/angular/workspace/schema';
 import { Schema as ApplicationOptions, Style } from '@schematics/angular/application/schema';
 

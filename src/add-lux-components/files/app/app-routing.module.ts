@@ -6,7 +6,8 @@ import { HomeComponent } from './home/home.component';
 import { ProfilComponent } from './profil/profil.component';
 
 const routes: Routes = [
-  { path: '', component: HomeComponent },
+  { path: '', redirectTo: '/home', pathMatch: 'full' },
+  { path: 'home', component: HomeComponent },
   { path: 'profil', component: ProfilComponent },
   { path: '**', component: ErrorComponent } // Immer als letzte Route !! -> 404!
 ];

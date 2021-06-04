@@ -3,12 +3,12 @@ import { SchematicTestRunner, UnitTestTree } from '@angular-devkit/schematics/te
 import { callRule, SchematicContext } from '@angular-devkit/schematics';
 import { of as observableOf } from 'rxjs';
 import { UtilConfig } from '../utility/util';
-import { appOptions, workspaceOptions } from '../utility/test-helper';
+import { appOptions, workspaceOptions } from '../utility/test';
 import { addLuxComponents } from './index';
 import {
   getPackageJsonDependency,
   NodeDependencyType,
-  updatePackageJsonDependencyForceUpdate
+  updatePackageJsonDependency
 } from '../utility/dependencies';
 import { updateMajorVersion } from '../update';
 
@@ -42,7 +42,7 @@ describe('add-lux-components', () => {
 
   describe('[Rule] addLuxComponents', () => {
     it('Sollte die LUX-Components im Projekt eingerichtet haben', (done) => {
-      updatePackageJsonDependencyForceUpdate(
+      updatePackageJsonDependency(
         appTree,
         context,
         { type: NodeDependencyType.Default, version: updateMajorVersion + '.0.0', name: '@angular/common' }

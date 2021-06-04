@@ -2,10 +2,17 @@ import { callRule, SchematicContext } from '@angular-devkit/schematics';
 import { SchematicTestRunner, UnitTestTree } from '@angular-devkit/schematics/testing';
 import * as path from 'path';
 import { of as observableOf } from 'rxjs';
-import { getPackageJsonDependency, NodeDependencyType, updatePackageJsonDependencyForceUpdate } from '../utility/dependencies';
-import { appOptions, workspaceOptions } from '../utility/test-helper';
+import { getPackageJsonDependency, NodeDependencyType, updatePackageJsonDependency } from '../utility/dependencies';
+import { appOptions, workspaceOptions } from '../utility/test';
 import { UtilConfig } from '../utility/util';
-import { deleteOldThemeDir, update, updateLocale, updateMajorVersion, updatePolyfills, updateTsConfig } from './index';
+import {
+  addThemeAssets, clearStylesScss,
+  deleteOldThemeDir,
+  update,
+  updateAppComponent,
+  updateAppModule,
+  updateMajorVersion
+} from './index';
 
 const collectionPath = path.join(__dirname, '../collection.json');
 
@@ -37,7 +44,7 @@ describe('update', () => {
 
   describe('[Rule] update', () => {
     it('Sollte einen Fehler werfen, wenn Version < n - 1', () => {
-      updatePackageJsonDependencyForceUpdate(
+      updatePackageJsonDependency(
         appTree,
         context,
         { type: NodeDependencyType.Default, version: '1.9.3', name: '@ihk-gfi/lux-components' }
@@ -84,190 +91,6 @@ describe('update', () => {
     });
   });
 
-  describe('[Rule] updatePolyfill', () => {
-    it('Sollte die polyfill.ts aktualisieren (Single Quote)',  (done) => {
-      appTree.overwrite(
-        testOptions.path + '/src/polyfills.ts',
-        `
-import 'core-js/es/symbol';
-import 'core-js/es/weak-map';
-import 'core-js/es/reflect';
-        `
-      );
-
-      callRule(updatePolyfills(testOptions), observableOf(appTree), context).subscribe(
-        (success) => {
-          const content = success.read(testOptions.path + '/src/polyfills.ts')?.toString();
-          expect(content).toContain("import 'core-js/es/weak-set';");
-          done();
-        },
-        (reason) => expect(reason).toBeNull()
-      );
-    });
-
-    it('Sollte die polyfill.ts aktualisieren (Double Quote)',  (done) => {
-      appTree.overwrite(
-        testOptions.path + '/src/polyfills.ts',
-        `
-import "core-js/es/symbol";
-import "core-js/es/weak-map";
-import "core-js/es/reflect";
-        `
-      );
-
-      callRule(updatePolyfills(testOptions), observableOf(appTree), context).subscribe(
-        (success) => {
-          const content = success.read(testOptions.path + '/src/polyfills.ts')?.toString();
-          expect(content).toContain('import "core-js/es/weak-set";');
-          done();
-        },
-        (reason) => expect(reason).toBeNull()
-      );
-    });
-  });
-
-  describe('[Rule] updateLocale', () => {
-    it('Sollte die Locale aktualisieren',  (done) => {
-      appTree.overwrite(
-        testOptions.path + '/src/app/app.module.ts',
-        `
-import { registerLocaleData } from '@angular/common';
-import localeDE from '@angular/common/locales/de';
-import localeDeExtra from '@angular/common/locales/extra/de';
-import { LOCALE_ID } from '@angular/core';
-import { PlaceholderComponent } from './demo/abstract/placeholder/placeholder.component';
-import { RedirectComponent } from './demo/abstract/redirect/redirect.component';
-
-registerLocaleData(localeDE, localeDeExtra);
-import '@angular/common/locales/global/de';
-
-@NgModule({
-  declarations: [AppComponent, PlaceholderComponent, RedirectComponent],
-  imports: [
-    BrowserModule,
-    BrowserAnimationsModule,
-    AppRoutingModule,
-    HammerModule
-  ],
-  entryComponents: [LuxSnackbarComponent, LuxFilePreviewComponent],
-  providers: [
-    { provide: LOCALE_ID, useValue: 'de-DE' },
-    LuxAppFooterButtonService,
-    LuxStorageService
-  ],
-  bootstrap: [AppComponent]
-})
-export class AppModule {}
-        `
-      );
-
-      callRule(updateLocale(testOptions), observableOf(appTree), context).subscribe(
-        (success) => {
-          const content = success.read(testOptions.path + '/src/app/app.module.ts')?.toString();
-          expect(content).toContain("import '@angular/common/locales/global/de';");
-          expect(content).not.toContain('registerLocaleData');
-          expect(content).not.toContain('@angular/common/locales/de');
-          expect(content).not.toContain('@angular/common/locales/extra/de');
-          done();
-        },
-        (reason) => expect(reason).toBeNull()
-      );
-    });
-
-    it('Sollte die Locale hinzufügen',  (done) => {
-      appTree.overwrite(
-        testOptions.path + '/src/app/app.module.ts',
-        `
-import { registerLocaleData } from '@angular/common';
-import localeDE from '@angular/common/locales/de';
-import localeDeExtra from '@angular/common/locales/extra/de';
-import { LOCALE_ID } from '@angular/core';
-import { PlaceholderComponent } from './demo/abstract/placeholder/placeholder.component';
-import { RedirectComponent } from './demo/abstract/redirect/redirect.component';
-
-registerLocaleData(localeDE, localeDeExtra);
-import '@angular/common/locales/global/de';
-
-@NgModule({
-  declarations: [AppComponent, PlaceholderComponent, RedirectComponent],
-  imports: [
-    BrowserModule,
-    BrowserAnimationsModule,
-    AppRoutingModule,
-    HammerModule
-  ],
-  entryComponents: [LuxSnackbarComponent, LuxFilePreviewComponent],
-  providers: [
-    LuxAppFooterButtonService,
-    LuxStorageService
-  ],
-  bootstrap: [AppComponent]
-})
-export class AppModule {}
-        `
-      );
-
-      callRule(updateLocale(testOptions), observableOf(appTree), context).subscribe(
-        (success) => {
-          const content = success.read(testOptions.path + '/src/app/app.module.ts')?.toString();
-          expect(content).toContain("{ provide: LOCALE_ID, useValue: 'de-DE' },");
-          done();
-        },
-        (reason) => expect(reason).toBeNull()
-      );
-    });
-  });
-
-  describe('[Rule] updateTsConfig', () => {
-    it('Sollte die tsconfig.json aktualisieren (es2020)',  (done) => {
-      appTree.overwrite(
-        '/tsconfig.json',
-        `
-{
-    "experimentalDecorators": true,
-    "target": "es2020",
-    "typeRoots": [
-      "node_modules/@types"
-    ]
-}
-        `
-      );
-
-      callRule(updateTsConfig(testOptions), observableOf(appTree), context).subscribe(
-        (success) => {
-          const content = success.read('/tsconfig.json')?.toString();
-          expect(content).toContain('"target": "es2015",');
-          done();
-        },
-        (reason) => expect(reason).toBeNull()
-      );
-    });
-
-    it('Sollte die tsconfig.json aktualisieren (es5)',  (done) => {
-      appTree.overwrite(
-          '/tsconfig.json',
-          `
-{
-    "experimentalDecorators": true,
-    "target": "es5",
-    "typeRoots": [
-      "node_modules/@types"
-    ]
-}
-        `
-      );
-
-      callRule(updateTsConfig(testOptions), observableOf(appTree), context).subscribe(
-          (success) => {
-            const content = success.read('/tsconfig.json')?.toString();
-            expect(content).toContain('"target": "es2015",');
-            done();
-          },
-          (reason) => expect(reason).toBeNull()
-      );
-    });
-  });
-
   describe('[Rule] deleteOldThemeDir', () => {
     it('Sollte das alte Theming-Verzeichnis löschen.',  (done) => {
       const oldThemePath = testOptions.path + '/src/theming/';
@@ -292,6 +115,325 @@ export class AppModule {}
           done();
         },
         (reason) => expect(reason).toBeNull()
+      );
+    });
+  });
+
+  describe('[Rule] clearStylesScss', () => {
+    it('Sollte die alten Styles aus der styles.scss entfernen.',  (done) => {
+      appTree.overwrite(
+        testOptions.path + '/src/styles.scss',
+        `
+/* You can add global styles to this file, and also import other style files */
+/* Themenamen: deeppurple-amber.css, indigo-pink.css, pink-bluegrey.css und purple-green.css */
+$fa-font-path: '~@fortawesome/fontawesome-free/webfonts';
+@import '~@fortawesome/fontawesome-free/scss/fontawesome';
+@import '~@fortawesome/fontawesome-free/scss/regular';
+@import '~@fortawesome/fontawesome-free/scss/solid';
+@import '~@fortawesome/fontawesome-free/scss/brands';
+@import '~material-design-icons-iconfont/dist/material-design-icons.css';
+@import '../node_modules/@angular/material/theming';
+@import './theming/luxtheme';
+
+@include mat-core();
+
+@include angular-material-theme($lux-theme);
+
+        `
+      );
+
+      callRule(clearStylesScss(testOptions), observableOf(appTree), context).subscribe(
+        (success) => {
+          const content = success.read(testOptions.path + '/src/styles.scss')?.toString();
+          expect(content).not.toContain('$fa-font-path: \'~@fortawesome/fontawesome-free/webfonts\';');
+          expect(content).not.toContain('@import \'~@fortawesome/fontawesome-free/scss/fontawesome\';');
+          expect(content).not.toContain('@import \'~@fortawesome/fontawesome-free/scss/regular\';');
+          expect(content).not.toContain('@import \'~@fortawesome/fontawesome-free/scss/solid\';');
+          expect(content).not.toContain('@import \'~@fortawesome/fontawesome-free/scss/brands\';');
+          expect(content).not.toContain('@import \'~material-design-icons-iconfont/dist/material-design-icons.css\';');
+          expect(content).not.toContain('@import \'../node_modules/@angular/material/theming\';');
+          expect(content).not.toContain('@import \'./theming/luxtheme\';');
+          expect(content).not.toContain('@include mat-core();');
+          expect(content).not.toContain('@include angular-material-theme($lux-theme);');
+          done();
+        },
+        (reason) => expect(reason).toBeNull()
+      );
+    });
+  });
+
+  describe('[Rule] addThemeAssets', () => {
+    it('Sollte das Theme in das Assets-Array eintragen',  (done) => {
+      appTree.overwrite(
+        '/angular.json',
+        `
+{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "newProjectRoot": "projects",
+  "projects": {
+    "bar": {
+      "projectType": "application",
+      "schematics": {
+        "@schematics/angular:component": {
+          "style": "scss"
+        }
+      },
+      "root": "projects/bar",
+      "sourceRoot": "projects/bar/src",
+      "prefix": "app",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:browser",
+          "options": {
+            "assets": [
+              "projects/bar/src/favicon.ico",
+              "projects/bar/src/assets"
+            ],
+            "styles": [
+              "projects/bar/src/styles.scss"
+            ],
+            "scripts": []
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "main": "projects/bar/src/test.ts",
+            "polyfills": "projects/bar/src/polyfills.ts",
+            "tsConfig": "projects/bar/tsconfig.spec.json",
+            "karmaConfig": "projects/bar/karma.conf.js",
+            "assets": [
+              "projects/bar/src/favicon.ico",
+              "projects/bar/src/assets"
+            ],
+            "styles": [
+              "projects/bar/src/styles.scss"
+            ],
+            "scripts": []
+          }
+        }
+      }
+    }
+  },
+  "defaultProject": "bar"
+}           
+        `
+      );
+
+      callRule(addThemeAssets(testOptions), observableOf(appTree), context).subscribe(
+        (success) => {
+          const content = success.read('/angular.json')?.toString();
+          expect(content).toContain(`
+          "options": {
+            "assets": [
+              {
+                "glob": "*.css",
+                "input": "./node_modules/@ihk-gfi/lux-components-theme/prebuilt-themes",
+                "output": "./assets/themes"
+              },
+              "projects/bar/src/favicon.ico",
+              "projects/bar/src/assets"
+            ],
+          `);
+
+          expect(content).toContain(`
+            "karmaConfig": "projects/bar/karma.conf.js",
+            "assets": [
+              {
+                "glob": "*.css",
+                "input": "./node_modules/@ihk-gfi/lux-components-theme/prebuilt-themes",
+                "output": "./assets/themes"
+              },
+              "projects/bar/src/favicon.ico",
+              "projects/bar/src/assets"
+            ],
+          `);
+          done();
+        },
+        (reason) => expect(reason).toBeUndefined()
+      );
+    });
+  });
+
+  describe('[Rule] updateAppComponent', () => {
+    it('Sollte die app.component.ts (mit Constructor) anpassen',  (done) => {
+      appTree.overwrite(
+        testOptions.path + '/src/app/app.component.ts',
+        `
+import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
+
+@Component({
+  selector: 'app-root',
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.component.scss']
+})
+export class AppComponent implements OnInit {
+  constructor(public router: Router) {}
+
+  ngOnInit(): void {}
+}
+        `
+      );
+
+      callRule(updateAppComponent(testOptions), observableOf(appTree), context).subscribe(
+        (success) => {
+          const content = success.read(testOptions.path + '/src/app/app.component.ts')?.toString();
+          expect(content).toContain('import { LuxThemeService } from \'@ihk-gfi/lux-components\';');
+          expect(content).toContain('constructor(public router: Router, private themeService: LuxThemeService)');
+          expect(content).toContain('themeService.loadTheme();');
+          done();
+        },
+        (reason) => expect(reason).toBeUndefined()
+      );
+    });
+
+    it('Sollte die app.component.ts (leerer Constructor) anpassen',  (done) => {
+      appTree.overwrite(
+        testOptions.path + '/src/app/app.component.ts',
+        `
+import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
+
+@Component({
+  selector: 'app-root',
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.component.scss']
+})
+export class AppComponent implements OnInit {
+  constructor() {
+    console.log('Test');
+  }
+
+  ngOnInit(): void {}
+}
+        `
+      );
+
+      callRule(updateAppComponent(testOptions), observableOf(appTree), context).subscribe(
+        (success) => {
+          const content = success.read(testOptions.path + '/src/app/app.component.ts')?.toString();
+          expect(content).toContain('import { LuxThemeService } from \'@ihk-gfi/lux-components\';');
+          expect(content).toContain('constructor(private themeService: LuxThemeService)');
+          expect(content).toContain('themeService.loadTheme();');
+          done();
+        },
+        (reason) => expect(reason).toBeUndefined()
+      );
+    });
+
+    it('Sollte die app.component.ts (ohne Constructor) anpassen',  (done) => {
+      appTree.overwrite(
+        testOptions.path + '/src/app/app.component.ts',
+        `
+import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
+
+@Component({
+  selector: 'app-root',
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.component.scss']
+})
+export class AppComponent implements OnInit {
+
+  ngOnInit(): void {}
+}
+        `
+      );
+
+      callRule(updateAppComponent(testOptions), observableOf(appTree), context).subscribe(
+        (success) => {
+          const content = success.read(testOptions.path + '/src/app/app.component.ts')?.toString();
+          expect(content).toContain('import { LuxThemeService } from \'@ihk-gfi/lux-components\';');
+          expect(content).toContain('constructor(private themeService: LuxThemeService)');
+          expect(content).toContain('themeService.loadTheme();');
+          done();
+        },
+        (reason) => expect(reason).toBeUndefined()
+      );
+    });
+  });
+
+  describe('[Rule] updateAppModule', () => {
+    it('Sollte die Root-Services aus den Providern entfernen', (done) => {
+      appTree.overwrite(
+        testOptions.path + '/src/app/app.module.ts',
+        `
+import { BrowserModule } from '@angular/platform-browser';
+import { FlexLayoutModule } from '@angular/flex-layout';
+import {
+  LuxActionModule,
+  LuxAppFooterButtonService,
+  LuxAppFooterLinkService,
+  LuxCommonModule,
+  LuxComponentsConfigModule,
+  LuxComponentsConfigParameters,
+  LuxConsoleService,
+  LuxDirectivesModule,
+  LuxErrorModule,
+  LuxErrorService,
+  LuxFormModule,
+  LuxIconModule,
+  LuxLayoutModule,
+  LuxMasterDetailMobileHelperService,
+  LuxPipesModule,
+  LuxPopupsModule,
+  LuxSnackbarService,
+  LuxStepperHelperService
+} from '@ihk-gfi/lux-components';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+        
+@NgModule({
+  declarations: [AppComponent, HomeComponent, ErrorComponent, ProfilComponent],
+  imports: [
+    BrowserModule,
+    BrowserAnimationsModule,
+    AppRoutingModule,
+    LuxDirectivesModule,
+    LuxIconModule,
+    LuxLayoutModule,
+    LuxActionModule,
+    LuxFormModule,
+    LuxCommonModule,
+    LuxPipesModule,
+    LuxPopupsModule,
+    LuxErrorModule,
+    FlexLayoutModule,
+    LuxComponentsConfigModule.forRoot(luxComponentsConfig)
+  ],
+  providers: [
+    LuxAppFooterButtonService,
+    LuxAppFooterLinkService,
+    LuxSnackbarService,
+    LuxErrorService,
+    LuxMasterDetailMobileHelperService,
+    LuxStepperHelperService,
+    LuxConsoleService
+  ],
+  bootstrap: [AppComponent]
+})
+export class AppModule {}
+        `
+      );
+
+      callRule(updateAppModule(testOptions), observableOf(appTree), context).subscribe(
+        (success) => {
+          const content = success.read(testOptions.path + '/src/app/app.module.ts')?.toString();
+
+          expect(content).not.toContain('LuxAppFooterButtonService,');
+          expect(content).not.toContain('LuxAppFooterLinkService,');
+          expect(content).not.toContain('LuxSnackbarService,');
+          expect(content).not.toContain('LuxErrorService,');
+          expect(content).not.toContain('LuxMasterDetailMobileHelperService,');
+          expect(content).not.toContain('LuxStepperHelperService,');
+          expect(content).not.toContain('LuxConsoleService,');
+
+          expect(content).toContain('LuxIconModule,');
+          expect(content).toContain('LuxCommonModule,');
+          done();
+        },
+        (reason) => expect(reason).toBeUndefined()
       );
     });
   });

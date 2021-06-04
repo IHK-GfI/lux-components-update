@@ -2,9 +2,8 @@ import { SchematicContext, Tree } from '@angular-devkit/schematics';
 import * as chalk from 'chalk';
 import { applyEdits, findNodeAtLocation, modify, Node, parseTree } from 'jsonc-parser';
 import { deleteLineFromFile } from './files';
+import { jsonFormattingOptions, readJson, readJsonAsString } from './json';
 import { formattedSchematicsException, logInfo } from './logging';
-
-const packageJsonPath = '/package.json';
 
 export enum NodeDependencyType {
   Default = 'dependencies',
@@ -25,7 +24,7 @@ export interface NodeDependency {
  * @param name
  */
 export function getPackageJsonDependency(tree: Tree, name: string): NodeDependency {
-  const packageJsonNode = readPackageJson(tree);
+  const packageJsonNode = readJson(tree, '/package.json');
   let dependency: NodeDependency | null = null;
 
   [NodeDependencyType.Default, NodeDependencyType.Dev, NodeDependencyType.Optional, NodeDependencyType.Peer].forEach(
@@ -58,21 +57,7 @@ export function getPackageJsonDependency(tree: Tree, name: string): NodeDependen
  * @param dependency
  */
 export function updatePackageJsonDependency(tree: Tree, context: SchematicContext, dependency: NodeDependency): void {
-  updatePackageJsonDependencyForceUpdate(tree, context, dependency);
-}
-
-/**
- * Aktualisiert eine Dependency in der package.json bzw. fügt diese hinzu, falls sie noch nicht vorhanden ist.
- * @param tree
- * @param context
- * @param dependency
- */
-export function updatePackageJsonDependencyForceUpdate(
-  tree: Tree,
-  context: SchematicContext,
-  dependency: NodeDependency
-): void {
-  const packageJsonAsNode = readPackageJson(tree);
+  const packageJsonAsNode = readJson(tree, '/package.json');
   let node = findNodeAtLocation(packageJsonAsNode, [dependency.type.toString(), dependency.name]);
   if (node) {
     if (node && node.value !== dependency.version) {
@@ -91,55 +76,22 @@ export function updatePackageJsonDependencyForceUpdate(
   }
 
   if (!node || node.value !== dependency.version) {
-    const packageJonsAsString = readPackageJsonAsString(tree);
-    const edits = modify(packageJonsAsString, [dependency.type.toString(), dependency.name], dependency.version, {});
+    const packageJonsAsString = readJsonAsString(tree, '/package.json');
+    const edits = modify(packageJonsAsString, [dependency.type.toString(), dependency.name], dependency.version, { formattingOptions: jsonFormattingOptions});
 
     if (edits) {
       tree.overwrite(
-        packageJsonPath,
+        '/package.json',
         applyEdits(packageJonsAsString, edits)
       );
     }
   }
 }
 
-/**
- *
- * @param tree
- * @param context
- * @param dependency
- */
 export function deletePackageJsonDependency(tree: Tree, context: SchematicContext, dependency: NodeDependency) {
-  deleteLineFromFile(tree, context, packageJsonPath, dependency.name);
+  deleteLineFromFile(tree, context, '/package.json', dependency.name);
+  logInfo(
+    `Dependency ` + chalk.yellowBright(`${dependency.name}`) + ` wurde aus dem Abschnitt ${dependency.type} gelöscht.`
+  );
 }
 
-/**
- * Liest die package.json des Projekts aus und wirft Fehlermeldungen, sollte die package.json nicht gefunden oder
- * in einem falschen Format sein.
- * @param context
- * @param tree
- */
-function readPackageJson(tree: Tree): Node {
-  const buffer = tree.read(packageJsonPath);
-  if (buffer === null) {
-    throw formattedSchematicsException('Konnte die package.json nicht lesen.');
-  }
-  const content = buffer.toString();
-
-  let result = parseTree(content) as Node;
-  return result;
-}
-
-/**
- * Liest die package.json des Projekts aus und wirft Fehlermeldungen, sollte die package.json nicht gefunden oder
- * in einem falschen Format sein.
- * @param context
- * @param tree
- */
-function readPackageJsonAsString(tree: Tree): string {
-  const buffer = tree.read(packageJsonPath);
-  if (buffer === null) {
-    throw formattedSchematicsException('Konnte die package.json nicht lesen.');
-  }
-  return buffer.toString();
-}
