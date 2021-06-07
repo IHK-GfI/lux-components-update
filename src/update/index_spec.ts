@@ -7,7 +7,7 @@ import { appOptions, workspaceOptions } from '../utility/test';
 import { UtilConfig } from '../utility/util';
 import {
   addThemeAssets, clearStylesScss,
-  deleteOldThemeDir,
+  deleteOldThemeDir, removeThemeAssets,
   update,
   updateAppComponent,
   updateAppModule,
@@ -247,6 +247,82 @@ $fa-font-path: '~@fortawesome/fontawesome-free/webfonts';
               },
               "projects/bar/src/favicon.ico",
               "projects/bar/src/assets"
+            ],
+          `);
+          done();
+        },
+        (reason) => expect(reason).toBeUndefined()
+      );
+    });
+  });
+
+  describe('[Rule] removeThemeAssets', () => {
+    it('Sollte das Theme aus dem Assets-Array austragen',  (done) => {
+      appTree.overwrite(
+        '/angular.json',
+        `
+{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "newProjectRoot": "projects",
+  "projects": {
+    "bar": {
+      "projectType": "application",
+      "schematics": {
+        "@schematics/angular:component": {
+          "style": "scss"
+        }
+      },
+      "root": "projects/bar",
+      "sourceRoot": "projects/bar/src",
+      "prefix": "app",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:browser",
+          "options": {
+            "styles": [
+              "projects/bar/src/styles.scss",
+              "src/theming/luxtheme.scss"
+            ],
+            "scripts": []
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "main": "projects/bar/src/test.ts",
+            "polyfills": "projects/bar/src/polyfills.ts",
+            "tsConfig": "projects/bar/tsconfig.spec.json",
+            "karmaConfig": "projects/bar/karma.conf.js",
+            "styles": [
+              "src/theming/luxtheme.scss",
+              "projects/bar/src/styles.scss"
+            ],
+            "scripts": []
+          }
+        }
+      }
+    }
+  },
+  "defaultProject": "bar"
+}           
+        `
+      );
+
+      callRule(removeThemeAssets(testOptions), observableOf(appTree), context).subscribe(
+        (success) => {
+          const content = success.read('/angular.json')?.toString();
+          expect(content).toContain(`
+          "options": {
+            "styles": [
+              "projects/bar/src/styles.scss"
+            ],
+          `);
+
+          expect(content).toContain(`
+            "karmaConfig": "projects/bar/karma.conf.js",
+            "styles": [
+              "projects/bar/src/styles.scss"
             ],
           `);
           done();

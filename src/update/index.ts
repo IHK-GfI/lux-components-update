@@ -34,7 +34,7 @@ export function updateProject(options: any): Rule {
       messageInfoRule(`LUX-Components ${updateMajorVersion} werden aktualisiert...`),
       deleteOldThemeDir(options),
       clearStylesScss(options),
-      addThemeAssets(options),
+      updateAngularJson(options),
       updateAppComponent(options),
       updateAppModule(options),
       updateDependencies(),
@@ -64,43 +64,15 @@ export function deleteOldThemeDir(options: any): Rule {
   ]);
 }
 
-export function addThemeAssets(options: any): Rule {
-  return chain([
-    messageInfoRule(`Datei "angular.json" wird aktualisiert...`),
-    (tree: Tree, context: SchematicContext) => {
-      const filePath = '/angular.json';
-      const value = { "glob": "*.css", "input": "./node_modules/@ihk-gfi/lux-components-theme/prebuilt-themes", "output": "./assets/themes" };
-
-      let contentAsNode = readJson(tree, filePath);
-      const testAssetsNode = findNodeAtLocation(contentAsNode, ['projects', options.project, 'architect', 'test', 'options', 'assets']);
-      if (testAssetsNode) {
-        const angularJson = readJsonAsString(tree, filePath);
-        const edits = modify(angularJson, ['projects', options.project, 'architect', 'test', 'options', 'assets', 0], value, { formattingOptions: jsonFormattingOptions, isArrayInsertion: true });
-        if (edits) {
-          tree.overwrite(
-            filePath,
-            applyEdits(angularJson, edits)
-          );
-          logInfo(`LUX-Themes im Assets-Abschnitt (build) hinzugefügt.`);
-        }
-      }
-
-      contentAsNode = readJson(tree, filePath);
-      const buildAssetsNode = findNodeAtLocation(contentAsNode, ['projects', options.project, 'architect', 'build', 'options', 'assets']);
-      if (buildAssetsNode) {
-        const angularJson = readJsonAsString(tree, filePath);
-        const edits = modify(angularJson, ['projects', options.project, 'architect', 'build', 'options', 'assets', 0], value, { formattingOptions: jsonFormattingOptions, isArrayInsertion: true });
-        if (edits) {
-          tree.overwrite(
-            filePath,
-            applyEdits(angularJson, edits)
-          );
-          logInfo(`LUX-Themes im Assets-Abschnitt (test) hinzugefügt.`);
-        }
-      }
-    },
-    messageSuccessRule(`\`Datei "angular.json" wurde aktualisiert.`)
-  ]);
+export function updateAngularJson(options: any): Rule {
+  return (tree: Tree, _context: SchematicContext) => {
+    return chain([
+      messageInfoRule(`Datei "angular.json" wird aktualisiert...`),
+      addThemeAssets(options),
+      removeThemeAssets(options),
+      messageSuccessRule(`Datei "angular.json" wurde aktualisiert.`),
+    ]);
+  };
 }
 
 export function clearStylesScss(options: any): Rule {
@@ -129,6 +101,7 @@ export function clearStylesScss(options: any): Rule {
 
          if (content !== modifiedContent) {
            tree.overwrite(filePath, modifiedContent);
+           logInfo(`Einträge des alten LUX-Themes entfernt.`);
          }
        }
      }
@@ -137,7 +110,85 @@ export function clearStylesScss(options: any): Rule {
   ]);
 }
 
+export function addThemeAssets(options: any): Rule {
+  return (tree: Tree, context: SchematicContext) => {
+    const filePath = '/angular.json';
+    const value = { "glob": "*.css", "input": "./node_modules/@ihk-gfi/lux-components-theme/prebuilt-themes", "output": "./assets/themes" };
 
+    let contentAsNode = readJson(tree, filePath);
+    const testAssetsNode = findNodeAtLocation(contentAsNode, ['projects', options.project, 'architect', 'test', 'options', 'assets']);
+    if (testAssetsNode) {
+      const angularJson = readJsonAsString(tree, filePath);
+      const edits = modify(angularJson, ['projects', options.project, 'architect', 'test', 'options', 'assets', 0], value, { formattingOptions: jsonFormattingOptions, isArrayInsertion: true });
+      if (edits) {
+        tree.overwrite(
+          filePath,
+          applyEdits(angularJson, edits)
+        );
+        logInfo(`Neues LUX-Theme im Assets-Abschnitt (test) hinzugefügt.`);
+      }
+    }
+
+    contentAsNode = readJson(tree, filePath);
+    const buildAssetsNode = findNodeAtLocation(contentAsNode, ['projects', options.project, 'architect', 'build', 'options', 'assets']);
+    if (buildAssetsNode) {
+      const angularJson = readJsonAsString(tree, filePath);
+      const edits = modify(angularJson, ['projects', options.project, 'architect', 'build', 'options', 'assets', 0], value, { formattingOptions: jsonFormattingOptions, isArrayInsertion: true });
+      if (edits) {
+        tree.overwrite(
+          filePath,
+          applyEdits(angularJson, edits)
+        );
+        logInfo(`Neues LUX-Theme im Assets-Abschnitt (build) hinzugefügt.`);
+      }
+    }
+  }
+}
+
+export function removeThemeAssets(options: any): Rule {
+  return (tree: Tree, context: SchematicContext) => {
+    const filePath = '/angular.json';
+    const value = "src/theming/luxtheme.scss";
+
+    let contentAsNode = readJson(tree, filePath);
+    const testAssetsNode = findNodeAtLocation(contentAsNode, ['projects', options.project, 'architect', 'test', 'options', 'styles']);
+    if (testAssetsNode && testAssetsNode.children) {
+      const assetArray = testAssetsNode.children as Array<any>;
+      const index = assetArray.findIndex(item => item.value === value);
+
+      if (index >= 0) {
+        const angularJson = readJsonAsString(tree, filePath);
+        const edits = modify(angularJson, ['projects', options.project, 'architect', 'test', 'options', 'styles', index], void 0, { formattingOptions: jsonFormattingOptions });
+        if (edits) {
+          tree.overwrite(
+            filePath,
+            applyEdits(angularJson, edits)
+          );
+          logInfo(`Altes LUX-Theme aus dem Assets-Abschnitt (test) entfernt.`);
+        }
+      }
+    }
+
+    contentAsNode = readJson(tree, filePath);
+    const buildAssetsNode = findNodeAtLocation(contentAsNode, ['projects', options.project, 'architect', 'build', 'options', 'styles']);
+    if (buildAssetsNode && buildAssetsNode.children) {
+      const assetArray = buildAssetsNode.children as Array<any>;
+      const index = assetArray.findIndex(item => item.value === value);
+
+      if (index >= 0) {
+        const angularJson = readJsonAsString(tree, filePath);
+        const edits = modify(angularJson, ['projects', options.project, 'architect', 'build', 'options', 'styles', index], void 0, { formattingOptions: jsonFormattingOptions });
+        if (edits) {
+          tree.overwrite(
+            filePath,
+            applyEdits(angularJson, edits)
+          );
+          logInfo(`Altes LUX-Theme aus dem Assets-Abschnitt (build) entfernt.`);
+        }
+      }
+    }
+  }
+}
 
 export function updateAppComponent(options: any): Rule {
   return chain([
