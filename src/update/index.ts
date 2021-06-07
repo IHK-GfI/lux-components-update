@@ -32,6 +32,7 @@ export function updateProject(options: any): Rule {
   return (tree: Tree, _context: SchematicContext) => {
     return chain([
       messageInfoRule(`LUX-Components ${updateMajorVersion} werden aktualisiert...`),
+      updateBrowserList(options),
       deleteOldThemeDir(options),
       clearStylesScss(options),
       updateAngularJson(options),
@@ -54,6 +55,37 @@ export function check(options: any): Rule {
 
     return tree;
   };
+}
+
+export function updateBrowserList(options: any): Rule {
+  return chain([
+    messageInfoRule(`Datei ".browserslistrc" wird aktualisiert...`),
+    (tree: Tree, context: SchematicContext) => {
+      const filePath = '/.browserslistrc';
+      const content = (tree.read(filePath) as Buffer).toString();
+      if (content) {
+        let modifiedContent = '';
+
+        const lines = content.split('\n');
+        if (lines) {
+          lines.forEach(line => {
+            if (line.trim().startsWith('IE 9-11')) {
+              modifiedContent += 'not IE 9-10' + '\n';
+              modifiedContent += 'IE 11' + '\n';
+            } else {
+              modifiedContent += line + '\n';
+            }
+          });
+
+          if (content !== modifiedContent) {
+            tree.overwrite(filePath, modifiedContent);
+            logInfo(`Einträge für den IE 9-10 entfernt.`);
+          }
+        }
+      }
+    },
+    messageSuccessRule(`Datei ".browserslistrc" wurde aktualisiert.`),
+  ]);
 }
 
 export function deleteOldThemeDir(options: any): Rule {

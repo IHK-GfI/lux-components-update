@@ -10,7 +10,7 @@ import {
   deleteOldThemeDir, removeThemeAssets,
   update,
   updateAppComponent,
-  updateAppModule,
+  updateAppModule, updateBrowserList,
   updateMajorVersion
 } from './index';
 
@@ -87,6 +87,40 @@ describe('update', () => {
           done();
         },
         (reason) => expect(reason).toBeUndefined()
+      );
+    });
+  });
+
+  describe('[Rule] updateBrowserList', () => {
+    it('Sollte die alten IE-Versionen (9 und 10) entfernt haben',  (done) => {
+      appTree.create(
+        '/.browserslistrc',
+        `
+# This file is used by the build system to adjust CSS and JS output to support the specified browsers below.
+# For additional information regarding the format and rule options, please see:
+# https://github.com/browserslist/browserslist#queries
+
+# You can see what browsers were selected by your queries by running:
+#   npx browserslist
+
+> 0.5%
+last 2 versions
+Firefox ESR
+not dead
+IE 9-11 # For IE 9-11 support, remove 'not'.
+
+        `
+      );
+
+      callRule(updateBrowserList(testOptions), observableOf(appTree), context).subscribe(
+        (success) => {
+          const content = success.read('/.browserslistrc')?.toString();
+          expect(content).toContain('not IE 9-10');
+          expect(content).toContain('IE 11');
+          console.log('aaa', content);
+          done();
+        },
+        (reason) => expect(reason).toBeNull()
       );
     });
   });
