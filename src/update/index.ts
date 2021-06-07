@@ -62,26 +62,31 @@ export function updateBrowserList(options: any): Rule {
     messageInfoRule(`Datei ".browserslistrc" wird aktualisiert...`),
     (tree: Tree, context: SchematicContext) => {
       const filePath = '/.browserslistrc';
-      const content = (tree.read(filePath) as Buffer).toString();
-      if (content) {
-        let modifiedContent = '';
+      const browserListContent = tree.read(filePath);
+      if (browserListContent) {
+        const content = (browserListContent as Buffer).toString();
+        if (content) {
+          let modifiedContent = '';
 
-        const lines = content.split('\n');
-        if (lines) {
-          lines.forEach(line => {
-            if (line.trim().startsWith('IE 9-11')) {
-              modifiedContent += 'not IE 9-10' + '\n';
-              modifiedContent += 'IE 11' + '\n';
-            } else {
-              modifiedContent += line + '\n';
+          const lines = content.split('\n');
+          if (lines) {
+            lines.forEach(line => {
+              if (line.trim().startsWith('IE 9-11')) {
+                modifiedContent += 'not IE 9-10' + '\n';
+                modifiedContent += 'IE 11' + '\n';
+              } else {
+                modifiedContent += line + '\n';
+              }
+            });
+
+            if (content !== modifiedContent) {
+              tree.overwrite(filePath, modifiedContent);
+              logInfo(`Einträge für den IE 9-10 entfernt.`);
             }
-          });
-
-          if (content !== modifiedContent) {
-            tree.overwrite(filePath, modifiedContent);
-            logInfo(`Einträge für den IE 9-10 entfernt.`);
           }
         }
+      } else {
+        logInfo(`Die Datei ".browserslistrc" konnte nicht gefunden werden.`);
       }
     },
     messageSuccessRule(`Datei ".browserslistrc" wurde aktualisiert.`),

@@ -114,10 +114,11 @@ IE 9-11 # For IE 9-11 support, remove 'not'.
 
       callRule(updateBrowserList(testOptions), observableOf(appTree), context).subscribe(
         (success) => {
-          const content = success.read('/.browserslistrc')?.toString();
+          const browserListContent = success.read('/.browserslistrc');
+          expect(browserListContent).toBeDefined();
+          const content = browserListContent?.toString();
           expect(content).toContain('not IE 9-10');
           expect(content).toContain('IE 11');
-          console.log('aaa', content);
           done();
         },
         (reason) => expect(reason).toBeNull()
