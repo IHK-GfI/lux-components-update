@@ -67,6 +67,7 @@ export function updateApp(options: any): Rule {
   return chain([
     messageInfoRule(`App-Dateien werden angelegt...`),
     moveFilesToDirectory(options, 'files/app', 'src/app'),
+    moveFilesToDirectory(options, 'files/environments', 'src/environments'),
     messageSuccessRule(`App-Dateien wurden angelegt.`)
   ]);
 }

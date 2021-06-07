@@ -1,4 +1,5 @@
 import { SchematicsException, Tree } from '@angular-devkit/schematics';
+import { SyntaxKind } from 'typescript';
 import * as ts from 'typescript';
 import { logInfo } from './logging';
 
@@ -120,6 +121,60 @@ export function removeProvider(tree: Tree, filePath: string, providerName: strin
       }
     }
   }
+}
+
+export function getSiblings(node: ts.Node, childKind?: ts.SyntaxKind): ts.Node[] {
+  let result: ts.Node[] = [];
+
+  if (node && node.parent.getChildren()) {
+    if (childKind) {
+      const childNode = node.parent.getChildren().find(child => child.kind === childKind);
+
+      if (!childNode) {
+        throw new SchematicsException(`Es konnte kein Knoten vom Typ ${childKind} gefunden werden.`);
+      }
+
+      result = childNode.getChildren();
+    } else {
+      result = node.parent.getChildren();
+    }
+  }
+
+  return result;
+}
+
+export function getPrevSibling(node: ts.Node, childKind?: ts.SyntaxKind): ts.Node | null {
+  let result: ts.Node | null = null;
+
+  if (node) {
+    let siblings: ts.Node[] = getSiblings(node, childKind);
+
+    if (siblings) {
+      const index = siblings.indexOf(node);
+      if (index > 0) {
+        result = siblings[ index - 1 ];
+      }
+    }
+  }
+
+  return result;
+}
+
+export function getNextSibling(node: ts.Node, childKind?: ts.SyntaxKind): ts.Node | null {
+  let result: ts.Node | null = null;
+
+  if (node) {
+    let siblings: ts.Node[] = getSiblings(node, childKind);
+
+    if (siblings) {
+      const index = siblings.indexOf(node);
+      if (index >= 0 && index < siblings.length - 1) {
+        result = siblings[ index + 1 ];
+      }
+    }
+  }
+
+  return result;
 }
 
 export function showTree(node: ts.Node, indent: string = '    '): void {

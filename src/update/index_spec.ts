@@ -494,6 +494,15 @@ import {
   LuxStepperHelperService
 } from '@ihk-gfi/lux-components';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+
+const luxComponentsConfig: LuxComponentsConfigParameters = {
+  generateLuxTagIds: true,
+  labelConfiguration: {
+    allUppercase: true,
+    notAppliedTo: ['lux-side-nav-item', 'lux-menu-item', 'lux-link']
+  },
+  lookupServiceUrl: '/lookup/'
+};
         
 @NgModule({
   declarations: [AppComponent, HomeComponent, ErrorComponent, ProfilComponent],
@@ -542,6 +551,11 @@ export class AppModule {}
 
           expect(content).toContain('LuxIconModule,');
           expect(content).toContain('LuxCommonModule,');
+
+          expect(content).toContain(`
+const luxComponentsConfig: LuxComponentsConfigParameters = {
+  generateLuxTagIds: environment.generateLuxTagIds
+};`);
           done();
         },
         (reason) => expect(reason).toBeUndefined()

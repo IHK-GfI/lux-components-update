@@ -6,7 +6,7 @@ import { updateDependencies } from '../update-dependencies/index';
 import { deleteFilesInDirectory } from '../utility/files';
 import { jsonFormattingOptions, readJson, readJsonAsString } from '../utility/json';
 import { logInfo, logInfoWithDescriptor, logSuccess } from '../utility/logging';
-import { getSourceNodes, removeImport, removeProvider } from '../utility/typescript';
+import { getNextSibling, getPrevSibling, getSourceNodes, removeImport, removeProvider } from '../utility/typescript';
 import { applyRuleIf, finish, messageInfoRule, messageSuccessRule } from '../utility/util';
 import { validateLuxComponentsVersion, validateNodeVersion } from '../utility/validation';
 
@@ -320,11 +320,129 @@ export function updateAppComponent(options: any): Rule {
   ]);
 }
 
+function updateConfigGenerateLuxTagIds(tree: Tree, filePath: string) {
+  const content    = (tree.read(filePath) as Buffer).toString();
+  const fileName   = filePath.substring(filePath.lastIndexOf('/') + 1, filePath.length);
+  const sourceFile = ts.createSourceFile(`${ fileName }`, content, ts.ScriptTarget.Latest, true);
+  const nodes      = getSourceNodes(sourceFile);
+
+  const identifierNode = nodes.find(n => n.kind === ts.SyntaxKind.Identifier && n.getText() === 'luxComponentsConfig');
+  if (identifierNode) {
+    const objectNode = identifierNode.parent.getChildren().find(n => n.kind === ts.SyntaxKind.ObjectLiteralExpression);
+    if (objectNode) {
+      const syntaxListNode = objectNode.getChildren().find(n => n.kind === ts.SyntaxKind.SyntaxList);
+      if (syntaxListNode) {
+        const propertyAssignmentNodes = syntaxListNode.getChildren().filter(n => n.kind === ts.SyntaxKind.PropertyAssignment);
+        if (propertyAssignmentNodes) {
+          propertyAssignmentNodes.forEach(assignment => {
+            const propertyIdentifierNode = assignment.getChildren().find(n => n.kind === ts.SyntaxKind.Identifier);
+            if (propertyIdentifierNode && propertyIdentifierNode.getText() === 'generateLuxTagIds') {
+              const updateRecorder = tree.beginUpdate(filePath);
+              updateRecorder.remove(assignment.pos, assignment.end - assignment.pos);
+              updateRecorder.insertLeft(assignment.pos, '\n  generateLuxTagIds: environment.generateLuxTagIds');
+              tree.commitUpdate(updateRecorder);
+              logInfo(`In der Konfiguration wurde der Wert "generateLuxTagIds: environment.generateLuxTagIds" eingetragen.`);
+            }
+          });
+        }
+      }
+    }
+  }
+}
+
+function updateConfigLabelConfiguration(tree: Tree, filePath: string) {
+  const content    = (tree.read(filePath) as Buffer).toString();
+  const fileName   = filePath.substring(filePath.lastIndexOf('/') + 1, filePath.length);
+  const sourceFile = ts.createSourceFile(`${ fileName }`, content, ts.ScriptTarget.Latest, true);
+  const nodes      = getSourceNodes(sourceFile);
+
+  const identifierNode = nodes.find(n => n.kind === ts.SyntaxKind.Identifier && n.getText() === 'luxComponentsConfig');
+  if (identifierNode) {
+    const objectNode = identifierNode.parent.getChildren().find(n => n.kind === ts.SyntaxKind.ObjectLiteralExpression);
+    if (objectNode) {
+      const syntaxListNode = objectNode.getChildren().find(n => n.kind === ts.SyntaxKind.SyntaxList);
+      if (syntaxListNode) {
+        const propertyAssignmentNodes = syntaxListNode.getChildren().filter(n => n.kind === ts.SyntaxKind.PropertyAssignment);
+        if (propertyAssignmentNodes) {
+          propertyAssignmentNodes.forEach(assignment => {
+            const propertyIdentifierNode = assignment.getChildren().find(n => n.kind === ts.SyntaxKind.Identifier);
+            if (propertyIdentifierNode && propertyIdentifierNode.getText() === 'labelConfiguration') {
+              const prevSibling = getPrevSibling(assignment, ts.SyntaxKind.SyntaxList);
+              const nextSibling = getNextSibling(assignment, ts.SyntaxKind.SyntaxList);
+              const updateRecorder = tree.beginUpdate(filePath);
+              if (nextSibling) {
+                updateRecorder.remove(assignment.pos, nextSibling.end - assignment.pos);
+              } else {
+                if (prevSibling) {
+                  updateRecorder.remove(prevSibling.pos, assignment.end - assignment.pos);
+                } else {
+                  updateRecorder.remove(assignment.pos, assignment.end - assignment.pos);
+                }
+              }
+              logInfo(`Aus der Konfiguration wurde die Property "labelConfiguration" entfernt, damit der Default verwendet wird.`)
+              tree.commitUpdate(updateRecorder);
+            }
+          });
+        }
+      }
+    }
+  }
+}
+
+function updateConfiglookupServiceUrl(tree: Tree, filePath: string) {
+  const content    = (tree.read(filePath) as Buffer).toString();
+  const fileName   = filePath.substring(filePath.lastIndexOf('/') + 1, filePath.length);
+  const sourceFile = ts.createSourceFile(`${ fileName }`, content, ts.ScriptTarget.Latest, true);
+  const nodes      = getSourceNodes(sourceFile);
+
+  const identifierNode = nodes.find(n => n.kind === ts.SyntaxKind.Identifier && n.getText() === 'luxComponentsConfig');
+  if (identifierNode) {
+    const objectNode = identifierNode.parent.getChildren().find(n => n.kind === ts.SyntaxKind.ObjectLiteralExpression);
+    if (objectNode) {
+      const syntaxListNode = objectNode.getChildren().find(n => n.kind === ts.SyntaxKind.SyntaxList);
+      if (syntaxListNode) {
+        const propertyAssignmentNodes = syntaxListNode
+          .getChildren()
+          .filter((n) => n.kind === ts.SyntaxKind.PropertyAssignment);
+        if (propertyAssignmentNodes) {
+          propertyAssignmentNodes.forEach((assignment) => {
+            const propertyIdentifierNode = assignment.getChildren().find((n) => n.kind === ts.SyntaxKind.Identifier);
+            const propertyStringNode = assignment.getChildren().find((n) => n.kind === ts.SyntaxKind.StringLiteral);
+            if (
+              propertyIdentifierNode && propertyIdentifierNode.getText() === 'lookupServiceUrl' &&
+              propertyStringNode && (propertyStringNode.getText() === "'/lookup/'" || propertyStringNode.getText() === '"/lookup/"')
+            ) {
+              const prevSibling = getPrevSibling(assignment, ts.SyntaxKind.SyntaxList);
+              const nextSibling = getNextSibling(assignment, ts.SyntaxKind.SyntaxList);
+              const updateRecorder = tree.beginUpdate(filePath);
+              if (nextSibling) {
+                updateRecorder.remove(assignment.pos, nextSibling.end - assignment.pos);
+              } else {
+                if (prevSibling) {
+                  updateRecorder.remove(prevSibling.pos, assignment.end - prevSibling.pos);
+                } else {
+                  updateRecorder.remove(assignment.pos, assignment.end - assignment.pos);
+                }
+              }
+              logInfo(`Aus der Konfiguration wurde die Property "lookupServiceUrl" entfernt. Der Wert entspricht dem Defaultwert.`)
+              tree.commitUpdate(updateRecorder);
+            }
+          });
+        }
+      }
+    }
+  }
+}
+
 export function updateAppModule(options: any): Rule {
   return chain([
-    messageInfoRule(`AppComponent wird aktualisiert...`),
+    messageInfoRule(`AppModule wird aktualisiert...`),
     (tree: Tree, context: SchematicContext) => {
       const filePath = (options.path ? options.path : '') + `/src/app/app.module.ts`;
+
+      updateConfigGenerateLuxTagIds(tree, filePath);
+      updateConfigLabelConfiguration(tree, filePath);
+      updateConfiglookupServiceUrl(tree, filePath);
 
       removeImport(tree, filePath, '@ihk-gfi/lux-components', 'LuxAppFooterButtonService');
       removeImport(tree, filePath, '@ihk-gfi/lux-components','LuxAppFooterLinkService');
@@ -342,7 +460,7 @@ export function updateAppModule(options: any): Rule {
       removeProvider(tree, filePath, 'LuxStepperHelperService');
       removeProvider(tree, filePath, 'LuxConsoleService');
     },
-    messageSuccessRule(`AppComponent wurde aktualisiert.`)
+    messageSuccessRule(`AppModule wurde aktualisiert.`)
   ]);
 }
 
