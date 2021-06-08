@@ -1,6 +1,6 @@
 import { chain, Rule, SchematicContext, SchematicsException, Tree } from '@angular-devkit/schematics';
 import * as chalk from 'chalk';
-import { applyEdits, findNodeAtLocation, modify } from 'jsonc-parser';
+import { applyEdits, Edit, findNodeAtLocation, modify } from 'jsonc-parser';
 import * as ts from 'typescript';
 import { updateDependencies } from '../update-dependencies/index';
 import { deleteFilesInDirectory } from '../utility/files';
@@ -38,6 +38,7 @@ export function updateProject(options: any): Rule {
       updateAngularJson(options),
       updateAppComponent(options),
       updateAppModule(options),
+      updateTsConfigJson(options),
       updateDependencies(),
       messageSuccessRule(`LUX-Components ${updateMajorVersion} wurden aktualisiert.`)
     ]);
@@ -55,6 +56,38 @@ export function check(options: any): Rule {
 
     return tree;
   };
+}
+
+export function updateTsConfigJson(options: any): Rule {
+  return  chain([
+    messageInfoRule(`Datei "tsconfig.json" wird aktualisiert...`),(tree: Tree, _context: SchematicContext) => {
+      const filePath = '/tsconfig.json';
+
+      const newValuesArr = [
+        { path: ['compilerOptions', 'strict'], value: false, message: `Die Property "compilerOptions.strict" wurde auf "false" gesetzt.`},
+        { path: ['compilerOptions', 'noImplicitReturns'], value: true, message: `Die Property "compilerOptions.noImplicitReturns" wurde auf "true" gesetzt.`},
+        { path: ['compilerOptions', 'noFallthroughCasesInSwitch'], value: true, message: `Die Property "compilerOptions.noFallthroughCasesInSwitch" wurde auf "true" gesetzt.`},
+        { path: ['compilerOptions', 'forceConsistentCasingInFileNames'], value: true, message: `Die Property "compilerOptions.forceConsistentCasingInFileNames" wurde auf "true" gesetzt.`},
+        { path: ['compilerOptions', 'lib'], value: ["es2018", "dom"], message: `Die Property "compilerOptions.lib" wurde auf "["es2018", "dom"]" gesetzt.`},
+        { path: ['compilerOptions', 'module'], value: "es2020", message: `Die Property "compilerOptions.module" wurde auf "es2020" gesetzt.`},
+        { path: ['angularCompilerOptions', 'strictInputAccessModifiers'], value: true, message: `Die Property "angularCompilerOptions.strictInputAccessModifiers" wurde auf "true" gesetzt.`},
+        { path: ['angularCompilerOptions', 'strictTemplates'], value: false, message: `Die Property "angularCompilerOptions.strictTemplates" wurde auf "false" gesetzt.`},
+      ];
+
+      newValuesArr.forEach(change => {
+        const tsConfigJson = readJsonAsString(tree, filePath);
+        const edits: Edit[] = modify(tsConfigJson, change.path, change.value, { formattingOptions: jsonFormattingOptions })
+
+        tree.overwrite(
+          filePath,
+          applyEdits(tsConfigJson, edits)
+        );
+
+        logInfo(change.message);
+      });
+    } ,
+    messageSuccessRule(`Datei "tsconfig.json" wurde aktualisiert.`),
+  ]);
 }
 
 export function updateBrowserList(options: any): Rule {

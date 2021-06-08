@@ -11,7 +11,7 @@ import {
   update,
   updateAppComponent,
   updateAppModule, updateBrowserList,
-  updateMajorVersion
+  updateMajorVersion, updateTsConfigJson
 } from './index';
 
 const collectionPath = path.join(__dirname, '../collection.json');
@@ -556,6 +556,61 @@ export class AppModule {}
 const luxComponentsConfig: LuxComponentsConfigParameters = {
   generateLuxTagIds: environment.generateLuxTagIds
 };`);
+          done();
+        },
+        (reason) => expect(reason).toBeUndefined()
+      );
+    });
+  });
+
+  describe('[Rule] updateTsConfigJson', () => {
+    it('Sollte die tsconfig.json anpassen', (done) => {
+      appTree.overwrite( '/tsconfig.json',
+        `
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "downlevelIteration": true,
+    "outDir": "./dist/out-tsc",
+    "sourceMap": true,
+    "declaration": false,
+    "moduleResolution": "node",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "target": "es2015",
+    "typeRoots": [
+      "node_modules/@types"
+    ],
+    "lib": [
+      "es2017",
+      "dom"
+    ],
+    "module": "esnext",
+    "baseUrl": "./"
+  },
+  "angularCompilerOptions": {
+    "fullTemplateTypeCheck": true,
+    "preserveWhiteSpace": false,
+    "strictInjectionParameters": true,
+    "enableIvy": true
+  }
+}
+        `
+      );
+
+      callRule(updateTsConfigJson(testOptions), observableOf(appTree), context).subscribe(
+        (success) => {
+          const content = success.read('/tsconfig.json')?.toString();
+
+          expect(content).toContain('"strict": false');
+          expect(content).toContain('"noImplicitReturns": true');
+          expect(content).toContain('"noFallthroughCasesInSwitch": true');
+          expect(content).toContain('"forceConsistentCasingInFileNames": true');
+          expect(content).toContain('"lib": [\n      "es2018",\n      "dom"\n    ]');
+          expect(content).toContain('"module": "es2020"');
+          expect(content).toContain('"strictInputAccessModifiers": true');
+          expect(content).toContain('"strictTemplates": false');
+
           done();
         },
         (reason) => expect(reason).toBeUndefined()
