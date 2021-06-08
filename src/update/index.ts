@@ -373,6 +373,9 @@ function updateConfigGenerateLuxTagIds(tree: Tree, filePath: string) {
               const updateRecorder = tree.beginUpdate(filePath);
               updateRecorder.remove(assignment.pos, assignment.end - assignment.pos);
               updateRecorder.insertLeft(assignment.pos, '\n  generateLuxTagIds: environment.generateLuxTagIds');
+              if (!content.match(/import.*\{.*environment.*\}.*from.*/g)) {
+                updateRecorder.insertLeft(0, "import { environment } from '../environments/environment';\n");
+              }
               tree.commitUpdate(updateRecorder);
               logInfo(`In der Konfiguration wurde der Wert "generateLuxTagIds: environment.generateLuxTagIds" eingetragen.`);
             }
