@@ -7,7 +7,7 @@ import { appOptions, workspaceOptions } from '../utility/test';
 import { UtilConfig } from '../utility/util';
 import {
   addThemeAssets, clearStylesScss,
-  deleteOldThemeDir, removeThemeAssets,
+  deleteOldThemeDir, i18nUpdateAngularJson, i18nUpdateAppModule, i18nUpdatePackageJson, removeThemeAssets,
   update,
   updateAppComponent,
   updateAppModule, updateBrowserList,
@@ -548,14 +548,380 @@ export class AppModule {}
           expect(content).not.toContain('LuxMasterDetailMobileHelperService,');
           expect(content).not.toContain('LuxStepperHelperService,');
           expect(content).not.toContain('LuxConsoleService,');
-
           expect(content).toContain('LuxIconModule,');
+
           expect(content).toContain('LuxCommonModule,');
 
+          expect(content).not.toContain('displayBindingDebugHint');
           expect(content).toContain(`
 const luxComponentsConfig: LuxComponentsConfigParameters = {
   generateLuxTagIds: environment.generateLuxTagIds
 };`);
+          done();
+        },
+        (reason) => expect(reason).toBeUndefined()
+      );
+    });
+  });
+
+  describe('[Rule] i18nUpdateAppModule', () => {
+    it('Sollte die Datei "app.module.ts" (i18n) angepasst haben', (done) => {
+      appTree.overwrite(
+        testOptions.path + '/src/app/app.module.ts',
+        `
+import '@angular/common/locales/global/de';
+import { Configuration, ConfigurationParameters } from './../../src-gen/bsclient/configuration';
+import { SDApiModule } from '@ihk-gfi/lux-stammdaten';
+import { BSApiModule } from './../../src-gen/bsclient/api.module';
+import {registerLocaleData, DatePipe} from '@angular/common';
+import {HTTP_INTERCEPTORS, HttpClientModule} from '@angular/common/http';
+import {LOCALE_ID, NgModule, ErrorHandler} from '@angular/core';
+import {FlexLayoutModule} from '@angular/flex-layout';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {BrowserModule} from '@angular/platform-browser';
+
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import {
+  LuxFilePreviewModule,
+  LuxFilePreviewComponent
+} from '@ihk-gfi/lux-components';
+
+import { TimeoutComponent } from './components/basic/timeout/timeout.component';
+import {UnauthorizedComponent} from './components/basic/unauthorized/unauthorized.component';
+import {SharedService} from './services/shared.service';
+
+@NgModule({
+  declarations   : [
+    AppComponent,
+    DatenschutzComponent,
+    ImpressumComponent,
+    MaintenanceComponent,
+    ErrorComponent,
+    WelcomeComponent,
+    UnauthorizedComponent,
+    TimeoutComponent,
+    ByeComponent
+  ],
+  imports        : [
+    HttpClientModule,
+    BrowserModule,
+    FormsModule,
+    ReactiveFormsModule,
+    AppRoutingModule,
+    BrowserAnimationsModule,
+    LuxDirectivesModule,
+    LuxIconModule,
+    LuxLayoutModule,
+    LuxActionModule,
+    LuxFormModule,
+    LuxCommonModule,
+    LuxPipesModule,
+    LuxPopupsModule,
+    LuxErrorModule,
+    FlexLayoutModule,
+    LuxFilePreviewModule,
+    FeedbackModule,
+    HomeModule,
+    ConfigurationModule,
+    SDApiModule.forRoot(apiSDConfigFactory),
+    BSApiModule.forRoot(apiConfigFactory),
+    LuxComponentsConfigModule.forRoot(luxComponentsConfig)
+  ],
+    entryComponents: [
+    LuxSnackbarComponent,
+    LuxFilePreviewComponent
+  ],
+  providers      : [
+    LuxConsoleService,
+    {
+      provide : HTTP_INTERCEPTORS,
+      useClass: CSRFInterceptor,
+      multi   : true
+    },
+    {
+      provide : HTTP_INTERCEPTORS,
+      useClass: CorrelationInterceptor,
+      multi   : true
+    },
+    {
+      provide : HTTP_INTERCEPTORS,
+      useClass: UnauthorizedInterceptor,
+      multi   : true
+    },
+    {provide: LOCALE_ID, useValue: (document[ 'locale' ] ? document[ 'locale' ] : 'de-DE')},
+    { provide: Window, useValue: window },
+  ],
+  bootstrap      : [
+    AppComponent
+  ]
+})
+export class AppModule {
+}
+        `
+      );
+
+      callRule(i18nUpdateAppModule(testOptions), observableOf(appTree), context).subscribe(
+        (success) => {
+          const content = success.read(testOptions.path + '/src/app/app.module.ts')?.toString();
+
+          expect(content).not.toContain('import \'@angular/common/locales/global/de\';');
+          expect(content).not.toContain('{provide: LOCALE_ID, useValue: (document[ \'locale\' ] ? document[ \'locale\' ] : \'de-DE\')},');
+          expect(content).not.toContain('import {LOCALE_ID');
+          expect(content).toContain('import { NgModule, ErrorHandler} from \'@angular/core\';');
+          expect(content).not.toContain('import {registerLocaleData');
+          expect(content).toContain('import { DatePipe} from \'@angular/common\';');
+
+          done();
+        },
+        (reason) => expect(reason).toBeUndefined()
+      );
+    });
+  });
+
+  describe('[Rule] i18nUpdateAngularJson', () => {
+    it('Sollte die Datei "angular.json" (i18n) angepasst haben', (done) => {
+      appTree.overwrite('/angular.json',
+        `
+{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "newProjectRoot": "projects",
+  "projects": {
+    "bar": {
+      "root": "",
+      "sourceRoot": "src",
+      "projectType": "application",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:browser",
+          "options": {
+            "outputPath": "dist",
+            "index": "src/index.html",
+            "main": "src/main.ts",
+            "tsConfig": "src/tsconfig.app.json",
+            "polyfills": "src/polyfills.ts",
+            "assets": [
+              "src/assets",
+\t\t\t  { "glob": "**/*", "input": "./node_modules/pdfjs-dist/cmaps/", "output": "./assets/cmaps" }
+            ],
+            "styles": [
+              "src/styles.scss",
+              "src/theming/luxtheme.scss"
+            ],
+            "scripts": [],
+            "allowedCommonJsDependencies": ["hammerjs", "ng2-pdf-viewer"]
+          },
+          "configurations": {
+            "production": {
+              "budgets": [
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "6kb"
+                }
+              ],
+              "optimization": true,
+              "outputHashing": "all",
+              "sourceMap": false,
+              "namedChunks": false,
+              "aot": true,
+              "extractLicenses": true,
+              "vendorChunk": false,
+              "buildOptimizer": true,
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.prod.ts"
+                }
+              ]
+            }, 
+            "es5": {
+              "budgets": [
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "6kb"
+                }
+              ],
+              "tsConfig": "src/tsconfig.app.ie.json"
+            }
+          }
+        },
+        "serve": {
+          "builder": "@angular-devkit/build-angular:dev-server",
+          "options": {
+            "browserTarget": "lux-bp:build"
+          },
+          "configurations": {
+            "production": {
+              "browserTarget": "lux-bp:build:production"
+            },
+            "es5": {
+              "browserTarget": "lux-bp:build:es5"
+            }
+          }
+        },
+        "extract-i18n": {
+          "builder": "@angular-devkit/build-angular:extract-i18n",
+          "options": {
+            "browserTarget": "lux-bp:build"
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "main": "src/test.ts",
+            "karmaConfig": "./karma.conf.js",
+            "polyfills": "src/polyfills.ts",
+            "tsConfig": "src/tsconfig.spec.json",
+            "scripts": [],
+            "styles": [
+              "src/styles.scss",
+              "src/theming/luxtheme.scss"
+            ],
+            "assets": [
+              "src/assets",
+\t\t\t  { "glob": "**/*", "input": "./node_modules/pdfjs-dist/cmaps/", "output": "./assets/cmaps" }
+            ]
+          }
+        },
+        "app-lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": [
+              "src/tsconfig.app.json"
+            ],
+            "tslintConfig": "./tslint.json"
+          }
+\t\t},
+        "spec-lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": [
+              "src/tsconfig.spec.json"
+             ],
+            "tslintConfig": "./tslint.spec.json"
+          }
+\t\t}
+      }
+    },
+    "lux-bp-e2e": {
+      "root": "e2e",
+      "sourceRoot": "e2e",
+      "projectType": "application",
+      "architect": {
+        "e2e": {
+          "builder": "@angular-devkit/build-angular:protractor",
+          "options": {
+            "protractorConfig": "./protractor.conf.js",
+            "devServerTarget": "lux-bp:serve"
+          }
+        },
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": [
+              "e2e/tsconfig.e2e.json"
+            ],
+            "exclude": [
+              "**/node_modules/**"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "defaultProject": "lux-bp",
+  "schematics": {
+    "@schematics/angular:component": {
+      "prefix": "bp",
+      "style": "scss"
+    },
+    "@schematics/angular:directive": {
+      "prefix": "bp"
+    }
+  }
+}
+
+        `
+      );
+
+      callRule(i18nUpdateAngularJson(testOptions), observableOf(appTree), context).subscribe(
+        (success) => {
+          const content = success.read('angular.json')?.toString();
+
+          expect(content).toContain('"i18n": {\n' +
+                                    '        "sourceLocale": "de",\n' +
+                                    '        "locales": {\n' +
+                                    '          "en": "src/locale/messages.en.xlf"\n' +
+                                    '        }\n' +
+                                    '      }');
+          expect(content).toContain(`"localize": [
+              "de"
+            ]`);
+          expect(content).toContain('"i18nMissingTranslation": "error"');
+          expect(content).toContain(`"en": {
+              "localize": [
+                "en"
+              ],
+              "aot": true,
+              "outputPath": "dist/en",
+              "i18nMissingTranslation": "error"
+            }
+          `);
+          expect(content).toContain(`"en": {
+              "browserTarget": "bar:build:en"
+            }
+          `);
+
+          done();
+        },
+        (reason) => expect(reason).toBeUndefined()
+      );
+    });
+  });
+
+  describe('[Rule] i18nUpdatePackageJson', () => {
+    it('Sollte die Datei "package.json" (i18n) angepasst haben', (done) => {
+      appTree.overwrite('/package.json',
+        `
+{
+  "name": "BP",
+  "version": "0.0.1",
+  "license": "MIT",
+  "scripts": {
+    "ng": "ng",
+    "start": "ng serve --public-host=http://localhost:4200",
+    "start_en": "ng serve --public-host=http://localhost:4200 --configuration en",
+    "build": "node --max_old_space_size=4024 ./node_modules/@angular/cli/bin/ng build --source-map",
+    "build-aot": "node --max_old_space_size=4024 ./node_modules/@angular/cli/bin/ng build --aot",
+    "buildzentral": "node --max_old_space_size=4024 ./node_modules/@angular/cli/bin/ng build --prod",
+    "start-ie": "ng serve --configuration es5 --public-host=http://localhost:4200",
+    "test": "ng test",
+    "test_no_sm": "ng test --no-sourceMap",
+    "test_single_run": "ng test --watch=false --code-coverage=true --browsers=ChromeHeadless",
+    "test_coverage": "ng test --watch=false --code-coverage=true",
+    "lint": "ng run lux-bp:app-lint --format=stylish && ng run lux-bp:spec-lint --format=stylish",
+    "e2e": "ng e2e",
+    "compodoc": "./node_modules/.bin/compodoc -p tsconfig.json",
+    "docStart": "compodoc src -s --port 8888",
+    "security": "npm audit --registry=https://registry.npmjs.org --audit-level high",
+    "smoketest": "npm run test_single_run && npm run build-aot && npm run lint --bailOnLintError true",
+    "generate_bsclient": "openapi-generator generate -i http://localhost:8081/business-service/openapi/v3/api-docs -g typescript-angular -o src-gen/bsclient --additional-properties apiModulePrefix=BS",
+    "generate_bsclient_zentral": "openapi-generator generate -i ../business-service/target/swagger.json -g typescript-angular -o src-gen/bsclient --additional-properties apiModulePrefix=BS"
+  }
+}
+
+        `
+      );
+
+      callRule(i18nUpdatePackageJson(testOptions), observableOf(appTree), context).subscribe(
+        (success) => {
+          const content = success.read('package.json')?.toString();
+
+          expect(content).toContain('"xi18n": "ng xi18n --output-path src/locale --ivy"');
+          expect(content).toContain('"build-aot": "node --max_old_space_size=4024 ./node_modules/@angular/cli/bin/ng build --aot --localize"');
+          expect(content).toContain('"buildzentral": "node --max_old_space_size=4024 ./node_modules/@angular/cli/bin/ng build --prod --localize"');
+          expect(content).toContain('"start_en": "ng serve --public-host=http://localhost:4200 --configuration en"');
+
           done();
         },
         (reason) => expect(reason).toBeUndefined()

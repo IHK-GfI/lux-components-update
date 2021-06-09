@@ -3,7 +3,7 @@ import * as chalk from 'chalk';
 import { applyEdits, Edit, findNodeAtLocation, modify } from 'jsonc-parser';
 import * as ts from 'typescript';
 import { updateDependencies } from '../update-dependencies/index';
-import { deleteFilesInDirectory } from '../utility/files';
+import { deleteFilesInDirectory, moveFilesToDirectory } from '../utility/files';
 import { jsonFormattingOptions, readJson, readJsonAsString } from '../utility/json';
 import { logInfo, logInfoWithDescriptor, logSuccess } from '../utility/logging';
 import { getNextSibling, getPrevSibling, getSourceNodes, removeImport, removeProvider } from '../utility/typescript';
@@ -39,10 +39,212 @@ export function updateProject(options: any): Rule {
       updateAppComponent(options),
       updateAppModule(options),
       updateTsConfigJson(options),
+      addI18N(options),
       updateDependencies(),
       messageSuccessRule(`LUX-Components ${updateMajorVersion} wurden aktualisiert.`)
     ]);
   };
+}
+
+export function addI18N(options: any): Rule {
+  return chain([
+    messageInfoRule(`I18N-Unterstützung wird hinzugefügt...`),
+    i18nUpdatePackageJson(options),
+    i18nUpdateAngularJson(options),
+    i18nCopyMessages(options),
+    i18nUpdatePolyfills(options),
+    i18nUpdateAppModule(options),
+    messageSuccessRule(`I18N-Unterstützung wurde hinzugefügt...`)
+  ]);
+}
+
+export function i18nUpdateAngularJson(options: any): Rule {
+  return chain([
+    messageInfoRule(`Die Datei "angular.json" wird angepasst...`),
+    (tree: Tree, _context: SchematicContext) => {
+      const filePath = `/angular.json`;
+
+      const newValuesArr = [
+        {
+          path: ['projects', options.project, 'i18n'],
+          value: {
+            sourceLocale: 'de',
+            locales: {
+              en: 'src/locale/messages.en.xlf'
+            }
+          },
+          message: `Neuen Abschnitt "xi18n" unter projects/${options.project} hinzugefügt.`
+        },
+        {
+          path: ['projects', options.project, 'architect', 'build', 'options', 'localize'],
+          value: ["de"],
+          message: `Neuen Abschnitt "localize" unter projects/${options.project}/architect/build/options hinzugefügt.`
+        },
+        {
+          path: ['projects', options.project, 'architect', 'build', 'options', 'i18nMissingTranslation'],
+          value: "error",
+          message: `Neuen Abschnitt "i18nMissingTranslation" unter projects/${options.project}/architect/build/options hinzugefügt.`
+        },
+        {
+          path: ['projects', options.project, 'architect', 'build', 'configurations', 'en'],
+          value: {
+            "localize": ["en"],
+            "aot": true,
+            "outputPath": "dist/en",
+            "i18nMissingTranslation": "error"
+          },
+          message: `Neuen Abschnitt "en" unter projects/${options.project}/architect/build/configurations hinzugefügt.`
+        },
+        {
+          path: ['projects', options.project, 'architect', 'serve', 'configurations', 'en'],
+          value: {
+            "browserTarget": options.project + ":build:en"
+          },
+          message: `Neuen Abschnitt "en" unter projects/${options.project}/architect/serve/configurations hinzugefügt.`
+        }
+      ];
+
+      newValuesArr.forEach(change => {
+        const tsConfigJson = readJsonAsString(tree, filePath);
+        const edits: Edit[] = modify(tsConfigJson, change.path, change.value, { formattingOptions: jsonFormattingOptions })
+
+        tree.overwrite(
+          filePath,
+          applyEdits(tsConfigJson, edits)
+        );
+
+        logInfo(change.message);
+      });
+
+      return tree;
+    },
+    messageSuccessRule(`Die Datei "angular.json" wurde angepasst.`)
+  ]);
+}
+
+export function i18nUpdatePackageJson(options: any): Rule {
+  return chain([
+    messageInfoRule(`Die Datei "package.json" wird angepasst...`),
+    (tree: Tree, _context: SchematicContext) => {
+      const filePath = `/package.json`;
+
+      const newValuesArr = [
+        { path: ['scripts', 'xi18n'], value: "ng xi18n --output-path src/locale --ivy", message: `Neues Skript "xi18n" hinzugefügt.`}
+      ];
+
+      const packageJsonAsNode = readJson(tree, filePath);
+
+      // Neues start-en-Skript hinzufügen
+      const startScriptNode = findNodeAtLocation(packageJsonAsNode, ['scripts', 'start']);
+      if (startScriptNode) {
+        newValuesArr.push({
+          path: ['scripts', 'start-en'],
+          value: startScriptNode.value + ' --configuration en',
+          message: `Das neue Skript "start-en" hinzugefügt.`
+        });
+      } else {
+        newValuesArr.push({
+          path: ['scripts', 'start-en'],
+          value: 'ng serve --public-host=http://localhost:4200 --configuration en',
+          message: `Das neue Skript "start-en" hinzugefügt.`
+        });
+      }
+
+      // build-aot-Script anpassen
+      const buildAotScriptNode = findNodeAtLocation(packageJsonAsNode, ['scripts', 'build-aot']);
+      if (buildAotScriptNode) {
+        newValuesArr.push({
+          path: ['scripts', 'build-aot'],
+          value: buildAotScriptNode.value + ' --localize',
+          message: `Dem Skript "build-aot" den Parameter "--localize" hinzugefügt.`
+        });
+      } else {
+        newValuesArr.push({
+          path: ['scripts', 'build-aot'],
+          value: 'node --max_old_space_size=4024 ./node_modules/@angular/cli/bin/ng build --aot --localize',
+          message: `Das Skript "build-aot" mit dem Parameter "--localize" hinzugefügt.`
+        });
+      }
+
+      // buildzentral-Script anpassen
+      const buildZentralScriptNode = findNodeAtLocation(packageJsonAsNode, ['scripts', 'buildzentral']);
+      if (buildZentralScriptNode) {
+        newValuesArr.push({
+          path   : ['scripts', 'buildzentral'],
+          value  : buildZentralScriptNode.value + " --localize",
+          message: `Dem Skript "buildzentral" den Parameter "--localize" hinzugefügt.`
+        });
+      } else {
+        newValuesArr.push({
+          path: ['scripts', 'buildzentral'],
+          value: 'node --max_old_space_size=4024 ./node_modules/@angular/cli/bin/ng build --prod --localize',
+          message: `Das Skript "buildzentral" mit dem Parameter "--localize" hinzugefügt.`
+        });
+      }
+
+      newValuesArr.forEach(change => {
+        const tsConfigJson = readJsonAsString(tree, filePath);
+        const edits: Edit[] = modify(tsConfigJson, change.path, change.value, { formattingOptions: jsonFormattingOptions })
+
+        tree.overwrite(
+          filePath,
+          applyEdits(tsConfigJson, edits)
+        );
+
+        logInfo(change.message);
+      });
+
+      return tree;
+    },
+    messageSuccessRule(`Die Datei "package.json" wurde angepasst.`)
+  ]);
+}
+
+export function i18nUpdateAppModule(options: any): Rule {
+  return chain([
+    messageInfoRule(`Die Datei "app.module.ts" wird angepasst...`),
+    (tree: Tree, _context: SchematicContext) => {
+      const filePath = (options.path ? options.path : '') + `/src/app/app.module.ts`;
+
+      removeImport(tree, filePath, '@angular/core', 'LOCALE_ID');
+      removeImport(tree, filePath, '@angular/common', 'registerLocaleData');
+      removeImport(tree, filePath, '@angular/common/locales/global/de');
+
+      removeProvider(tree, filePath, 'LOCALE_ID');
+
+      return tree;
+    },
+    messageSuccessRule(`Die Datei "app.module.ts" wurde angepasst.`)
+  ]);
+}
+
+export function i18nUpdatePolyfills(options: any): Rule {
+  return chain([
+    messageInfoRule(`Import wird in der Datei "polyfills.ts" hinzugefügt...`),
+    (tree: Tree, _context: SchematicContext) => {
+      const filePath = (options.path ? options.path : '') + '/src/polyfills.ts';
+
+      const content = tree.read(filePath);
+      if (content) {
+        let modifiedContent = '/***************************************************************************************************\n * Load \`$localize\` onto the global scope - used if i18n tags appear in Angular templates.\n */\nimport \'@angular/localize/init\';\n\n';
+        modifiedContent += content;
+
+        tree.overwrite(filePath, modifiedContent);
+      }
+
+      return tree;
+    },
+    messageSuccessRule(`Import wird in der Datei "polyfills.ts" hinzugefügt...`)
+  ]);
+}
+
+
+export function i18nCopyMessages(options: any): Rule {
+  return chain([
+    messageInfoRule(`Sprachdateien werden kopiert...`),
+    moveFilesToDirectory(options, 'files/locale', 'src/locale'),
+    messageSuccessRule(`Sprachdateien wurden kopiert.`)
+  ]);
 }
 
 export function check(options: any): Rule {
@@ -425,6 +627,47 @@ function updateConfigLabelConfiguration(tree: Tree, filePath: string) {
   }
 }
 
+function deleteDisplayBindingDebugHint(tree: Tree, filePath: string) {
+  const content    = (tree.read(filePath) as Buffer).toString();
+  const fileName   = filePath.substring(filePath.lastIndexOf('/') + 1, filePath.length);
+  const sourceFile = ts.createSourceFile(`${ fileName }`, content, ts.ScriptTarget.Latest, true);
+  const nodes      = getSourceNodes(sourceFile);
+
+  const identifierNode = nodes.find(n => n.kind === ts.SyntaxKind.Identifier && n.getText() === 'luxComponentsConfig');
+  if (identifierNode) {
+    const objectNode = identifierNode.parent.getChildren().find(n => n.kind === ts.SyntaxKind.ObjectLiteralExpression);
+    if (objectNode) {
+      const syntaxListNode = objectNode.getChildren().find(n => n.kind === ts.SyntaxKind.SyntaxList);
+      if (syntaxListNode) {
+        const propertyAssignmentNodes = syntaxListNode
+          .getChildren()
+          .filter((n) => n.kind === ts.SyntaxKind.PropertyAssignment);
+        if (propertyAssignmentNodes) {
+          propertyAssignmentNodes.forEach((assignment) => {
+            const propertyIdentifierNode = assignment.getChildren().find((n) => n.kind === ts.SyntaxKind.Identifier);
+            if (propertyIdentifierNode && propertyIdentifierNode.getText() === 'displayBindingDebugHint') {
+              const prevSibling = getPrevSibling(assignment, ts.SyntaxKind.SyntaxList);
+              const nextSibling = getNextSibling(assignment, ts.SyntaxKind.SyntaxList);
+              const updateRecorder = tree.beginUpdate(filePath);
+              if (nextSibling) {
+                updateRecorder.remove(assignment.pos, nextSibling.end - assignment.pos);
+              } else {
+                if (prevSibling) {
+                  updateRecorder.remove(prevSibling.pos, assignment.end - prevSibling.pos);
+                } else {
+                  updateRecorder.remove(assignment.pos, assignment.end - assignment.pos);
+                }
+              }
+              logInfo(`Aus der Konfiguration wurde die Property "displayBindingDebugHint" entfernt.`)
+              tree.commitUpdate(updateRecorder);
+            }
+          });
+        }
+      }
+    }
+  }
+}
+
 function updateConfiglookupServiceUrl(tree: Tree, filePath: string) {
   const content    = (tree.read(filePath) as Buffer).toString();
   const fileName   = filePath.substring(filePath.lastIndexOf('/') + 1, filePath.length);
@@ -479,6 +722,7 @@ export function updateAppModule(options: any): Rule {
       updateConfigGenerateLuxTagIds(tree, filePath);
       updateConfigLabelConfiguration(tree, filePath);
       updateConfiglookupServiceUrl(tree, filePath);
+      deleteDisplayBindingDebugHint(tree, filePath);
 
       removeImport(tree, filePath, '@ihk-gfi/lux-components', 'LuxAppFooterButtonService');
       removeImport(tree, filePath, '@ihk-gfi/lux-components','LuxAppFooterLinkService');
