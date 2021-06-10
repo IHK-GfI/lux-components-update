@@ -115,7 +115,7 @@ export function writeLinesToFile(tree: Tree, context: SchematicContext, filePath
  */
 export function iterateFilesAndModifyContent(
   tree: Tree,
-  rootPath: string,
+  rootPath: string = '',
   callback: Function,
   ...filePathEndings: string[]
 ) {

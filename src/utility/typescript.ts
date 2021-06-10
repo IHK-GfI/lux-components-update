@@ -1,5 +1,4 @@
 import { SchematicsException, Tree } from '@angular-devkit/schematics';
-import { SyntaxKind } from 'typescript';
 import * as ts from 'typescript';
 import { logInfo } from './logging';
 
@@ -21,7 +20,71 @@ export function getSourceNodes(sourceFile: ts.SourceFile): ts.Node[] {
   return result;
 }
 
-export function removeImport(tree: Tree, filePath: string, packageName: string, importName?: string) {
+export function removeInterface(tree: Tree, filePath: string, interfaceName: string, logMessage = true) {
+  const content    = (tree.read(filePath) as Buffer).toString();
+  const fileName = filePath.substring(filePath.lastIndexOf('/') + 1, filePath.length);
+  const sourceFile = ts.createSourceFile(`${ fileName }`, content, ts.ScriptTarget.Latest, true);
+  const nodes      = getSourceNodes(sourceFile);
+
+  const classNode = nodes.find(n => n.kind === ts.SyntaxKind.ClassDeclaration);
+
+  if (classNode) {
+    const syntaxListClassNodes = classNode.getChildren().filter(n => n.kind === ts.SyntaxKind.SyntaxList);
+
+    if (syntaxListClassNodes) {
+      syntaxListClassNodes.forEach(syntaxListNode => {
+        const heritageClauseNodes = syntaxListNode.getChildren().filter( n => n.kind === ts.SyntaxKind.HeritageClause);
+        if (heritageClauseNodes) {
+          heritageClauseNodes.forEach(heritageClauseNode => {
+            const wordNode = heritageClauseNode.getChildren().find(n => n.kind === ts.SyntaxKind.FirstFutureReservedWord);
+            if (wordNode && wordNode.getText() === 'implements') {
+              const interfaceSyntaxNode = heritageClauseNode.getChildren().find(n => n.kind === ts.SyntaxKind.SyntaxList);
+              if (interfaceSyntaxNode) {
+                const interfaceChildren = interfaceSyntaxNode.getChildren();
+                if (interfaceChildren) {
+                  if (interfaceChildren.length === 1) {
+                    if (interfaceChildren[0].getText() === interfaceName) {
+                      const updateRecorder = tree.beginUpdate(filePath);
+                      updateRecorder.remove(heritageClauseNode.pos, heritageClauseNode.getChildren()[ heritageClauseNode.getChildren().length - 1 ].end - heritageClauseNode.pos);
+                      tree.commitUpdate(updateRecorder);
+                      if (logMessage) {
+                        logInfo(`Interface ${ interfaceName } entfernt.`)
+                      }
+                    }
+                  } else {
+                    for (let i = 0; i < interfaceChildren.length; i++) {
+                      if (interfaceChildren[ i ].getText() === interfaceName) {
+                        const prevSibling = getPrevSibling(interfaceChildren[ i ], ts.SyntaxKind.SyntaxList);
+                        const nextSibling = getNextSibling(interfaceChildren[ i ], ts.SyntaxKind.SyntaxList);
+                        const updateRecorder = tree.beginUpdate(filePath);
+                        if (nextSibling) {
+                          updateRecorder.remove(interfaceChildren[ i ].pos, nextSibling.end - interfaceChildren[ i ].pos);
+                        } else {
+                          if (prevSibling) {
+                            updateRecorder.remove(prevSibling.pos, interfaceChildren[ i ].end - prevSibling.pos);
+                          } else {
+                            updateRecorder.remove(interfaceChildren[ i ].pos, interfaceChildren[ i ].end - interfaceChildren[ i ].pos);
+                          }
+                        }
+                        tree.commitUpdate(updateRecorder);
+                        if (logMessage) {
+                          logInfo(`Interface ${ interfaceName } entfernt.`);
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          });
+        }
+      });
+    }
+  }
+}
+
+
+export function removeImport(tree: Tree, filePath: string, packageName: string, importName?: string, logMessage = true) {
   const content    = (tree.read(filePath) as Buffer).toString();
   const fileName = filePath.substring(filePath.lastIndexOf('/') + 1, filePath.length);
   const sourceFile = ts.createSourceFile(`${ fileName }`, content, ts.ScriptTarget.Latest, true);
@@ -62,21 +125,33 @@ export function removeImport(tree: Tree, filePath: string, packageName: string, 
           const importChildren = syntaxListNode.getChildren();
           if (importChildren) {
             if (importChildren.length === 1) {
-              const updateRecorder = tree.beginUpdate(filePath);
-              updateRecorder.remove(importNode.pos, importNode.getChildren()[ importNode.getChildren().length - 1 ].end - importNode.pos);
-              tree.commitUpdate(updateRecorder);
-              logInfo(`Import ${ importName } entfernt.`)
+              if (importChildren[0].getText() === importName) {
+                const updateRecorder = tree.beginUpdate(filePath);
+                updateRecorder.remove(importNode.pos, importNode.getChildren()[ importNode.getChildren().length - 1 ].end - importNode.pos);
+                tree.commitUpdate(updateRecorder);
+                if (logMessage) {
+                  logInfo(`Import ${ importName } entfernt.`)
+                }
+              }
             } else {
               for (let i = 0; i < importChildren.length; i++) {
                 if (importChildren[ i ].getText() === importName) {
+                  const prevSibling = getPrevSibling(importChildren[ i ], ts.SyntaxKind.SyntaxList);
+                  const nextSibling = getNextSibling(importChildren[ i ], ts.SyntaxKind.SyntaxList);
                   const updateRecorder = tree.beginUpdate(filePath);
-                  if ((i + 1) < importChildren.length && importChildren[ i + 1 ].kind === ts.SyntaxKind.CommaToken) {
-                    updateRecorder.remove(importChildren[ i ].pos, importChildren[ i + 1 ].end - importChildren[ i ].pos);
+                  if (nextSibling) {
+                    updateRecorder.remove(importChildren[ i ].pos, nextSibling.end - importChildren[ i ].pos);
                   } else {
-                    updateRecorder.remove(importChildren[ i ].pos, importChildren[ i ].end - importChildren[ i ].pos);
+                    if (prevSibling) {
+                      updateRecorder.remove(prevSibling.pos, importChildren[ i ].end - prevSibling.pos);
+                    } else {
+                      updateRecorder.remove(importChildren[ i ].pos, importChildren[ i ].end - importChildren[ i ].pos);
+                    }
                   }
                   tree.commitUpdate(updateRecorder);
-                  logInfo(`Import ${ importName } entfernt.`)
+                  if (logMessage) {
+                    logInfo(`Import ${ importName } entfernt.`);
+                  }
                 }
               }
             }
@@ -85,14 +160,16 @@ export function removeImport(tree: Tree, filePath: string, packageName: string, 
           const updateRecorder = tree.beginUpdate(filePath);
           updateRecorder.remove(importNode.pos, importNode.end - importNode.pos);
           tree.commitUpdate(updateRecorder);
-          logInfo(`Import ${ packageName } entfernt.`)
+          if (logMessage) {
+            logInfo(`Import ${ importName } entfernt.`);
+          }
         }
       }
     });
   }
 }
 
-export function removeProvider(tree: Tree, filePath: string, providerName: string) {
+export function removeProvider(tree: Tree, filePath: string, providerName: string, logMessage = true) {
   const content    = (tree.read(filePath) as Buffer).toString();
   const fileName = filePath.substring(filePath.lastIndexOf('/') + 1, filePath.length);
   const sourceFile = ts.createSourceFile(`${ fileName }`, content, ts.ScriptTarget.Latest, true);
@@ -110,17 +187,26 @@ export function removeProvider(tree: Tree, filePath: string, providerName: strin
         const providerNode = providerArrayNode.getChildren().find(n => n.kind === ts.SyntaxKind.SyntaxList);
         if (providerNode) {
           const providerChildren = providerNode.getChildren();
+
           if (providerChildren) {
             for (let i = 0; i < providerChildren.length; i++) {
               if (providerChildren[ i ].getText().indexOf(providerName) >= 0) {
+                const prevSibling = getPrevSibling(providerChildren[ i ], ts.SyntaxKind.SyntaxList);
+                const nextSibling = getNextSibling(providerChildren[ i ], ts.SyntaxKind.SyntaxList);
                 const updateRecorder = tree.beginUpdate(filePath);
-                if ((i + 1) < providerChildren.length && providerChildren[ i + 1 ].kind === ts.SyntaxKind.CommaToken) {
-                  updateRecorder.remove(providerChildren[ i ].pos, providerChildren[ i + 1 ].end - providerChildren[ i ].pos);
+                if (nextSibling) {
+                  updateRecorder.remove(providerChildren[ i ].pos, nextSibling.end - providerChildren[ i ].pos);
                 } else {
-                  updateRecorder.remove(providerChildren[ i ].pos, providerChildren[ i ].end - providerChildren[ i ].pos);
+                  if (prevSibling) {
+                    updateRecorder.remove(prevSibling.pos, providerChildren[ i ].end - prevSibling.pos);
+                  } else {
+                    updateRecorder.remove(providerChildren[ i ].pos, providerChildren[ i ].end - providerChildren[ i ].pos);
+                  }
                 }
                 tree.commitUpdate(updateRecorder);
-                logInfo(`Provider ${providerName} entfernt.`)
+                if (logMessage) {
+                  logInfo(`Provider ${ providerName } entfernt.`);
+                }
               }
             }
           }
