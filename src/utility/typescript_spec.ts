@@ -3,7 +3,15 @@ import { SchematicTestRunner, UnitTestTree } from '@angular-devkit/schematics/te
 import { SchematicContext } from '@angular-devkit/schematics';
 import { UtilConfig } from '../utility/util';
 import { appOptions, workspaceOptions } from '../utility/test';
-import { removeImport, removeInterface, removeProvider } from './typescript';
+import {
+  addClassProperty,
+  addConstructorContent,
+  addImport,
+  addInterface,
+  removeImport,
+  removeInterface,
+  removeProvider
+} from './typescript';
 
 const collectionPath = path.join(__dirname, '../collection.json');
 
@@ -444,6 +452,298 @@ export class AnbindungLazyComponent {
 
   });
 
+  describe('[Method] addInterface', () => {
+    it('Sollte das Interface (mit extends - ohne Interface) hinzufügen', (done) => {
+      const filePath = testOptions.path + '/src/app/test.component.ts';
+
+      appTree.create(
+        filePath,
+        `
+@Component({
+  selector   : 'bp-anbindung-lazy',
+  templateUrl: './anbindung-lazy.component.html'
+})
+export class AnbindungLazyComponent extends Aaa {
+
+  constructor() {
+  }
+
+  ngOnInit() {     
+  }
+
+}
+
+        `
+      );
+
+      addInterface(appTree, filePath, 'OnChanges', false);
+
+      const content = appTree.read(filePath)?.toString();
+      expect(content).toContain('export class AnbindungLazyComponent extends Aaa implements OnChanges {');
+
+      done();
+    });
+
+    it('Sollte das Interface (mit extends - mit Interface) hinzufügen', (done) => {
+      const filePath = testOptions.path + '/src/app/test.component.ts';
+
+      appTree.create(
+        filePath,
+        `
+@Component({
+  selector   : 'bp-anbindung-lazy',
+  templateUrl: './anbindung-lazy.component.html'
+})
+export class AnbindungLazyComponent extends Aaa implements Bbb {
+
+  constructor() {
+  }
+
+  ngOnInit() {     
+  }
+
+}
+
+        `
+      );
+
+      addInterface(appTree, filePath, 'OnChanges', false);
+
+      const content = appTree.read(filePath)?.toString();
+      expect(content).toContain('export class AnbindungLazyComponent extends Aaa implements Bbb, OnChanges {');
+
+      done();
+    });
+
+    it('Sollte das Interface (ohne extends - ohne Interface) hinzufügen', (done) => {
+      const filePath = testOptions.path + '/src/app/test.component.ts';
+
+      appTree.create(
+        filePath,
+        `
+@Component({
+  selector   : 'bp-anbindung-lazy',
+  templateUrl: './anbindung-lazy.component.html'
+})
+export class AnbindungLazyComponent {
+
+  constructor() {
+  }
+
+  ngOnInit() {     
+  }
+
+}
+
+        `
+      );
+
+      addInterface(appTree, filePath, 'OnChanges', false);
+
+      const content = appTree.read(filePath)?.toString();
+      expect(content).toContain('export class AnbindungLazyComponent implements OnChanges {');
+
+      done();
+    });
+
+    it('Sollte das Interface (ohne extends - mit Interface) hinzufügen', (done) => {
+      const filePath = testOptions.path + '/src/app/test.component.ts';
+
+      appTree.create(
+        filePath,
+        `
+@Component({
+  selector   : 'bp-anbindung-lazy',
+  templateUrl: './anbindung-lazy.component.html'
+})
+export class AnbindungLazyComponent implements OnInit {
+
+  constructor() {
+  }
+
+  ngOnInit() {     
+  }
+
+}
+
+        `
+      );
+
+      addInterface(appTree, filePath, 'OnChanges', false);
+
+      const content = appTree.read(filePath)?.toString();
+      expect(content).toContain('export class AnbindungLazyComponent implements OnInit, OnChanges {');
+
+      done();
+    });
+  });
+
+  describe('[Method] addImport', () => {
+    it('Sollte den Import (kein Import vorhanden) hinzufügen', (done) => {
+      const filePath = testOptions.path + '/src/app/test.component.ts';
+
+      appTree.create(
+        filePath,
+        `
+@Component({
+  selector   : 'bp-anbindung-lazy',
+  templateUrl: './anbindung-lazy.component.html'
+})
+export class AnbindungLazyComponent implements OnInit {
+
+  constructor() {
+  }
+
+  ngOnInit() {     
+  }
+
+}
+
+        `
+      );
+
+      addImport(appTree, filePath, '@angular/core', 'OnChanges', false);
+
+      const content = appTree.read(filePath)?.toString();
+
+      expect(content).toContain("import { OnChanges } from '@angular/core';");
+
+      done();
+    });
+
+    it('Sollte den Import (bereits vorhanden) hinzufügen', (done) => {
+      const filePath = testOptions.path + '/src/app/test.component.ts';
+
+      appTree.create(
+        filePath,
+        `
+import { OnChanges, OnDestroy, Component } from '@angular/core';        
+        
+@Component({
+  selector   : 'bp-anbindung-lazy',
+  templateUrl: './anbindung-lazy.component.html'
+})
+export class AnbindungLazyComponent implements OnInit {
+
+  constructor() {
+  }
+
+  ngOnInit() {     
+  }
+
+}
+
+        `
+      );
+
+      addImport(appTree, filePath, '@angular/core', 'OnChanges', false);
+
+      const content = appTree.read(filePath)?.toString();
+      expect(content).toContain("import { OnChanges, OnDestroy, Component } from '@angular/core';");
+
+      done();
+    });
+
+    it('Sollte den Import (ein Import) hinzufügen', (done) => {
+      const filePath = testOptions.path + '/src/app/test.component.ts';
+
+      appTree.create(
+        filePath,
+        `
+import { OnInit } from '@angular/core';
+
+@Component({
+  selector   : 'bp-anbindung-lazy',
+  templateUrl: './anbindung-lazy.component.html'
+})
+export class AnbindungLazyComponent implements OnInit {
+
+  constructor() {
+  }
+
+  ngOnInit() {     
+  }
+
+}
+
+        `
+      );
+
+      addImport(appTree, filePath, '@angular/core', 'OnChanges', false);
+
+      const content = appTree.read(filePath)?.toString();
+      expect(content).toContain("import { OnInit, OnChanges } from '@angular/core';");
+
+      done();
+    });
+
+    it('Sollte den Import (mehrere Imports - einfache Anführungszeichen) hinzufügen', (done) => {
+      const filePath = testOptions.path + '/src/app/test.component.ts';
+
+      appTree.create(
+        filePath,
+        `
+import { OnInit, Component } from '@angular/core';
+
+@Component({
+  selector   : 'bp-anbindung-lazy',
+  templateUrl: './anbindung-lazy.component.html'
+})
+export class AnbindungLazyComponent implements OnInit {
+
+  constructor() {
+  }
+
+  ngOnInit() {     
+  }
+
+}
+
+        `
+      );
+
+      addImport(appTree, filePath, '@angular/core', 'OnChanges', false);
+
+      const content = appTree.read(filePath)?.toString();
+      expect(content).toContain("import { OnInit, Component, OnChanges } from '@angular/core';");
+
+      done();
+    });
+
+    it('Sollte den Import (mehrere Imports - doppelte Anführungszeichen) hinzufügen', (done) => {
+      const filePath = testOptions.path + '/src/app/test.component.ts';
+
+      appTree.create(
+        filePath,
+        `
+import { OnInit, Component } from "@angular/core";
+
+@Component({
+  selector   : 'bp-anbindung-lazy',
+  templateUrl: './anbindung-lazy.component.html'
+})
+export class AnbindungLazyComponent implements OnInit {
+
+  constructor() {
+  }
+
+  ngOnInit() {     
+  }
+
+}
+
+        `
+      );
+
+      addImport(appTree, filePath, '@angular/core', 'OnChanges', false);
+
+      const content = appTree.read(filePath)?.toString();
+      expect(content).toContain(`import { OnInit, Component, OnChanges } from "@angular/core";`);
+
+      done();
+    });
+  });
+
   describe('[Method] removeImport', () => {
     it('Sollte den Import (mehrere Imports - erster Import) entfernen', (done) => {
       const filePath = testOptions.path + '/src/app/test.component.ts';
@@ -474,6 +774,39 @@ export class AnbindungLazyComponent implements OnInit {
 
       const content = appTree.read(filePath)?.toString();
       expect(content).toContain("import { Component } from '@angular/core';");
+
+      done();
+    });
+
+    it('Sollte den Import (mehrere Imports - erster Import - doppelte Anführungszeichen) entfernen', (done) => {
+      const filePath = testOptions.path + '/src/app/test.component.ts';
+
+      appTree.create(
+        filePath,
+        `
+import { OnInit, Component } from "@angular/core";
+
+@Component({
+  selector   : 'bp-anbindung-lazy',
+  templateUrl: './anbindung-lazy.component.html'
+})
+export class AnbindungLazyComponent implements OnInit {
+
+  constructor() {
+  }
+
+  ngOnInit() {     
+  }
+
+}
+
+        `
+      );
+
+      removeImport(appTree, filePath, '@angular/core', 'OnInit', false);
+
+      const content = appTree.read(filePath)?.toString();
+      expect(content).toContain(`import { Component } from "@angular/core";`);
 
       done();
     });
@@ -676,5 +1009,259 @@ export class AnbindungLazyComponent implements OnInit {
       done();
     });
 
+  });
+
+  describe('[Method] addConstructorContent', () => {
+    it('Sollte Inhalt im Konstruktor (mit Konstruktor - append=false) hinzufügen', (done) => {
+      const filePath = testOptions.path + '/src/app/test.component.ts';
+
+      appTree.create(
+        filePath,
+        `
+@Component({
+  selector   : 'bp-anbindung-lazy',
+  templateUrl: './anbindung-lazy.component.html'
+})
+export class AnbindungLazyComponent extends Aaa {
+
+  constructor() {
+    console.log();
+  }
+
+  ngOnInit() {     
+  }
+
+}
+
+        `
+      );
+
+      addConstructorContent(appTree, filePath, 'router.initialNavigation();', false);
+
+      const content = appTree.read(filePath)?.toString();
+      expect(content).toContain('constructor() {\n    router.initialNavigation();\n    console.log();\n  }');
+
+      done();
+    });
+
+    it('Sollte Inhalt im Konstruktor (mit Konstruktor - append=true) hinzufügen', (done) => {
+      const filePath = testOptions.path + '/src/app/test.component.ts';
+
+      appTree.create(
+        filePath,
+        `
+@Component({
+  selector   : 'bp-anbindung-lazy',
+  templateUrl: './anbindung-lazy.component.html'
+})
+export class AnbindungLazyComponent extends Aaa {
+
+  constructor() {
+    console.log();
+  }
+
+  ngOnInit() {     
+  }
+
+}
+
+        `
+      );
+
+      addConstructorContent(appTree, filePath, 'router.initialNavigation();', true);
+
+      const content = appTree.read(filePath)?.toString();
+      expect(content).toContain('constructor() {\n    console.log();\n    router.initialNavigation();\n  }');
+
+      done();
+    });
+
+    it('Sollte Inhalt im Konstruktor (mit leerem Konstruktor - append=false) hinzufügen', (done) => {
+      const filePath = testOptions.path + '/src/app/test.component.ts';
+
+      appTree.create(
+        filePath,
+        `
+@Component({
+  selector   : 'bp-anbindung-lazy',
+  templateUrl: './anbindung-lazy.component.html'
+})
+export class AnbindungLazyComponent extends Aaa {
+
+  constructor() {}
+
+  ngOnInit() {     
+  }
+
+}
+
+        `
+      );
+
+      addConstructorContent(appTree, filePath, 'router.initialNavigation();', false);
+
+      const content = appTree.read(filePath)?.toString();
+      expect(content).toContain('constructor() {\n    router.initialNavigation();\n  }');
+
+      done();
+    });
+
+    it('Sollte Inhalt im Konstruktor (mit leerem Konstruktor - append=true) hinzufügen', (done) => {
+      const filePath = testOptions.path + '/src/app/test.component.ts';
+
+      appTree.create(
+        filePath,
+        `
+@Component({
+  selector   : 'bp-anbindung-lazy',
+  templateUrl: './anbindung-lazy.component.html'
+})
+export class AnbindungLazyComponent extends Aaa {
+
+  constructor() {}
+
+  ngOnInit() {     
+  }
+
+}
+
+        `
+      );
+
+      addConstructorContent(appTree, filePath, 'router.initialNavigation();', true);
+
+      const content = appTree.read(filePath)?.toString();
+      expect(content).toContain('constructor() {\n    router.initialNavigation();\n  }');
+
+      done();
+    });
+
+    it('Sollte Inhalt im Konstruktor (ohne Konstruktor - append=false) hinzufügen', (done) => {
+      const filePath = testOptions.path + '/src/app/test.component.ts';
+
+      appTree.create(
+        filePath,
+        `
+@Component({
+  selector   : 'bp-anbindung-lazy',
+  templateUrl: './anbindung-lazy.component.html'
+})
+export class AnbindungLazyComponent extends Aaa {
+
+  ngOnInit() {     
+  }
+
+}
+
+        `
+      );
+
+      addConstructorContent(appTree, filePath, 'router.initialNavigation();', false);
+
+      const content = appTree.read(filePath)?.toString();
+
+      expect(content).toContain('constructor() {\n    router.initialNavigation();\n  }');
+
+      done();
+    });
+
+    it('Sollte Inhalt im Konstruktor (ohne Konstruktor - append=true) hinzufügen', (done) => {
+      const filePath = testOptions.path + '/src/app/test.component.ts';
+
+      appTree.create(
+        filePath,
+        `
+@Component({
+  selector   : 'bp-anbindung-lazy',
+  templateUrl: './anbindung-lazy.component.html'
+})
+export class AnbindungLazyComponent extends Aaa {
+
+  ngOnInit() {     
+  }
+
+}
+
+        `
+      );
+
+      addConstructorContent(appTree, filePath, 'router.initialNavigation();', true);
+
+      const content = appTree.read(filePath)?.toString();
+      expect(content).toContain('constructor() {\n    router.initialNavigation();\n  }');
+
+      done();
+    });
+  });
+
+  describe('[Method] addClassProperty', () => {
+    it('Sollte eine Property (mit Properties) hinzufügen', (done) => {
+      const filePath = testOptions.path + '/src/app/test.component.ts';
+
+      appTree.create(
+        filePath,
+        `
+@Component({
+  selector   : 'app-root',
+  templateUrl: './app.component.html',
+  styleUrls  : [ './app.component.scss' ]
+})
+export class AppComponent implements OnInit {
+
+  luxVersion = '';
+  isMaintenanceOrUnauthorized = false;
+
+  constructor(private readonly fachService: AccountFacadeService,
+              public router: Router, public window: Window,
+              private appService: LuxAppService) {
+  }
+
+  ngOnInit(): void {
+  }
+
+}
+        `
+      );
+
+      addClassProperty(appTree, filePath, '@Input() luxAppHeader: \'normal\' | \'minimal\' | \'none\' = \'normal\';');
+
+      const content = appTree.read(filePath)?.toString();
+      expect(content).toContain('  @Input() luxAppHeader: \'normal\' | \'minimal\' | \'none\' = \'normal\';');
+
+      done();
+    });
+
+    it('Sollte eine Property (ohne Properties) hinzufügen', (done) => {
+      const filePath = testOptions.path + '/src/app/test.component.ts';
+
+      appTree.create(
+        filePath,
+        `
+@Component({
+  selector   : 'app-root',
+  templateUrl: './app.component.html',
+  styleUrls  : [ './app.component.scss' ]
+})
+export class AppComponent implements OnInit {
+
+  constructor(private readonly fachService: AccountFacadeService,
+              public router: Router, public window: Window,
+              private appService: LuxAppService) {
+  }
+
+  ngOnInit(): void {
+  }
+
+}
+        `
+      );
+
+      addClassProperty(appTree, filePath, '@Input() luxAppHeader: \'normal\' | \'minimal\' | \'none\' = \'normal\';');
+
+      const content = appTree.read(filePath)?.toString();
+      expect(content).toContain('  @Input() luxAppHeader: \'normal\' | \'minimal\' | \'none\' = \'normal\';');
+
+      done();
+    });
   });
 });

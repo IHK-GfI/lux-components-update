@@ -1,5 +1,6 @@
-const htmlparser2 = require('htmlparser2');
 const cheerio = require('cheerio');
+
+const luxCherioParserOptions = { xmlMode: true, decodeEntities: false, selfClosingTags: false };
 
 export class CheerioInfo {
   content: string;
@@ -20,18 +21,37 @@ export class CheerioInfo {
  * @param attrValue
  */
 export function addAttribute(content: string, selector: string, attrName: string, attrValue: string): CheerioInfo {
-  const dom = htmlparser2.parseDOM(content, {
-    withDomLvl1: true,
-    normalizeWhitespace: false,
-    xmlMode: true,
-    decodeEntities: true
-  });
-  const $ = cheerio.load(dom);
+  const $ = cheerio.load(content, luxCherioParserOptions);
 
   const result = new CheerioInfo(content);
 
   $(selector).each(function (i, elem) {
     $(elem).attr(attrName, attrValue);
+    result.updated = true;
+  });
+
+  if (result.updated) {
+    result.content = $.xml();
+  }
+
+  return result;
+}
+
+/**
+ * Diese Methode fügt den Wert ans Ende des Attributwertes an, das zum Selektor passt.
+ *
+ * @param content
+ * @param selector
+ * @param attrName
+ * @param attrValue
+ */
+export function appendAttribute(content: string, selector: string, attrName: string, attrValue: string): CheerioInfo {
+  const $ = cheerio.load(content, luxCherioParserOptions);
+
+  const result = new CheerioInfo(content);
+
+  $(selector).each(function (i, elem) {
+    $(elem).attr(attrName, $(elem).attr(attrName) + attrValue);
     result.updated = true;
   });
 
@@ -50,19 +70,8 @@ export function addAttribute(content: string, selector: string, attrName: string
  * @param attrNameOld Ein beliebiger Attributname (z.B. luxItem).
  * @param attrNameNew Ein beliebiger neuer Attributname.
  */
-export function renameAttribute(
-  content: string,
-  selector: string,
-  attrNameOld: string,
-  attrNameNew: string
-): CheerioInfo {
-  const dom = htmlparser2.parseDOM(content, {
-    withDomLvl1: true,
-    normalizeWhitespace: false,
-    xmlMode: true,
-    decodeEntities: false
-  });
-  const $ = cheerio.load(dom, { decodeEntities: false });
+export function renameAttribute(  content: string,  selector: string,  attrNameOld: string,  attrNameNew: string): CheerioInfo {
+  const $ = cheerio.load(content, luxCherioParserOptions);
 
   const result = new CheerioInfo(content);
 
@@ -120,13 +129,7 @@ export function renameAttribute(
  * @param attrValue Ein beliebiger Wert.
  */
 export function updateAttribute(content: string, selector: string, attrName: string, attrValue: string): CheerioInfo {
-  const dom = htmlparser2.parseDOM(content, {
-    withDomLvl1: true,
-    normalizeWhitespace: false,
-    xmlMode: true,
-    decodeEntities: false
-  });
-  const $ = cheerio.load(dom, { decodeEntities: false });
+  const $ = cheerio.load(content, luxCherioParserOptions);
 
   const result = new CheerioInfo(content);
 
@@ -171,13 +174,7 @@ export function updateAttribute(content: string, selector: string, attrName: str
  * @param attrName Ein beliebiger Attributname (z.B. luxListItem).
  */
 export function removeAttribute(content: string, selector: string, attrName: string): CheerioInfo {
-  const dom = htmlparser2.parseDOM(content, {
-    withDomLvl1: true,
-    normalizeWhitespace: false,
-    xmlMode: true,
-    decodeEntities: false
-  });
-  const $ = cheerio.load(dom, { decodeEntities: false });
+  const $ = cheerio.load(content, luxCherioParserOptions);
 
   const result = new CheerioInfo(content);
 

@@ -20,6 +20,11 @@
       "description": "Bereitet das LUX-Componentsprojekt für die Migration auf ES-Lint vor",
       "factory": "./migrate-to-eslint/index#migrateToEsLint",
       "schema": "./migrate-to-eslint/schema.json"
+    },
+    "migrate-to-webcomponent": {
+      "description": "LUX-Componentsprojekt wird zur Web Component umgebaut",
+      "factory": "./migrate-to-webcomponent/index#migrateToWebcomponent",
+      "schema": "./migrate-to-webcomponent/schema.json"
     }
   }
 }

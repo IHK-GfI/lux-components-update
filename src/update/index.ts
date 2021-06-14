@@ -68,7 +68,10 @@ export function i18nUpdateAngularJson(options: any): Rule {
         {
           path: ['projects', options.project, 'i18n'],
           value: {
-            sourceLocale: 'de',
+            sourceLocale: {
+              'code': 'de',
+              'baseHref': '/'
+            },
             locales: {
               en: 'src/locale/messages.en.xlf'
             }

@@ -849,11 +849,10 @@ export class AppModule {
           const content = success.read('angular.json')?.toString();
 
           expect(content).toContain('"i18n": {\n' +
-                                    '        "sourceLocale": "de",\n' +
-                                    '        "locales": {\n' +
-                                    '          "en": "src/locale/messages.en.xlf"\n' +
-                                    '        }\n' +
-                                    '      }');
+                                    '        "sourceLocale": {\n' +
+                                    '          "code": "de",\n' +
+                                    '          "baseHref": "/"\n' +
+                                    '        }');
           expect(content).toContain(`"localize": [
               "de"
             ]`);
