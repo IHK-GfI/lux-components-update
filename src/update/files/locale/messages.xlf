@@ -6,14 +6,7 @@
         <source>Meldung schließen</source>
         <context-group purpose="location">
           <context context-type="sourcefile">node_modules/@ihk-gfi/lux-components/src/app/modules/lux-common/lux-message-box/lux-message-box-subcomponents/lux-message.component.ts</context>
-          <context context-type="linenumber">31,37</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="luxc.message.container.arialabel" datatype="html">
-        <source>Meldungen</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">node_modules/@ihk-gfi/lux-components/src/app/modules/lux-common/lux-message-box/lux-message-box.component.ts</context>
-          <context context-type="linenumber">23,27</context>
+          <context context-type="linenumber">48</context>
         </context-group>
       </trans-unit>
       <trans-unit id="luxc.message.announce.1_message" datatype="html">
@@ -35,6 +28,13 @@
         <context-group purpose="location">
           <context context-type="sourcefile">node_modules/@ihk-gfi/lux-components/src/app/modules/lux-common/lux-message-box/lux-message-box.component.ts</context>
           <context context-type="linenumber">88</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="luxc.message.container.arialabel" datatype="html">
+        <source>Meldungen</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">node_modules/@ihk-gfi/lux-components/src/app/modules/lux-common/lux-message-box/lux-message-box.component.ts</context>
+          <context context-type="linenumber">174</context>
         </context-group>
       </trans-unit>
       <trans-unit id="luxc.table.sort.descending" datatype="html">
@@ -111,7 +111,7 @@
         <source>Hinein zoomen</source>
         <context-group purpose="location">
           <context context-type="sourcefile">node_modules/@ihk-gfi/lux-components/src/app/modules/lux-file-preview/lux-file-preview-imgviewer/lux-file-preview-imgviewer.component.ts</context>
-          <context context-type="linenumber">53,54</context>
+          <context context-type="linenumber">67</context>
         </context-group>
       </trans-unit>
       <trans-unit id="luxc.file-preview.imgviewer.zoomout.arialabel" datatype="html">
@@ -128,60 +128,46 @@
           <context context-type="linenumber">17</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="luxc.file-preview.notsupportedviewer.close.arialabel" datatype="html">
-        <source>Dateivorschau schließen</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">node_modules/@ihk-gfi/lux-components/src/app/modules/lux-file-preview/lux-file-preview-notsupportedviewer/lux-file-preview-notsupportedviewer.component.ts</context>
-          <context context-type="linenumber">17,21</context>
-        </context-group>
-      </trans-unit>
       <trans-unit id="luxc.file-preview.notsupportedviewer.download.arialabel" datatype="html">
         <source>Datei herunterladen</source>
         <context-group purpose="location">
           <context context-type="sourcefile">node_modules/@ihk-gfi/lux-components/src/app/modules/lux-file-preview/lux-file-preview-notsupportedviewer/lux-file-preview-notsupportedviewer.component.ts</context>
-          <context context-type="linenumber">38,46</context>
+          <context context-type="linenumber">56</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="luxc.file-preview.notsupportedviewer.close.arialabel" datatype="html">
+        <source>Dateivorschau schließen</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">node_modules/@ihk-gfi/lux-components/src/app/modules/lux-file-preview/lux-file-preview-notsupportedviewer/lux-file-preview-notsupportedviewer.component.ts</context>
+          <context context-type="linenumber">56</context>
         </context-group>
       </trans-unit>
       <trans-unit id="luxc.file-preview.notsupportedviewer.message" datatype="html">
         <source>Diese Datei kann nicht angezeigt werden.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">node_modules/@ihk-gfi/lux-components/src/app/modules/lux-file-preview/lux-file-preview-notsupportedviewer/lux-file-preview-notsupportedviewer.component.ts</context>
-          <context context-type="linenumber">44,48</context>
+          <context context-type="linenumber">56</context>
         </context-group>
       </trans-unit>
       <trans-unit id="luxc.file-preview.pdfviewer.zoom.arialabel" datatype="html">
         <source>Zoom</source>
         <context-group purpose="location">
           <context context-type="sourcefile">node_modules/@ihk-gfi/lux-components/src/app/modules/lux-file-preview/lux-file-preview-pdfviewer/lux-file-preview-pdfviewer.component.ts</context>
-          <context context-type="linenumber">38,40</context>
+          <context context-type="linenumber">109</context>
         </context-group>
       </trans-unit>
       <trans-unit id="luxc.file-preview.pdfviewer.zoomin.arialabel" datatype="html">
         <source>Hinein zoomen</source>
         <context-group purpose="location">
           <context context-type="sourcefile">node_modules/@ihk-gfi/lux-components/src/app/modules/lux-file-preview/lux-file-preview-pdfviewer/lux-file-preview-pdfviewer.component.ts</context>
-          <context context-type="linenumber">54,61</context>
+          <context context-type="linenumber">109</context>
         </context-group>
       </trans-unit>
       <trans-unit id="luxc.file-preview.pdfviewer.zoomout.arialabel" datatype="html">
         <source>Heraus zoomen</source>
         <context-group purpose="location">
           <context context-type="sourcefile">node_modules/@ihk-gfi/lux-components/src/app/modules/lux-file-preview/lux-file-preview-pdfviewer/lux-file-preview-pdfviewer.component.ts</context>
-          <context context-type="linenumber">84,86</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="luxc.file-preview.filter-load-dialog.load.lbl" datatype="html">
-        <source>Laden</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">node_modules/@ihk-gfi/lux-components/src/app/modules/lux-filter/lux-filter-dialog/lux-filter-load-dialog/lux-filter-load-dialog.component.ts</context>
-          <context context-type="linenumber">11,15</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="luxc.file-preview.filter-load-dialog.delete.lbl" datatype="html">
-        <source>Löschen</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">node_modules/@ihk-gfi/lux-components/src/app/modules/lux-filter/lux-filter-dialog/lux-filter-load-dialog/lux-filter-load-dialog.component.ts</context>
-          <context context-type="linenumber">23,27</context>
+          <context context-type="linenumber">109</context>
         </context-group>
       </trans-unit>
       <trans-unit id="luxc.file-preview.filter-load-dialog.title" datatype="html">
@@ -198,32 +184,46 @@
           <context context-type="linenumber">27</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="luxc.file-preview.filter-save-dialog.save.lbl" datatype="html">
-        <source>Speichern</source>
+      <trans-unit id="luxc.file-preview.filter-load-dialog.load.lbl" datatype="html">
+        <source>Laden</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">node_modules/@ihk-gfi/lux-components/src/app/modules/lux-filter/lux-filter-dialog/lux-filter-save-dialog/lux-filter-save-dialog.component.ts</context>
-          <context context-type="linenumber">22,28</context>
+          <context context-type="sourcefile">node_modules/@ihk-gfi/lux-components/src/app/modules/lux-filter/lux-filter-dialog/lux-filter-load-dialog/lux-filter-load-dialog.component.ts</context>
+          <context context-type="linenumber">27</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="luxc.file-preview.filter-load-dialog.delete.lbl" datatype="html">
+        <source>Löschen</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">node_modules/@ihk-gfi/lux-components/src/app/modules/lux-filter/lux-filter-dialog/lux-filter-load-dialog/lux-filter-load-dialog.component.ts</context>
+          <context context-type="linenumber">27</context>
         </context-group>
       </trans-unit>
       <trans-unit id="luxc.file-preview.filter-save-dialog.title" datatype="html">
         <source>Filter speichern</source>
         <context-group purpose="location">
           <context context-type="sourcefile">node_modules/@ihk-gfi/lux-components/src/app/modules/lux-filter/lux-filter-dialog/lux-filter-save-dialog/lux-filter-save-dialog.component.ts</context>
-          <context context-type="linenumber">35,42</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="luxc.file-preview.filter-save-dialog.cancel.lbl" datatype="html">
-        <source>Abbrechen</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">node_modules/@ihk-gfi/lux-components/src/app/modules/lux-filter/lux-filter-dialog/lux-filter-save-dialog/lux-filter-save-dialog.component.ts</context>
-          <context context-type="linenumber">43,44</context>
+          <context context-type="linenumber">62</context>
         </context-group>
       </trans-unit>
       <trans-unit id="luxc.file-preview.filter-save-dialog.name.lbl" datatype="html">
         <source>Name</source>
         <context-group purpose="location">
           <context context-type="sourcefile">node_modules/@ihk-gfi/lux-components/src/app/modules/lux-filter/lux-filter-dialog/lux-filter-save-dialog/lux-filter-save-dialog.component.ts</context>
-          <context context-type="linenumber">52,12</context>
+          <context context-type="linenumber">62</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="luxc.file-preview.filter-save-dialog.save.lbl" datatype="html">
+        <source>Speichern</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">node_modules/@ihk-gfi/lux-components/src/app/modules/lux-filter/lux-filter-dialog/lux-filter-save-dialog/lux-filter-save-dialog.component.ts</context>
+          <context context-type="linenumber">62</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="luxc.file-preview.filter-save-dialog.cancel.lbl" datatype="html">
+        <source>Abbrechen</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">node_modules/@ihk-gfi/lux-components/src/app/modules/lux-filter/lux-filter-dialog/lux-filter-save-dialog/lux-filter-save-dialog.component.ts</context>
+          <context context-type="linenumber">62</context>
         </context-group>
       </trans-unit>
       <trans-unit id="luxc.filter.title" datatype="html">
@@ -474,10 +474,10 @@
         </context-group>
       </trans-unit>
       <trans-unit id="luxc.app-footer.version" datatype="html">
-        <source> Version <x id="INTERPOLATION" equiv-text="sendButtonCom"/> </source>
+        <source> Version <x id="INTERPOLATION"/> </source>
         <context-group purpose="location">
           <context context-type="sourcefile">node_modules/@ihk-gfi/lux-components/src/app/modules/lux-layout/lux-app-footer/lux-app-footer.component.ts</context>
-          <context context-type="linenumber">43,49</context>
+          <context context-type="linenumber">57</context>
         </context-group>
       </trans-unit>
       <trans-unit id="luxc.side-nav.ariarolenavigation" datatype="html">
@@ -530,10 +530,10 @@
         </context-group>
       </trans-unit>
       <trans-unit id="luxc.app-header.user.menu.trigger" datatype="html">
-        <source>Benutzermenü <x id="INTERPOLATION" equiv-text="lean) =&gt; {"/></source>
+        <source>Benutzermenü <x id="INTERPOLATION"/></source>
         <context-group purpose="location">
           <context context-type="sourcefile">node_modules/@ihk-gfi/lux-components/src/app/modules/lux-layout/lux-app-header/lux-app-header.component.ts</context>
-          <context context-type="linenumber">68,70</context>
+          <context context-type="linenumber">130</context>
         </context-group>
       </trans-unit>
       <trans-unit id="luxc.list.empty_label" datatype="html">
