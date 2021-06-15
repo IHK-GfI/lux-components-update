@@ -916,7 +916,7 @@ export class AppModule {
         (success) => {
           const content = success.read('package.json')?.toString();
 
-          expect(content).toContain('"xi18n": "ng xi18n --output-path src/locale --ivy"');
+          expect(content).toContain('"xi18n": "ng extract-i18n --output-path src/locale --ivy"');
           expect(content).toContain('"build-aot": "node --max_old_space_size=4024 ./node_modules/@angular/cli/bin/ng build --aot --localize"');
           expect(content).toContain('"buildzentral": "node --max_old_space_size=4024 ./node_modules/@angular/cli/bin/ng build --prod --localize"');
           expect(content).toContain('"start_en": "ng serve --public-host=http://localhost:4200 --configuration en"');

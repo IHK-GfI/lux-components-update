@@ -132,7 +132,7 @@ export function i18nUpdatePackageJson(options: any): Rule {
       const filePath = `/package.json`;
 
       const newValuesArr = [
-        { path: ['scripts', 'xi18n'], value: "ng xi18n --output-path src/locale --ivy", message: `Neues Skript "xi18n" hinzugefügt.`}
+        { path: ['scripts', 'xi18n'], value: "ng extract-i18n --output-path src/locale --ivy", message: `Neues Skript "xi18n" hinzugefügt.`}
       ];
 
       const packageJsonAsNode = readJson(tree, filePath);
