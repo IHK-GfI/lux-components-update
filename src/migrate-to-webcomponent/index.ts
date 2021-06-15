@@ -318,9 +318,11 @@ export function updateAppComponentHtml(options: any): Rule {
 
 function getWebComponentTagName(projectName: string) {
   let tagName = projectName;
-  tagName     = tagName.replace(/[0-9_]/g, '');
+  tagName     = tagName.replace(/[^a-z]/gi, '');
   tagName     = tagName.toLowerCase();
-  if (!tagName.startsWith('lux')) {
+  if (tagName.startsWith('lux')) {
+    tagName = tagName.replace(/lux/i, 'lux-');
+  } else {
     tagName = 'lux-' + tagName;
   }
   return tagName;

@@ -622,12 +622,15 @@ export class AppModule {
         `
       );
 
-      callRule(updateIndexHtml(testOptions), observableOf(appTree), context).subscribe(
+      const newTestOptions = JSON.parse(JSON.stringify(testOptions));
+      newTestOptions.project = 'Ka-74öäü';
+
+      callRule(updateIndexHtml(newTestOptions), observableOf(appTree), context).subscribe(
         (success) => {
           const content = success.read('src/index.html')?.toString();
 
           expect(content).not.toContain('<app-root></app-root>');
-          expect(content).toContain('<lux-bar></lux-bar>');
+          expect(content).toContain('<lux-ka></lux-ka>');
 
           done();
         },
