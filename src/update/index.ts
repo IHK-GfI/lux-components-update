@@ -6,7 +6,15 @@ import { updateDependencies } from '../update-dependencies/index';
 import { deleteFilesInDirectory, moveFilesToDirectory } from '../utility/files';
 import { jsonFormattingOptions, readJson, readJsonAsString } from '../utility/json';
 import { logInfo, logInfoWithDescriptor, logSuccess } from '../utility/logging';
-import { getNextSibling, getPrevSibling, getSourceNodes, removeImport, removeProvider } from '../utility/typescript';
+import {
+  addConstructorContent,
+  addConstructorParameter, addImport,
+  getNextSibling,
+  getPrevSibling,
+  getSourceNodes,
+  removeImport,
+  removeProvider
+} from '../utility/typescript';
 import { applyRuleIf, finish, messageInfoRule, messageSuccessRule } from '../utility/util';
 import { validateLuxComponentsVersion, validateNodeVersion } from '../utility/validation';
 
@@ -469,90 +477,10 @@ export function updateAppComponent(options: any): Rule {
   return chain([
     messageInfoRule(`AppComponent wird aktualisiert...`),
     (tree: Tree, context: SchematicContext) => {
-      // Init
-      const fileName   = 'app.component.ts';
       const filePath   = (options.path ? options.path : '') + '/src/app/app.component.ts';
-      const content    = (tree.read(filePath) as Buffer).toString();
-      const sourceFile = ts.createSourceFile(`${ fileName }`, content, ts.ScriptTarget.Latest, true);
-      const nodes      = getSourceNodes(sourceFile);
-
-      const constructorNode = nodes.find(n => n.kind === ts.SyntaxKind.Constructor);
-      if (constructorNode) {
-        // Constructor bereits vorhanden
-        let constructorChildren = constructorNode.getChildren();
-
-        if (!constructorChildren) {
-          throw new SchematicsException(`Der Konstruktor in der Klasse ${ fileName } hat keine Syntaxkinder.`);
-        }
-
-        const parameterListNode = constructorChildren.find(n => n.kind === ts.SyntaxKind.SyntaxList);
-        if (!parameterListNode) {
-          throw new SchematicsException(`Der Konstruktor in der Klasse ${ fileName } hat keine SyntaxList.`);
-        }
-
-        const parameterNodes = parameterListNode.getChildren();
-
-        const constructorBodyNode = constructorChildren.find(n => n.kind === ts.SyntaxKind.Block);
-
-        if (!constructorBodyNode) {
-          throw new SchematicsException(`Der Konstruktor in der Klasse ${ fileName } hat keinen Body.`);
-        }
-
-        const constructorSiblings      = constructorBodyNode.getChildren();
-        const constructorBodyStartNode = constructorSiblings.find(n => n.kind === ts.SyntaxKind.SyntaxList);
-
-        if (!constructorBodyStartNode) {
-          throw new SchematicsException(`Der Konstruktor in der Klasse ${ fileName } hat keine öffnende Klammer.`);
-        }
-
-        const updateRecorder = tree.beginUpdate(filePath);
-        if (parameterNodes.length == 0) {
-          // Constructor ohne Parameter
-          updateRecorder.insertLeft(parameterListNode.pos, `private themeService: LuxThemeService`);
-          updateRecorder.insertLeft(constructorBodyStartNode.pos, `\n    themeService.loadTheme();`);
-        } else if (parameterNodes.length > 0) {
-          // Constructor mit Parameter
-          updateRecorder.insertLeft(parameterNodes[ parameterNodes.length - 1 ].end, ', private themeService: LuxThemeService');
-          updateRecorder.insertLeft(constructorBodyStartNode.pos, `\n    themeService.loadTheme();`);
-        }
-        tree.commitUpdate(updateRecorder);
-      } else {
-        // Constructor muss mit angelegt werden
-        const classNode = nodes.find(n => n.kind === ts.SyntaxKind.ClassKeyword);
-
-        if (!classNode) {
-          throw new SchematicsException(`In der Klasse ${ fileName } fehlt das SyntaxKind.ClassKeyword.`);
-        }
-
-        const siblings            = classNode.parent.getChildren();
-        const classIdentifierNode = siblings.slice(siblings.indexOf(classNode)).find(n => n.kind === ts.SyntaxKind.Identifier);
-
-        if (!classIdentifierNode) {
-          throw new SchematicsException(`In der Klasse ${ fileName } fehlt das SyntaxKind.Identifier`);
-        }
-
-        if (classIdentifierNode.getText() !== 'AppComponent') {
-          throw new SchematicsException(`In der Klasse ${ fileName } wurde der Klassenname "AppComponent" erwartet.`);
-        }
-
-        const curlyNodeIndex = siblings.findIndex(n => n.kind === ts.SyntaxKind.FirstPunctuation);
-        const listNode       = siblings.slice(curlyNodeIndex).find(n => n.kind === ts.SyntaxKind.SyntaxList);
-
-        if (!listNode) {
-          throw new SchematicsException(`Die Klasse ${ fileName } hat keinen Inhalt.`);
-        }
-
-        const updateRecorder = tree.beginUpdate(filePath);
-        updateRecorder.insertLeft(listNode.pos + 1, `\n  constructor(private themeService: LuxThemeService){\n    themeService.loadTheme();\n  }\n`);
-        tree.commitUpdate(updateRecorder);
-      }
-      logInfo(`LuxThemeService im Konstruktor hinzugefügt.`);
-
-      // Import hinzufügen
-      const updateRecorder = tree.beginUpdate(filePath);
-      updateRecorder.insertLeft(0, `import { LuxThemeService } from '@ihk-gfi/lux-components';\n`);
-      tree.commitUpdate(updateRecorder);
-      logInfo(`Import für LuxThemeService hinzugefügt.`);
+      addImport(tree, filePath, '@ihk-gfi/lux-components', 'LuxThemeService');
+      addConstructorParameter(tree, filePath, 'private themeService: LuxThemeService');
+      addConstructorContent(tree, filePath, 'themeService.loadTheme();', true);
     },
     messageSuccessRule(`AppComponent wurde aktualisiert.`)
   ]);

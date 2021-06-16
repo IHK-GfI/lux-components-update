@@ -18,6 +18,7 @@ import {
   LuxPipesModule,
   LuxPopupsModule
 } from '@ihk-gfi/lux-components';
+import { environment } from '../environments/environment';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';

@@ -1,8 +1,8 @@
 <div class="lux-app-container">
-  <lux-app-header luxAppTitle="LUX Blueprint" luxAppTitleShort="LUX" luxUserName="Test">
+  <lux-app-header luxAppTitle="LUX Blueprint" luxAppTitleShort="LUX" luxUserName="Test" (luxClicked)="router.navigate(['/'])">
     <lux-side-nav>
       <lux-side-nav-header>
-        <h3>Willkommen!</h3>
+        <h3 i18n="@@luxapp.welcome">Willkommen!</h3>
       </lux-side-nav-header>
       <lux-side-nav-item
         luxLabel="Home"
@@ -21,7 +21,7 @@
     </lux-side-nav>
   </lux-app-header>
 
-  <lux-app-content class="lux-mt-3"></lux-app-content>
+  <lux-app-content luxAriaRoleMainLabel=""></lux-app-content>
 
   <lux-app-footer luxVersion="0.1"></lux-app-footer>
 </div>

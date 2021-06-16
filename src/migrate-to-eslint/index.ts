@@ -1,9 +1,9 @@
 import { chain, Rule, SchematicContext, SchematicsException, Tree } from '@angular-devkit/schematics';
 import * as chalk from 'chalk';
-import { applyEdits, Edit, modify } from 'jsonc-parser';
+import { applyEdits, Edit, findNodeAtLocation, modify } from 'jsonc-parser';
 import * as ts from 'typescript';
 import { iterateFilesAndModifyContent, moveFilesToDirectory } from '../utility/files';
-import { jsonFormattingOptions, readJsonAsString } from '../utility/json';
+import { jsonFormattingOptions, readJson, readJsonAsString } from '../utility/json';
 import { logInfo } from '../utility/logging';
 import { getSourceNodes, removeImport, removeInterface } from '../utility/typescript';
 import { finish, messageInfoRule, messageSuccessRule } from '../utility/util';
@@ -107,11 +107,23 @@ export function updateAngularJson(options: any): Rule {
     (tree: Tree, _context: SchematicContext) => {
       const filePath = `/angular.json`;
 
-      const newValuesArr = [
-        { path: ['projects', options.project, 'architect', 'app-lint'], value: undefined, message: `Der alte Abschnitt "app-lint" wurde entfernt.`},
-        { path: ['projects', options.project, 'architect', 'spec-lint'], value: undefined, message: `Der alte Abschnitt "spec-lint" wurde entfernt.`},
-        { path: ['projects', options.project + '-e2e', 'architect', 'lint'], value: undefined, message: `Der alte Abschnitt "lint" wurde entfernt.`}
-      ];
+      const newValuesArr: { path: string[]; value: any; message: string }[] = [];
+
+      const packageJsonAsNode = readJson(tree, filePath);
+      const appLintNode = findNodeAtLocation(packageJsonAsNode, ['projects', options.project, 'architect', 'app-lint']);
+      if (appLintNode) {
+        newValuesArr.push({ path: ['projects', options.project, 'architect', 'app-lint'], value: undefined, message: `Der alte Abschnitt "app-lint" wurde entfernt.`});
+      }
+
+      const specLintNode = findNodeAtLocation(packageJsonAsNode, ['projects', options.project, 'architect', 'spec-lint']);
+      if (specLintNode) {
+        newValuesArr.push({ path: ['projects', options.project, 'architect', 'spec-lint'], value: undefined, message: `Der alte Abschnitt "spec-lint" wurde entfernt.`});
+      }
+
+      const e2eLintNode = findNodeAtLocation(packageJsonAsNode, ['projects', options.project + '-e2e', 'architect', 'lint']);
+      if (e2eLintNode) {
+        newValuesArr.push({ path: ['projects', options.project + '-e2e', 'architect', 'lint'], value: undefined, message: `Der alte Abschnitt "lint" wurde entfernt.`});
+      }
 
       newValuesArr.forEach(change => {
         const tsConfigJson = readJsonAsString(tree, filePath);

@@ -11,7 +11,7 @@ export class ErrorComponent implements OnInit {
 
   constructor(private readonly router: Router) {}
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.url404 = this.router.routerState.snapshot.url;
   }
 }
