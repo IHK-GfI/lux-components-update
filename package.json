@@ -4,7 +4,8 @@
   "description": "Schematics für die Aktualisierung von LUX-Applikationen",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "test": "npm run build && jasmine src/**/*_spec.js"
+    "test": "npm run build && jasmine src/**/*_spec.js",
+    "security": "npm audit --registry=https://registry.npmjs.org --audit-level high"
   },
   "keywords": [
     "schematics",
