@@ -2,6 +2,14 @@
 <xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
   <file source-language="de" datatype="plaintext" original="ng2.template">
     <body>
+      <trans-unit id="luxc.menu.trigger.btn" datatype="html">
+        <source>Menü</source>
+        <target>Menu</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">node_modules/@ihk-gfi/lux-components/src/app/modules/lux-action/lux-menu/lux-menu.component.ts</context>
+          <context context-type="linenumber">57</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="luxc.message.btn.close.arialabel" datatype="html">
         <source>Meldung schließen</source>
         <context-group purpose="location">

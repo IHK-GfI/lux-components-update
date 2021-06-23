@@ -3,7 +3,7 @@ import { applyEdits, Edit, findNodeAtLocation, modify } from 'jsonc-parser';
 import * as ts from 'typescript';
 import { iterateFilesAndModifyContent } from '../utility/files';
 import { addAttribute, appendAttribute } from '../utility/html';
-import { jsonFormattingOptions, readJson, readJsonAsString } from '../utility/json';
+import { appendScript, jsonFormattingOptions, readJson, readJsonAsString } from '../utility/json';
 import { logInfo } from '../utility/logging';
 import {
   addConstructorParameter, addConstructorContent,
@@ -75,13 +75,13 @@ export function updatePackageJson(options: any): Rule {
       if (buildAotScriptNode) {
         newValuesArr.push({
           path: ['scripts', 'build-aot'],
-          value: buildAotScriptNode.value + ' --single-bundle --output-hashing none',
+          value: appendScript(buildAotScriptNode.value, ' --single-bundle --output-hashing none'),
           message: `Das Skript "build-aot" angepasst.`
         });
       } else {
         newValuesArr.push({
           path: ['scripts', 'build-aot'],
-          value: 'node --max_old_space_size=4024 ./node_modules/@angular/cli/bin/ng build --aot --localize --single-bundle --output-hashing none',
+          value: 'node --max_old_space_size=4024 ./node_modules/@angular/cli/bin/ng build --aot --single-bundle --output-hashing none && npm run move-de-files',
           message: `Das neue Skript "build-aot" hinzugefügt.`
         });
       }
@@ -90,13 +90,13 @@ export function updatePackageJson(options: any): Rule {
       if (buildZentralScriptNode) {
         newValuesArr.push({
           path: ['scripts', 'buildzentral'],
-          value: buildZentralScriptNode.value + ' --single-bundle --output-hashing none --plugin @ihk-gfi/lux-components/ie11-lazy-modules-plugin.js',
+          value: appendScript(buildZentralScriptNode.value,  ' --single-bundle --output-hashing none --plugin @ihk-gfi/lux-components/ie11-lazy-modules-plugin.js'),
           message: `Das Skript "buildzentral" angepasst.`
         });
       } else {
         newValuesArr.push({
           path: ['scripts', 'buildzentral'],
-          value: 'node --max_old_space_size=4024 ./node_modules/@angular/cli/bin/ng build --prod --localize --single-bundle --output-hashing none --plugin @ihk-gfi/lux-components/ie11-lazy-modules-plugin.js',
+          value: 'node --max_old_space_size=4024 ./node_modules/@angular/cli/bin/ng build --prod --single-bundle --output-hashing none --plugin @ihk-gfi/lux-components/ie11-lazy-modules-plugin.js && npm run move-de-files',
           message: `Das neue Skript "buildzentral" hinzugefügt.`
         });
       }

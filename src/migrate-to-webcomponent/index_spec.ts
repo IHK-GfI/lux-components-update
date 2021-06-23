@@ -116,8 +116,8 @@ export class AppComponent implements OnInit {
         (success) => {
           const content = success.read(`package.json`)?.toString();
 
-          expect(content).toContain('"build-aot": "node --max_old_space_size=4024 ./node_modules/@angular/cli/bin/ng build --aot --localize --single-bundle --output-hashing none"');
-          expect(content).toContain('"buildzentral": "node --max_old_space_size=4024 ./node_modules/@angular/cli/bin/ng build --prod --localize --single-bundle --output-hashing none --plugin @ihk-gfi/lux-components/ie11-lazy-modules-plugin.js"');
+          expect(content).toContain('"build-aot": "node --max_old_space_size=4024 ./node_modules/@angular/cli/bin/ng build --aot --single-bundle --output-hashing none && npm run move-de-files"');
+          expect(content).toContain('"buildzentral": "node --max_old_space_size=4024 ./node_modules/@angular/cli/bin/ng build --prod --single-bundle --output-hashing none --plugin @ihk-gfi/lux-components/ie11-lazy-modules-plugin.js && npm run move-de-files"');
 
           expect(content).toContain('"@webcomponents/webcomponentsjs"');
           expect(content).toContain('"ngx-build-plus"');
@@ -141,8 +141,8 @@ export class AppComponent implements OnInit {
     "ng": "ng",
     "start": "ng serve --public-host=http://localhost:4200",
     "build": "node --max_old_space_size=4024 ./node_modules/@angular/cli/bin/ng build --source-map",
-    "build-aot": "node --max_old_space_size=4024 ./node_modules/@angular/cli/bin/ng build --aot --localize",
-    "buildzentral": "node --max_old_space_size=4024 ./node_modules/@angular/cli/bin/ng build --prod --localize",
+    "build-aot": "node --max_old_space_size=4024 ./node_modules/@angular/cli/bin/ng build --aot && npm run move-de-files",
+    "buildzentral": "node --max_old_space_size=4024 ./node_modules/@angular/cli/bin/ng build --prod && npm run move-de-files",
   },
   "private": true,
   "dependencies": {
@@ -158,8 +158,8 @@ export class AppComponent implements OnInit {
         (success) => {
           const content = success.read(`package.json`)?.toString();
 
-          expect(content).toContain('"build-aot": "node --max_old_space_size=4024 ./node_modules/@angular/cli/bin/ng build --aot --localize --single-bundle --output-hashing none"');
-          expect(content).toContain('"buildzentral": "node --max_old_space_size=4024 ./node_modules/@angular/cli/bin/ng build --prod --localize --single-bundle --output-hashing none --plugin @ihk-gfi/lux-components/ie11-lazy-modules-plugin.js"');
+          expect(content).toContain('"build-aot": "node --max_old_space_size=4024 ./node_modules/@angular/cli/bin/ng build --aot --single-bundle --output-hashing none && npm run move-de-files"');
+          expect(content).toContain('"buildzentral": "node --max_old_space_size=4024 ./node_modules/@angular/cli/bin/ng build --prod --single-bundle --output-hashing none --plugin @ihk-gfi/lux-components/ie11-lazy-modules-plugin.js && npm run move-de-files"');
 
           expect(content).toContain('"@webcomponents/webcomponentsjs"');
           expect(content).toContain('"ngx-build-plus"');

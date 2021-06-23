@@ -140,6 +140,7 @@ export function i18nUpdatePackageJson(options: any): Rule {
       const filePath = `/package.json`;
 
       const newValuesArr = [
+        { path: ['scripts', 'move-de-files'], value: "node move-de-files.js", message: `Neues Skript "move-de-files" hinzugefügt.`},
         { path: ['scripts', 'xi18n'], value: "ng extract-i18n --output-path src/locale --ivy", message: `Neues Skript "xi18n" hinzugefügt.`}
       ];
 
@@ -166,14 +167,14 @@ export function i18nUpdatePackageJson(options: any): Rule {
       if (buildAotScriptNode) {
         newValuesArr.push({
           path: ['scripts', 'build-aot'],
-          value: buildAotScriptNode.value + ' --localize',
-          message: `Dem Skript "build-aot" den Parameter "--localize" hinzugefügt.`
+          value: buildAotScriptNode.value + ' && npm run move-de-files',
+          message: `Dem Skript "build-aot" den Parameter "&& npm run move-de-files" hinzugefügt.`
         });
       } else {
         newValuesArr.push({
           path: ['scripts', 'build-aot'],
-          value: 'node --max_old_space_size=4024 ./node_modules/@angular/cli/bin/ng build --aot --localize',
-          message: `Das Skript "build-aot" mit dem Parameter "--localize" hinzugefügt.`
+          value: 'node --max_old_space_size=4024 ./node_modules/@angular/cli/bin/ng build --aot && npm run move-de-files',
+          message: `Das Skript "build-aot" mit dem Parameter "&& npm run move-de-files" hinzugefügt.`
         });
       }
 
@@ -182,14 +183,14 @@ export function i18nUpdatePackageJson(options: any): Rule {
       if (buildZentralScriptNode) {
         newValuesArr.push({
           path   : ['scripts', 'buildzentral'],
-          value  : buildZentralScriptNode.value + " --localize",
-          message: `Dem Skript "buildzentral" den Parameter "--localize" hinzugefügt.`
+          value  : buildZentralScriptNode.value + " && npm run move-de-files",
+          message: `Dem Skript "buildzentral" den Parameter "&& npm run move-de-files" hinzugefügt.`
         });
       } else {
         newValuesArr.push({
           path: ['scripts', 'buildzentral'],
-          value: 'node --max_old_space_size=4024 ./node_modules/@angular/cli/bin/ng build --prod --localize',
-          message: `Das Skript "buildzentral" mit dem Parameter "--localize" hinzugefügt.`
+          value: 'node --max_old_space_size=4024 ./node_modules/@angular/cli/bin/ng build --prod && npm run move-de-files',
+          message: `Das Skript "buildzentral" mit dem Parameter "&& npm run move-de-files" hinzugefügt.`
         });
       }
 
@@ -254,6 +255,7 @@ export function i18nCopyMessages(options: any): Rule {
   return chain([
     messageInfoRule(`Sprachdateien werden kopiert...`),
     moveFilesToDirectory(options, 'files/locale', 'src/locale'),
+    moveFilesToDirectory(options, 'files/scripts', '/'),
     messageSuccessRule(`Sprachdateien wurden kopiert.`)
   ]);
 }
@@ -353,9 +355,41 @@ export function updateAngularJson(options: any): Rule {
       messageInfoRule(`Datei "angular.json" wird aktualisiert...`),
       addThemeAssets(options),
       removeThemeAssets(options),
+      addNg2PdfViewer(options),
       messageSuccessRule(`Datei "angular.json" wurde aktualisiert.`),
     ]);
   };
+}
+
+export function addNg2PdfViewer(options: any): Rule {
+  return (tree: Tree, context: SchematicContext) => {
+    const filePath = '/angular.json';
+    const value = 'ng2-pdf-viewer';
+
+    let contentAsNode = readJson(tree, filePath);
+    const ngPdfViewerNode = findNodeAtLocation(contentAsNode, ['projects', options.project, 'architect', 'build', 'options', 'allowedCommonJsDependencies']);
+
+    let found = false;
+    if (ngPdfViewerNode){
+      ngPdfViewerNode.children?.forEach(child => {
+        if (child.value === value) {
+          found = true;
+        }
+      });
+    }
+
+    if (!found) {
+      const angularJson = readJsonAsString(tree, filePath);
+      const edits = modify(angularJson, ['projects', options.project, 'architect', 'build', 'options', 'allowedCommonJsDependencies', 0], value, { formattingOptions: jsonFormattingOptions, isArrayInsertion: true });
+      if (edits) {
+        tree.overwrite(
+          filePath,
+          applyEdits(angularJson, edits)
+        );
+        logInfo(`"ng2-pdf-viewer" im Abschnitt "allowedCommonJsDependencies" hinzugefügt.`);
+      }
+    }
+  }
 }
 
 export function clearStylesScss(options: any): Rule {

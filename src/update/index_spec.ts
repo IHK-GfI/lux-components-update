@@ -3,9 +3,11 @@ import { SchematicTestRunner, UnitTestTree } from '@angular-devkit/schematics/te
 import * as path from 'path';
 import { of as observableOf } from 'rxjs';
 import { getPackageJsonDependency, NodeDependencyType, updatePackageJsonDependency } from '../utility/dependencies';
+import { readJson } from '../utility/json';
 import { appOptions, workspaceOptions } from '../utility/test';
 import { UtilConfig } from '../utility/util';
 import {
+  addNg2PdfViewer,
   addThemeAssets, clearStylesScss,
   deleteOldThemeDir, i18nUpdateAngularJson, i18nUpdateAppModule, i18nUpdatePackageJson, removeThemeAssets,
   update,
@@ -40,6 +42,143 @@ describe('update', () => {
     testOptions.project = appOptions.name;
     testOptions.path = workspaceOptions.newProjectRoot + '/' + appOptions.name;
     testOptions.verbose = true;
+  });
+
+  describe('[Rule] addNg2PdfViewer', () => {
+    it('Sollte Ng2PdfViewer hinzufügen', (done) => {
+      appTree.overwrite(
+        '/angular.json',
+        `
+{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "newProjectRoot": "projects",
+  "projects": {
+    "bar": {
+      "root": "",
+      "sourceRoot": "src",
+      "projectType": "application",
+      "i18n": {
+        "sourceLocale": {
+          "code": "de",
+          "baseHref": "/"
+        },
+        "locales": {
+          "en": "src/locale/messages.en.xlf"
+        }
+      },
+      "architect": {
+        "build": {
+          "builder": "ngx-build-plus:browser",
+          "options": {
+            "outputPath": "dist",
+            "allowedCommonJsDependencies": [
+              "hammerjs"
+            ]
+          }
+        }
+      }
+    },
+  },
+  "defaultProject": "lux-components",
+  "schematics": {
+    "@schematics/angular:component": {
+      "prefix": "lux",
+      "style": "scss"
+    },
+    "@schematics/angular:directive": {
+      "prefix": "lux"
+    }
+  }
+}
+
+        `
+      );
+
+      callRule(addNg2PdfViewer(testOptions), observableOf(appTree), context).subscribe(
+        (success) => {
+          const content = success.read('/angular.json')?.toString();
+
+          if (content) {
+            console.log('aaa', content);
+          }
+          expect(content).toContain(
+            '"allowedCommonJsDependencies": [\n              "ng2-pdf-viewer",\n              "hammerjs"\n            ]'
+          );
+
+          done();
+        },
+        (reason) => expect(reason).toBeUndefined()
+      );
+    });
+
+    it('Sollte Ng2PdfViewer nicht hinzufügen', (done) => {
+      appTree.overwrite(
+        '/angular.json',
+        `
+{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "newProjectRoot": "projects",
+  "projects": {
+    "bar": {
+      "root": "",
+      "sourceRoot": "src",
+      "projectType": "application",
+      "i18n": {
+        "sourceLocale": {
+          "code": "de",
+          "baseHref": "/"
+        },
+        "locales": {
+          "en": "src/locale/messages.en.xlf"
+        }
+      },
+      "architect": {
+        "build": {
+          "builder": "ngx-build-plus:browser",
+          "options": {
+            "outputPath": "dist",
+            "allowedCommonJsDependencies": [
+              "hammerjs",
+              "ng2-pdf-viewer"
+            ]
+          }
+        }
+      }
+    },
+  },
+  "defaultProject": "lux-components",
+  "schematics": {
+    "@schematics/angular:component": {
+      "prefix": "lux",
+      "style": "scss"
+    },
+    "@schematics/angular:directive": {
+      "prefix": "lux"
+    }
+  }
+}
+
+        `
+      );
+
+      callRule(addNg2PdfViewer(testOptions), observableOf(appTree), context).subscribe(
+        (success) => {
+          const content = success.read('/angular.json')?.toString();
+
+          if (content) {
+            console.log('aaa', content);
+          }
+          expect(content).toContain(
+            '"allowedCommonJsDependencies": [\n              "hammerjs",\n              "ng2-pdf-viewer"\n            ]'
+          );
+
+          done();
+        },
+        (reason) => expect(reason).toBeUndefined()
+      );
+    });
   });
 
   describe('[Rule] update', () => {
@@ -917,8 +1056,8 @@ export class AppModule {
           const content = success.read('package.json')?.toString();
 
           expect(content).toContain('"xi18n": "ng extract-i18n --output-path src/locale --ivy"');
-          expect(content).toContain('"build-aot": "node --max_old_space_size=4024 ./node_modules/@angular/cli/bin/ng build --aot --localize"');
-          expect(content).toContain('"buildzentral": "node --max_old_space_size=4024 ./node_modules/@angular/cli/bin/ng build --prod --localize"');
+          expect(content).toContain('"build-aot": "node --max_old_space_size=4024 ./node_modules/@angular/cli/bin/ng build --aot && npm run move-de-files"');
+          expect(content).toContain('"buildzentral": "node --max_old_space_size=4024 ./node_modules/@angular/cli/bin/ng build --prod && npm run move-de-files"');
           expect(content).toContain('"start_en": "ng serve --public-host=http://localhost:4200 --configuration en"');
 
           done();

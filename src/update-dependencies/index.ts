@@ -45,7 +45,8 @@ export function updateDefaultDependencies(): Rule {
         { type: NodeDependencyType.Default, version: '6.3.2', name: 'ng2-pdf-viewer' },
         { type: NodeDependencyType.Default, version: '2.5.207', name: 'pdfjs-dist' },
         { type: NodeDependencyType.Default, version: '2.1.5', name: '@types/pdfjs-dist' },
-        { type: NodeDependencyType.Default, version: '2.5.207', name: 'pdfjs-dist' }
+        { type: NodeDependencyType.Default, version: '2.5.207', name: 'pdfjs-dist' },
+        { type: NodeDependencyType.Default, version: '12.0.0', name: 'ngx-cookie-service' }
       ];
 
       dependencies.forEach((dependency) => {
@@ -83,7 +84,9 @@ export function updateDevDependencies(): Rule {
         { type: NodeDependencyType.Dev, version: '8.3.0', name: 'ts-node' },
         { type: NodeDependencyType.Dev, version: '6.1.3', name: 'tslint' },
         { type: NodeDependencyType.Dev, version: '3.0.3', name: 'tslint-angular' },
-        { type: NodeDependencyType.Dev, version: '4.1.5', name: 'typescript' }
+        { type: NodeDependencyType.Dev, version: '4.1.5', name: 'typescript' },
+        { type: NodeDependencyType.Dev, version: '10.0.0', name: 'fs-extra' },
+        { type: NodeDependencyType.Dev, version: '6.0.0', name: 'del' }
       ];
 
       devDependencies.forEach((devDependency) => {
