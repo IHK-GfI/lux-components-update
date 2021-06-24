@@ -214,7 +214,7 @@ describe('update', () => {
                 "lux-components"
               ],
               "dependencies": {
-                "@ihk-gfi/lux-components": "10.8.1"
+                "@ihk-gfi/lux-components": "10.8.2"
               }
             }
         `

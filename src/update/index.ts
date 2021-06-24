@@ -19,7 +19,7 @@ import { applyRuleIf, finish, messageInfoRule, messageSuccessRule } from '../uti
 import { validateLuxComponentsVersion, validateNodeVersion } from '../utility/validation';
 
 export const updateMajorVersion = '11';
-export const updateMinVersion = '10.8.1';
+export const updateMinVersion = '10.8.2';
 export const updateNodeMinVersion = '12.0.0';
 
 export function update(options: any): Rule {
