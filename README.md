@@ -5,8 +5,9 @@ Dieses Projekt enthält alle Updateskripte (umgesetzt mit Angular Schematics) f�
 Updateskripte:
 
 - `update` (aktualisiert das Projekt)
-- `update-theme` (aktualisiert das Theme)
 - `add-lux-components` (fügt die LUX-Components zu einem Angular-Projekt hinzu)
+- `migrate-to-eslint` (migriert das Projekt von TS-Lint nach ES-Lint)
+- `migrate-to-webcomponent` (wandelt das Projekt in eine Web Component)
 
 ## Voraussetzungen
 
@@ -33,17 +34,20 @@ ng generate @ihk-gfi/lux-components-update:update --dry-run
 
 ## LUX-Components im Projekt einrichten
 
-Wenn man die LUX-Components in seinen Projekt einrichten möchte, kann der folgende Befehl verwendet werden:
+Wenn man die LUX-Components in seinem Projekt einrichten möchte, kann der folgende Befehl verwendet werden:
 
 ```bash
 ng generate @ihk-gfi/lux-components-update:add-lux-components
 ```
 
-## LUX-Theme aktualisieren
-
-Dieses Updateskript liest die LUX-Componentsversion aus der package.json
-und aktualisiert das LUX-Theme entsprechend.
-
+## Migration von TS-Lint nach ES-Lint
 ```bash
-ng generate @ihk-gfi/lux-components-update:update-theme
+ng generate @ihk-gfi/lux-components-update:migrate-to-eslint
+```
+
+WICHTIG! Der Updater schreibt zusätzliche Befehle in die Console. Diese müssen manuell ausgeführt werden.
+
+## Migration zur Web Component
+```bash
+ng generate @ihk-gfi/lux-components-update:migrate-to-webcomponent
 ```

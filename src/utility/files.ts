@@ -115,7 +115,7 @@ export function writeLinesToFile(tree: Tree, context: SchematicContext, filePath
  */
 export function iterateFilesAndModifyContent(
   tree: Tree,
-  rootPath: string,
+  rootPath: string = '',
   callback: Function,
   ...filePathEndings: string[]
 ) {
@@ -170,7 +170,7 @@ export function moveFilesToDirectory(options: any, sourcePath: string, targetPat
       sourcePath = '/' + sourcePath;
     }
 
-    targetPath = options.path + targetPath;
+    targetPath = (options.path ? options.path : '') + targetPath;
 
     const templateSource = apply(url('.' + sourcePath), [
       template({
@@ -210,7 +210,7 @@ export function deleteFilesInDirectory(options: any, path: string, exclude: stri
       path = path + '/';
     }
 
-    path = options.path + path;
+    path = (options.path ? options.path : '') + path;
 
     const dir = tree.getDir(path);
     if (dir) {
@@ -339,7 +339,7 @@ export function deleteFile(options: any, targetPath: string): Rule {
       targetPath = '/' + targetPath;
     }
 
-    targetPath = options.path + targetPath;
+    targetPath = (options.path ? options.path : '') + targetPath;
 
     if (tree.exists(targetPath)) {
       tree.delete(targetPath);

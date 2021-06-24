@@ -1,9 +1,8 @@
 import { Observable, of } from 'rxjs';
 import { delay } from 'rxjs/operators';
 import { Rule, SchematicContext, Tree } from '@angular-devkit/schematics';
-import { logInfo, logInfoWithDescriptor, logSuccess } from './logging';
+import { logError, logInfo, logInfoWithDescriptor, logSuccess } from './logging';
 import { NodePackageInstallTask } from '@angular-devkit/schematics/tasks';
-import { getProject } from '@schematics/angular/utility/project';
 import { getPackageJsonDependency } from './dependencies';
 import * as semver from 'semver';
 
@@ -83,12 +82,6 @@ export function applyRuleIf(minVersion: string, rule: Rule): Rule {
       return tree;
     }
   };
-}
-
-export function setupPath(options: any, tree: Tree) {
-  if (options.path === undefined) {
-    options.path = getProject(tree, options.project).root;
-  }
 }
 
 export function messageDebugRule(message: any, options: any): Rule {
