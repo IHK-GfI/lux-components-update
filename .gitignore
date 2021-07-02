@@ -51,3 +51,4 @@ src/**/*.js
 src/**/*.js.map
 src/**/*.d.ts
 lux-components-update.iml
+!file/**/*.js

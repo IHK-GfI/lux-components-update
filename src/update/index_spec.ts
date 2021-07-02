@@ -9,7 +9,7 @@ import { UtilConfig } from '../utility/util';
 import {
   addNg2PdfViewer,
   addThemeAssets, clearStylesScss,
-  deleteOldThemeDir, i18nUpdateAngularJson, i18nUpdateAppModule, i18nUpdatePackageJson, removeThemeAssets,
+  deleteOldThemeDir, i18nCopyMessages, i18nUpdateAngularJson, i18nUpdateAppModule, i18nUpdatePackageJson, removeThemeAssets,
   update,
   updateAppComponent,
   updateAppModule, updateBrowserList,
@@ -810,6 +810,21 @@ export class AppModule {
           expect(content).not.toContain('import {registerLocaleData');
           expect(content).toContain('import { DatePipe} from \'@angular/common\';');
 
+          done();
+        },
+        (reason) => expect(reason).toBeUndefined()
+      );
+    });
+  });
+
+  describe('[Rule] i18nCopyMessages', () => {
+    it('Sollte die I18N-Dateien kopieren',  (done) => {
+
+      callRule(i18nCopyMessages(testOptions), observableOf(appTree), context).subscribe(
+        (success) => {
+          expect(success.exists(testOptions.path + '/src/locale/messages.xlf')).toBeTrue();
+          expect(success.exists(testOptions.path + '/src/locale/messages.en.xlf')).toBeTrue();
+          expect(success.exists(testOptions.path + '/move-de-files.js')).toBeTrue();
           done();
         },
         (reason) => expect(reason).toBeUndefined()
