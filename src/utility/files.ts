@@ -178,12 +178,15 @@ export function moveFilesToDirectory(options: any, sourcePath: string, targetPat
         ...options
       }),
       forEach((file) => {
-        if (tree.exists(targetPath + file.path)) {
-          tree.overwrite(targetPath + file.path, file.content);
-          logInfo(`Datei '${file.path}' aktualisiert.`);
+        let newTargetPath = targetPath + file.path;
+        newTargetPath = newTargetPath.replace('//', '/');
+
+        if (tree.exists(newTargetPath)) {
+          tree.overwrite(newTargetPath, file.content);
+          logInfo(`Datei '${newTargetPath}' aktualisiert.`);
         } else {
-          tree.create(targetPath + file.path, file.content);
-          logInfo(`Datei '${file.path}' angelegt.`);
+          tree.create(newTargetPath, file.content);
+          logInfo(`Datei '${newTargetPath}' angelegt.`);
         }
         return null;
       })
