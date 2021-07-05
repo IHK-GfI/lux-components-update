@@ -1,6 +1,6 @@
 import { SchematicContext, Tree } from '@angular-devkit/schematics';
 import * as chalk from 'chalk';
-import { applyEdits, findNodeAtLocation, modify, Node, parseTree } from 'jsonc-parser';
+import { applyEdits, findNodeAtLocation, modify } from 'jsonc-parser';
 import { deleteLineFromFile } from './files';
 import { jsonFormattingOptions, readJson, readJsonAsString } from './json';
 import { formattedSchematicsException, logInfo } from './logging';
@@ -53,10 +53,29 @@ export function getPackageJsonDependency(tree: Tree, name: string): NodeDependen
 /**
  * Aktualisiert eine Dependency in der package.json bzw. fügt diese hinzu, falls sie noch nicht vorhanden ist.
  * @param tree
- * @param context
+ * @param name
+ * @param verion
+ */
+export function updateDependency(tree: Tree, name: string, version: string): void {
+  updatePackageJsonDependency(tree, { type: NodeDependencyType.Default, name: name, version: version});
+}
+
+/**
+ * Aktualisiert eine Dependency in der package.json bzw. fügt diese hinzu, falls sie noch nicht vorhanden ist.
+ * @param tree
+ * @param name
+ * @param verion
+ */
+export function updateDependencyDev(tree: Tree, name: string, version: string): void {
+  updatePackageJsonDependency(tree, { type: NodeDependencyType.Dev, name: name, version: version});
+}
+
+/**
+ * Aktualisiert eine Dependency in der package.json bzw. fügt diese hinzu, falls sie noch nicht vorhanden ist.
+ * @param tree
  * @param dependency
  */
-export function updatePackageJsonDependency(tree: Tree, context: SchematicContext, dependency: NodeDependency): void {
+export function updatePackageJsonDependency(tree: Tree, dependency: NodeDependency): void {
   const packageJsonAsNode = readJson(tree, '/package.json');
   let node = findNodeAtLocation(packageJsonAsNode, [dependency.type.toString(), dependency.name]);
   if (node) {

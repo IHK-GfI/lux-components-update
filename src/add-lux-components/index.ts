@@ -1,26 +1,21 @@
 import { chain, Rule, SchematicContext, Tree } from '@angular-devkit/schematics';
-import { applyEdits, Edit, modify } from 'jsonc-parser';
-import { iterateFilesAndModifyContent, moveFilesToDirectory } from '../utility/files';
-import { jsonFormattingOptions, readJson, readJsonAsString } from '../utility/json';
-import { logInfo } from '../utility/logging';
-import {
-  finish,
-  messageInfoRule,
-  messageSuccessRule,
-  replaceAll,
-  waitForTreeCallback
-} from '../utility/util';
-import { validateAngularVersion, validateNodeVersion } from '../utility/validation';
-import { updateDependencies } from '../update-dependencies/index';
 import * as chalk from 'chalk';
+import { applyEdits, Edit, modify } from 'jsonc-parser';
+import { updateDependencies } from '../update-dependencies/index';
 import {
-  addThemeAssets, i18nCopyMessages,
+  addThemeAssets,
+  i18nCopyMessages,
   i18nUpdateAngularJson,
-  i18nUpdatePackageJson, i18nUpdatePolyfills,
+  i18nUpdatePackageJson,
   updateAppComponent,
   updateMajorVersion,
   updateNodeMinVersion
 } from '../update/index';
+import { iterateFilesAndModifyContent, moveFilesToDirectory } from '../utility/files';
+import { jsonFormattingOptions, readJson, readJsonAsString } from '../utility/json';
+import { logInfo } from '../utility/logging';
+import { finish, messageInfoRule, messageSuccessRule, replaceAll, waitForTreeCallback } from '../utility/util';
+import { validateAngularVersion, validateNodeVersion } from '../utility/validation';
 
 export function addLuxComponents(options: any): Rule {
   return (tree: Tree, _context: SchematicContext) => {

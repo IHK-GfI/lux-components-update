@@ -2,9 +2,14 @@
   "$schema": "../node_modules/@angular-devkit/schematics/collection-schema.json",
   "schematics": {
     "update": {
-      "description": "Aktualisiert das LUX-Componentsprojekt",
+      "description": "Aktualisiert das LUX-Componentsprojekt auf die Version 11.0.0",
       "factory": "./update/index#update",
       "schema": "./update/schema.json"
+    },
+    "update-11.0.1": {
+      "description": "Aktualisiert das LUX-Componentsprojekt auf die Version 11.0.1",
+      "factory": "./update110001/index#update110001",
+      "schema": "./update110001/schema.json"
     },
     "update-dependencies": {
       "description": "Aktualisiert die Abhängigkeiten im LUX-Componentsprojekt",

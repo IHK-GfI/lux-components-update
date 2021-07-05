@@ -1,5 +1,5 @@
-import { Schema as WorkspaceOptions } from '@schematics/angular/workspace/schema';
 import { Schema as ApplicationOptions, Style } from '@schematics/angular/application/schema';
+import { Schema as WorkspaceOptions } from '@schematics/angular/workspace/schema';
 
 /**
  * Standard-Optionen für das Test-Workspace.

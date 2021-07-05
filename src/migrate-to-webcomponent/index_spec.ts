@@ -1,16 +1,18 @@
-import * as path from 'path';
-import { SchematicTestRunner, UnitTestTree } from '@angular-devkit/schematics/testing';
 import { callRule, SchematicContext } from '@angular-devkit/schematics';
+import { SchematicTestRunner, UnitTestTree } from '@angular-devkit/schematics/testing';
+import * as path from 'path';
 import { of as observableOf } from 'rxjs';
-import { UtilConfig } from '../utility/util';
 import { appOptions, workspaceOptions } from '../utility/test';
+import { UtilConfig } from '../utility/util';
 import {
   createWebpackConfigJs,
-  updateAngularJson, updateAppComponent,
+  updateAngularJson,
+  updateAppComponent,
   updateAppComponentHtml,
   updateAppModule,
   updateAppRoutingModule,
-  updateIndexHtml, updatePackageJson
+  updateIndexHtml,
+  updatePackageJson
 } from './index';
 
 const collectionPath = path.join(__dirname, '../collection.json');
