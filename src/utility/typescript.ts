@@ -1,4 +1,4 @@
-import { forEach, SchematicsException, Tree } from '@angular-devkit/schematics';
+import { SchematicsException, Tree } from '@angular-devkit/schematics';
 import * as ts from 'typescript';
 import { logInfo } from './logging';
 

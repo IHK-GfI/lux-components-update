@@ -1,17 +1,10 @@
-import * as path from 'path';
-import { SchematicTestRunner, UnitTestTree } from '@angular-devkit/schematics/testing';
 import { callRule, SchematicContext } from '@angular-devkit/schematics';
+import { SchematicTestRunner, UnitTestTree } from '@angular-devkit/schematics/testing';
+import * as path from 'path';
 import { of as observableOf } from 'rxjs';
-import { UtilConfig } from '../utility/util';
 import { appOptions, workspaceOptions } from '../utility/test';
-import {
-  getPackageJsonDependency,
-  NodeDependencyType,
-  updatePackageJsonDependency
-} from '../utility/dependencies';
-import { updateMajorVersion } from '../update';
+import { UtilConfig } from '../utility/util';
 import { deleteEmptyLifecyleHooksInTsFiles } from './index';
-import exp = require('constants');
 
 const collectionPath = path.join(__dirname, '../collection.json');
 

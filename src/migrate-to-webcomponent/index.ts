@@ -6,12 +6,14 @@ import { addAttribute, appendAttribute } from '../utility/html';
 import { appendScript, jsonFormattingOptions, readJson, readJsonAsString } from '../utility/json';
 import { logInfo } from '../utility/logging';
 import {
-  addConstructorParameter, addConstructorContent,
+  addClassProperty,
+  addConstructorContent,
+  addConstructorParameter,
   addImport,
   addInterface,
   addMethod,
   getSourceNodes,
-  getSyntaxListOfClass, addClassProperty
+  getSyntaxListOfClass
 } from '../utility/typescript';
 import { finish, messageInfoRule, messageSuccessRule } from '../utility/util';
 

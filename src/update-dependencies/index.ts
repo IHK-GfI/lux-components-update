@@ -23,7 +23,8 @@ export function updateDefaultDependencies(): Rule {
   return (tree: Tree, context: SchematicContext) => {
     return waitForTreeCallback(tree, () => {
       const dependencies: NodeDependency[] = [
-        { type: NodeDependencyType.Default, version: '~' + updateMajorVersion + '.0.0', name: '@ihk-gfi/lux-components' },
+        { type: NodeDependencyType.Default, version: '' + updateMajorVersion + '.0.0', name: '@ihk-gfi/lux-components' },
+        { type: NodeDependencyType.Default, version: '^' + updateMajorVersion + '.0.0', name: '@ihk-gfi/lux-components-update' },
         { type: NodeDependencyType.Default, version: '^' + updateMajorVersion + '.1.0', name: '@ihk-gfi/lux-components-theme'},
         { type: NodeDependencyType.Default, version: '11.2.11', name: '@angular/animations' },
         { type: NodeDependencyType.Default, version: '11.2.11', name: '@angular/common' },
@@ -50,7 +51,7 @@ export function updateDefaultDependencies(): Rule {
       ];
 
       dependencies.forEach((dependency) => {
-        updatePackageJsonDependency(tree, context, dependency);
+        updatePackageJsonDependency(tree, dependency);
       });
       return tree;
     });
@@ -90,7 +91,7 @@ export function updateDevDependencies(): Rule {
       ];
 
       devDependencies.forEach((devDependency) => {
-        updatePackageJsonDependency(tree, context, devDependency);
+        updatePackageJsonDependency(tree, devDependency);
       });
       return tree;
     });

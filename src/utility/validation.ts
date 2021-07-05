@@ -1,8 +1,8 @@
 import { SchematicContext, Tree } from '@angular-devkit/schematics';
-import { getPackageJsonDependency } from './dependencies';
-import * as semver from 'semver';
-import { formattedSchematicsException, logInfo } from './logging';
 import * as chalk from 'chalk';
+import * as semver from 'semver';
+import { getPackageJsonDependency } from './dependencies';
+import { formattedSchematicsException, logInfo } from './logging';
 
 export function validateNodeVersion(context: SchematicContext, minimumVersion: string) {
   if (semver.lt(process.versions.node, minimumVersion)) {

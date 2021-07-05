@@ -4,7 +4,8 @@ Dieses Projekt enthält alle Updateskripte (umgesetzt mit Angular Schematics) f�
 
 Updateskripte:
 
-- `update` (aktualisiert das Projekt)
+- `update` (aktualisiert das Projekt auf die Version 11.0.0)
+- `update-11.0.1` (aktualisiert das Projekt auf die Version 11.0.1)
 - `add-lux-components` (fügt die LUX-Components zu einem Angular-Projekt hinzu)
 - `migrate-to-eslint` (migriert das Projekt von TS-Lint nach ES-Lint)
 - `migrate-to-webcomponent` (wandelt das Projekt in eine Web Component)

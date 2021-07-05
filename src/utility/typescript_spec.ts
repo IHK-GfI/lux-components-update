@@ -1,8 +1,8 @@
-import * as path from 'path';
-import { SchematicTestRunner, UnitTestTree } from '@angular-devkit/schematics/testing';
 import { SchematicContext } from '@angular-devkit/schematics';
-import { UtilConfig } from '../utility/util';
+import { SchematicTestRunner, UnitTestTree } from '@angular-devkit/schematics/testing';
+import * as path from 'path';
 import { appOptions, workspaceOptions } from '../utility/test';
+import { UtilConfig } from '../utility/util';
 import {
   addClassProperty,
   addConstructorContent,

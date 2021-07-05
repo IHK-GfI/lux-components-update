@@ -2,15 +2,15 @@ import { callRule, SchematicContext } from '@angular-devkit/schematics';
 import { SchematicTestRunner, UnitTestTree } from '@angular-devkit/schematics/testing';
 import * as path from 'path';
 import { of as observableOf } from 'rxjs';
-import { updateMajorVersion } from '../update';
-import { getPackageJsonDependency, NodeDependencyType, updatePackageJsonDependency } from '../utility/dependencies';
+import { update } from '../update/index';
+import { getPackageJsonDependency } from '../utility/dependencies';
 import { appOptions, workspaceOptions } from '../utility/test';
 import { UtilConfig } from '../utility/util';
-import { addLuxComponents } from './index';
+import { update110001 } from './index';
 
 const collectionPath = path.join(__dirname, '../collection.json');
 
-describe('add-lux-components', () => {
+describe('update', () => {
   let appTree: UnitTestTree;
   let runner: SchematicTestRunner;
   let context: SchematicContext;
@@ -28,7 +28,7 @@ describe('add-lux-components', () => {
     UtilConfig.defaultWaitMS = 0;
 
     const collection = runner.engine.createCollection(collectionPath);
-    const schematic = runner.engine.createSchematic('add-lux-components', collection);
+    const schematic = runner.engine.createSchematic('update-11.0.1', collection);
     context = runner.engine.createContext(schematic);
 
     testOptions.project = appOptions.name;
@@ -36,16 +36,33 @@ describe('add-lux-components', () => {
     testOptions.verbose = true;
   });
 
-  describe('[Rule] addLuxComponents', () => {
-    it('Sollte die LUX-Components im Projekt eingerichtet haben', (done) => {
-      updatePackageJsonDependency(
-        appTree,
-        { type: NodeDependencyType.Default, version: updateMajorVersion + '.0.0', name: '@angular/common' }
+  describe('[Rule] update01', () => {
+    it('Sollte die Abhängigkeiten aktualisieren', (done) => {
+      appTree.overwrite(
+        '/package.json',
+        `
+            {
+              "name": "Lorem ipsum",
+              "version": "0.0.32",
+              "scripts": {
+                "build": "tsc -p tsconfig.json",
+                "test": "npm run build && jasmine src/**/*_spec.js"
+              },
+              "dependencies": {
+                "@ihk-gfi/lux-components": "11.0.0"
+              },
+              "devDependencies": {
+                "@angular-devkit/build-angular": "0.1102.10",
+              }
+            }
+        `
       );
 
-      callRule(addLuxComponents(testOptions), observableOf(appTree), context).subscribe(
+      callRule(update110001(testOptions), observableOf(appTree), context).subscribe(
         () => {
-          expect(getPackageJsonDependency(appTree, '@ihk-gfi/lux-components').version).toContain(updateMajorVersion);
+          expect(getPackageJsonDependency(appTree, '@ihk-gfi/lux-components').version).toEqual('11.0.1');
+          expect(getPackageJsonDependency(appTree, '@ihk-gfi/lux-components-theme').version).toEqual('^11.1.0');
+          expect(getPackageJsonDependency(appTree, '@angular-devkit/build-angular').version).toEqual('0.1102.14');
           done();
         },
         (reason) => expect(reason).toBeUndefined()

@@ -1,4 +1,4 @@
-import { chain, Rule, SchematicContext, SchematicsException, Tree } from '@angular-devkit/schematics';
+import { chain, Rule, SchematicContext, Tree } from '@angular-devkit/schematics';
 import * as chalk from 'chalk';
 import { applyEdits, Edit, findNodeAtLocation, modify } from 'jsonc-parser';
 import * as ts from 'typescript';
@@ -8,7 +8,8 @@ import { jsonFormattingOptions, readJson, readJsonAsString } from '../utility/js
 import { logInfo, logInfoWithDescriptor, logSuccess } from '../utility/logging';
 import {
   addConstructorContent,
-  addConstructorParameter, addImport,
+  addConstructorParameter,
+  addImport,
   getNextSibling,
   getPrevSibling,
   getSourceNodes,

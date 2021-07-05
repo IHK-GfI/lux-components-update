@@ -3,17 +3,24 @@ import { SchematicTestRunner, UnitTestTree } from '@angular-devkit/schematics/te
 import * as path from 'path';
 import { of as observableOf } from 'rxjs';
 import { getPackageJsonDependency, NodeDependencyType, updatePackageJsonDependency } from '../utility/dependencies';
-import { readJson } from '../utility/json';
 import { appOptions, workspaceOptions } from '../utility/test';
 import { UtilConfig } from '../utility/util';
 import {
   addNg2PdfViewer,
-  addThemeAssets, clearStylesScss,
-  deleteOldThemeDir, i18nCopyMessages, i18nUpdateAngularJson, i18nUpdateAppModule, i18nUpdatePackageJson, removeThemeAssets,
+  addThemeAssets,
+  clearStylesScss,
+  deleteOldThemeDir,
+  i18nCopyMessages,
+  i18nUpdateAngularJson,
+  i18nUpdateAppModule,
+  i18nUpdatePackageJson,
+  removeThemeAssets,
   update,
   updateAppComponent,
-  updateAppModule, updateBrowserList,
-  updateMajorVersion, updateTsConfigJson
+  updateAppModule,
+  updateBrowserList,
+  updateMajorVersion,
+  updateTsConfigJson
 } from './index';
 
 const collectionPath = path.join(__dirname, '../collection.json');
@@ -185,7 +192,6 @@ describe('update', () => {
     it('Sollte einen Fehler werfen, wenn Version < n - 1', () => {
       updatePackageJsonDependency(
         appTree,
-        context,
         { type: NodeDependencyType.Default, version: '1.9.3', name: '@ihk-gfi/lux-components' }
       );
       Object.defineProperty(process.versions, 'node', {
@@ -222,7 +228,7 @@ describe('update', () => {
 
       callRule(update(testOptions), observableOf(appTree), context).subscribe(
         () => {
-          expect(getPackageJsonDependency(appTree, '@ihk-gfi/lux-components').version).toEqual('~' + updateMajorVersion + '.0.0');
+          expect(getPackageJsonDependency(appTree, '@ihk-gfi/lux-components').version).toEqual('' + updateMajorVersion + '.0.0');
           done();
         },
         (reason) => expect(reason).toBeUndefined()

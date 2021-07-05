@@ -1,10 +1,10 @@
+import { Rule, SchematicContext, Tree } from '@angular-devkit/schematics';
+import { NodePackageInstallTask } from '@angular-devkit/schematics/tasks';
 import { Observable, of } from 'rxjs';
 import { delay } from 'rxjs/operators';
-import { Rule, SchematicContext, Tree } from '@angular-devkit/schematics';
-import { logError, logInfo, logInfoWithDescriptor, logSuccess } from './logging';
-import { NodePackageInstallTask } from '@angular-devkit/schematics/tasks';
-import { getPackageJsonDependency } from './dependencies';
 import * as semver from 'semver';
+import { getPackageJsonDependency } from './dependencies';
+import { logInfo, logInfoWithDescriptor, logSuccess } from './logging';
 
 /**
  * Konfig-Objekt für einige Util-Methoden.
