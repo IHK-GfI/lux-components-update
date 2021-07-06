@@ -2,15 +2,14 @@ import { callRule, SchematicContext } from '@angular-devkit/schematics';
 import { SchematicTestRunner, UnitTestTree } from '@angular-devkit/schematics/testing';
 import * as path from 'path';
 import { of as observableOf } from 'rxjs';
-import { update } from '../update/index';
 import { getPackageJsonDependency } from '../utility/dependencies';
 import { appOptions, workspaceOptions } from '../utility/test';
 import { UtilConfig } from '../utility/util';
-import { update110001 } from './index';
+import { update110100 } from './index';
 
 const collectionPath = path.join(__dirname, '../collection.json');
 
-describe('update110001', () => {
+describe('update110100', () => {
   let appTree: UnitTestTree;
   let runner: SchematicTestRunner;
   let context: SchematicContext;
@@ -28,7 +27,7 @@ describe('update110001', () => {
     UtilConfig.defaultWaitMS = 0;
 
     const collection = runner.engine.createCollection(collectionPath);
-    const schematic = runner.engine.createSchematic('update-11.0.1', collection);
+    const schematic = runner.engine.createSchematic('update-11.1.0', collection);
     context = runner.engine.createContext(schematic);
 
     testOptions.project = appOptions.name;
@@ -36,7 +35,7 @@ describe('update110001', () => {
     testOptions.verbose = true;
   });
 
-  describe('[Rule] update110001', () => {
+  describe('[Rule] update110100', () => {
     it('Sollte die Abhängigkeiten aktualisieren', (done) => {
       appTree.overwrite(
         '/package.json',
@@ -49,7 +48,8 @@ describe('update110001', () => {
                 "test": "npm run build && jasmine src/**/*_spec.js"
               },
               "dependencies": {
-                "@ihk-gfi/lux-components": "11.0.0"
+                "@ihk-gfi/lux-components": "11.0.0",
+                "@ihk-gfi/lux-components": "^11.1.0"
               },
               "devDependencies": {
                 "@angular-devkit/build-angular": "0.1102.10",
@@ -58,11 +58,10 @@ describe('update110001', () => {
         `
       );
 
-      callRule(update110001(testOptions), observableOf(appTree), context).subscribe(
+      callRule(update110100(testOptions), observableOf(appTree), context).subscribe(
         () => {
-          expect(getPackageJsonDependency(appTree, '@ihk-gfi/lux-components').version).toEqual('11.0.1');
-          expect(getPackageJsonDependency(appTree, '@ihk-gfi/lux-components-theme').version).toEqual('^11.1.0');
-          expect(getPackageJsonDependency(appTree, '@angular-devkit/build-angular').version).toEqual('0.1102.14');
+          expect(getPackageJsonDependency(appTree, '@ihk-gfi/lux-components').version).toEqual('11.1.0');
+          expect(getPackageJsonDependency(appTree, '@ihk-gfi/lux-components-theme').version).toEqual('^11.2.0');
           done();
         },
         (reason) => expect(reason).toBeUndefined()
