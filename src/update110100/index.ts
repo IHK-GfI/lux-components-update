@@ -9,6 +9,7 @@ export function update110100(options: any): Rule {
       messageInfoRule(`Die LUX-Components werden auf die Version 11.1.0 aktualisiert...`),
       messageInfoRule(`Die Datei "package.json" wird angepasst...`),
       (tree: Tree, _context: SchematicContext) => {
+        updateDependency(tree, 'marked', '2.1.3');
         updateDependency(tree, '@ihk-gfi/lux-components', '11.1.0');
         updateDependency(tree, '@ihk-gfi/lux-components-theme', '^11.3.0');
 
