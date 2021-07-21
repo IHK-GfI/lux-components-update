@@ -63,6 +63,7 @@ describe('update110100', () => {
           expect(getPackageJsonDependency(appTree, 'marked').version).toEqual('2.1.3');
           expect(getPackageJsonDependency(appTree, '@ihk-gfi/lux-components').version).toEqual('11.1.0');
           expect(getPackageJsonDependency(appTree, '@ihk-gfi/lux-components-theme').version).toEqual('^11.3.0');
+          expect(getPackageJsonDependency(appTree, '@compodoc/compodoc').version).toEqual('1.1.14');
           done();
         },
         (reason) => expect(reason).toBeUndefined()
