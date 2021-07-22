@@ -16,6 +16,11 @@
       "factory": "./update110100/index#update110100",
       "schema": "./update110100/schema.json"
     },
+    "update-11.1.1": {
+      "description": "Aktualisiert das LUX-Componentsprojekt auf die Version 11.1.1",
+      "factory": "./update110101/index#update110101",
+      "schema": "./update110101/schema.json"
+    },
     "update-dependencies": {
       "description": "Aktualisiert die Abhängigkeiten im LUX-Componentsprojekt",
       "factory": "./update-dependencies/index#updateDependencies",
