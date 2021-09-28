@@ -11,6 +11,11 @@ import {
   updateMajorVersion,
   updateNodeMinVersion
 } from '../update/index';
+import { update110001 } from '../update110001/index';
+import { update110100 } from '../update110100/index';
+import { update110101 } from '../update110101/index';
+import { update110200 } from '../update110200/index';
+import { update110300 } from '../update110300/index';
 import { iterateFilesAndModifyContent, moveFilesToDirectory } from '../utility/files';
 import { jsonFormattingOptions, readJson, readJsonAsString } from '../utility/json';
 import { logInfo } from '../utility/logging';
@@ -31,6 +36,11 @@ export function addLuxComponents(options: any): Rule {
       i18nUpdateAngularJson(options),
       i18nCopyMessages(options),
       updateApp(options),
+      update110001(options),
+      update110100(options),
+      update110101(options),
+      update110200(options),
+      update110300(options),
       finish(
         `Die LUX-Components ${updateMajorVersion} wurden erfolgreich eingerichtet.`,
         `${chalk.yellowBright('Fertig!')}`
