@@ -24,7 +24,7 @@ export function update110300(options: any): Rule {
   function updateDependencies() {
     return (tree: Tree, _context: SchematicContext) => {
       updateDependency(tree, '@ihk-gfi/lux-components', '11.3.0');
-      updateDependency(tree, '@ihk-gfi/lux-components-theme', '11.4.0');
+      updateDependency(tree, '@ihk-gfi/lux-components-theme', '11.5.0');
 
       return tree;
     };
