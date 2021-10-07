@@ -60,6 +60,7 @@ describe('update110301', () => {
       callRule(update110301(testOptions), observableOf(appTree), context).subscribe(
         () => {
           expect(getPackageJsonDependency(appTree, '@ihk-gfi/lux-components').version).toEqual('11.3.1');
+          expect(getPackageJsonDependency(appTree, '@ihk-gfi/lux-components-theme').version).toEqual('11.6.0');
           done();
         },
         (reason) => expect(reason).toBeUndefined()
