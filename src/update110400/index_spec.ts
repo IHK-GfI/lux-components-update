@@ -5,11 +5,11 @@ import { of as observableOf } from 'rxjs';
 import { getPackageJsonDependency } from '../utility/dependencies';
 import { appOptions, workspaceOptions } from '../utility/test';
 import { UtilConfig } from '../utility/util';
-import { update110301 } from './index';
+import { update110400 } from './index';
 
 const collectionPath = path.join(__dirname, '../collection.json');
 
-describe('update110301', () => {
+describe('update110400', () => {
   let appTree: UnitTestTree;
   let runner: SchematicTestRunner;
   let context: SchematicContext;
@@ -27,7 +27,7 @@ describe('update110301', () => {
     UtilConfig.defaultWaitMS = 0;
 
     const collection = runner.engine.createCollection(collectionPath);
-    const schematic = runner.engine.createSchematic('update-11.3.1', collection);
+    const schematic = runner.engine.createSchematic('update-11.4.0', collection);
     context = runner.engine.createContext(schematic);
 
     testOptions.project = appOptions.name;
@@ -35,7 +35,7 @@ describe('update110301', () => {
     testOptions.verbose = true;
   });
 
-  describe('[Rule] update110301', () => {
+  describe('[Rule] update110400', () => {
     it('Sollte die Abhängigkeiten aktualisieren', (done) => {
       appTree.overwrite(
         '/package.json',
@@ -57,10 +57,10 @@ describe('update110301', () => {
         `
       );
 
-      callRule(update110301(testOptions), observableOf(appTree), context).subscribe(
+      callRule(update110400(testOptions), observableOf(appTree), context).subscribe(
         () => {
-          expect(getPackageJsonDependency(appTree, '@ihk-gfi/lux-components').version).toEqual('11.3.1');
-          expect(getPackageJsonDependency(appTree, '@ihk-gfi/lux-components-theme').version).toEqual('11.6.0');
+          expect(getPackageJsonDependency(appTree, '@ihk-gfi/lux-components').version).toEqual('11.4.0');
+          expect(getPackageJsonDependency(appTree, '@ihk-gfi/lux-components-theme').version).toEqual('11.6.1');
           done();
         },
         (reason) => expect(reason).toBeUndefined()
