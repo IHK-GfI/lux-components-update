@@ -157,6 +157,10 @@ export function iterateFilesAndModifyContent(
 /**
  * Diese Methode ersetzt die angegebene Dateien. Sollten diese nicht existieren, werden sie neu angelegt.
  *
+ * Beispiele:
+ *   moveFilesToDirectory(options, 'files/locale', 'src/locale')
+ *   moveFilesToDirectory(options, 'files/root', '/')
+ *
  * @param options Die Optionen.
  * @param sourcePath Ein Quellpfad (z.B. files/theming für alle Dateien unter /theming).
  * @param targetPath Ein Zielpfad (z.B. src/theming/).

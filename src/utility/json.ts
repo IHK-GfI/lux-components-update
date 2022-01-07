@@ -1,6 +1,6 @@
 import { Tree } from '@angular-devkit/schematics';
-import { FormattingOptions, Node, parseTree } from 'jsonc-parser';
-import { formattedSchematicsException } from './logging';
+import { applyEdits, findNodeAtLocation, FormattingOptions, modify, Node, parseTree } from 'jsonc-parser';
+import { formattedSchematicsException, logInfo } from './logging';
 
 export const jsonFormattingOptions: FormattingOptions = {
   insertSpaces: true,
@@ -67,4 +67,103 @@ export function appendScript(script: string, part: string, index?: number) {
   }
 
   return newSkript;
+}
+
+/**
+ * Diese Methode liefert den Index im Array des Objekts mit der übergebenen Property zurück.
+ *
+ * Beispiel: findObjectIndexInArray(node, 'glob', '*.css') = 1
+ * ```json
+ * 'assets': [
+ *   'src/assets',
+ *   {
+ *     'glob': '*.css',
+ *     'input': './node_modules/@ihk-gfi/lux-components-theme/prebuilt-themes',
+ *     'output': './assets/themes'
+ *   },
+ *   'src/favicon.ico',
+ * ]
+ * ```
+ *
+ * @param arrayNode Ein Konten, der ein Array als Wert hat.
+ * @param propertyName Ein Propertyname (z.B. glob).
+ * @param propertyValue Ein Propertywert (z.B. *.css).
+ */
+export function findObjectIndexInArray(arrayNode: Node, propertyName: string, propertyValue: string): number {
+  let arrayIndex = -1;
+  if (arrayNode.children) {
+    for (let i = 0; i < arrayNode.children.length; i++) {
+      const assetChild = arrayNode.children[i];
+      if (assetChild.type === 'object' && assetChild.children && assetChild.children.length > 0) {
+        const assetObjectChildren = assetChild.children;
+        if (assetObjectChildren) {
+          for (let j = 0; j < assetObjectChildren.length; j++) {
+            if (assetObjectChildren[j].type === 'property') {
+              const propertyChildren = assetObjectChildren[j].children ?? [];
+              if (
+                propertyChildren.length > 1 &&
+                propertyChildren[0].value === propertyName &&
+                propertyChildren[1].value === propertyValue
+              ) {
+                arrayIndex = i;
+                break;
+              }
+            }
+          }
+        }
+      } else if (assetChild.type === 'string' && assetChild.value === propertyValue) {
+        arrayIndex = i;
+        break;
+      }
+    }
+  }
+
+  return arrayIndex;
+}
+
+/**
+ * Diese Methode liefert den Index im Array des Werts zurück.
+ *
+ * Beispiel: findStringIndexInArray(node, 'src/favicon.ico') = 2
+ * ```json
+ * 'assets': [
+ *   'src/assets',
+ *   {
+ *     'glob': '*.css',
+ *     'input': './node_modules/@ihk-gfi/lux-components-theme/prebuilt-themes',
+ *     'output': './assets/themes'
+ *   },
+ *   'src/favicon.ico',
+ * ]
+ * ```
+ *
+ * @param arrayNode Ein Konten, der ein Array als Wert hat.
+ * @param value Ein Wert (z.B. 'src/favicon.ico').
+ */
+export function findStringIndexInArray(arrayNode: Node, value: string): number {
+  let arrayIndex = -1;
+  if (arrayNode.children) {
+    for (let i = 0; i < arrayNode.children.length; i++) {
+      const assetChild = arrayNode.children[i];
+      if (assetChild.type === 'string' && assetChild.value === value) {
+        arrayIndex = i;
+        break;
+      }
+    }
+  }
+
+  return arrayIndex;
+}
+
+export function removeJsonNode(tree: Tree, filePath: string, jsonPath: (string | any)[], message = `Den Abschnitt "${JSON.stringify(jsonPath)}" gelöscht.`) {
+  const contentAsNode  = readJson(tree, filePath);
+  const testAssetsNode = findNodeAtLocation(contentAsNode, jsonPath);
+  if (testAssetsNode) {
+    const angularJson = readJsonAsString(tree, filePath);
+    const edits       = modify(angularJson, jsonPath, void 0, { formattingOptions: jsonFormattingOptions });
+    if (edits) {
+      tree.overwrite(filePath, applyEdits(angularJson, edits));
+      logInfo(message);
+    }
+  }
 }

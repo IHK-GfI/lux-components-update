@@ -2,7 +2,7 @@ import { chain, Rule, SchematicContext, Tree } from '@angular-devkit/schematics'
 import * as chalk from 'chalk';
 import { applyEdits, Edit, modify } from 'jsonc-parser';
 import { updateDependencies } from '../update-dependencies/index';
-import { addThemeAssets, i18nCopyMessages, updateMajorVersion, updateNodeMinVersion } from '../update/index';
+import { updateBuildThemeAssets, copyFiles, updateMajorVersion, updateNodeMinVersion } from '../update/index';
 import { iterateFilesAndModifyContent, moveFilesToDirectory } from '../utility/files';
 import { jsonFormattingOptions, readJson, readJsonAsString } from '../utility/json';
 import { logInfo } from '../utility/logging';
@@ -16,9 +16,9 @@ export function addLuxComponents(options: any): Rule {
       copyAppFiles(options),
       updatePackageJson(options),
       updateDependencies(),
-      addThemeAssets(options),
+      updateBuildThemeAssets(options),
       updateIndexHtml(options),
-      i18nCopyMessages(options),
+      copyFiles(options),
       updateApp(options),
       finish(
         `Die LUX-Components ${updateMajorVersion} wurden erfolgreich eingerichtet.`,

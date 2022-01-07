@@ -1,21 +1,22 @@
 import { chain, Rule, SchematicContext, Tree } from '@angular-devkit/schematics';
 import * as chalk from 'chalk';
-import { applyEdits, Edit, findNodeAtLocation, modify } from 'jsonc-parser';
-import * as ts from 'typescript';
+import { applyEdits, findNodeAtLocation, modify } from 'jsonc-parser';
 import { updateDependencies } from '../update-dependencies/index';
-import { moveFilesToDirectory } from '../utility/files';
-import { jsonFormattingOptions, readJson, readJsonAsString } from '../utility/json';
-import { logInfo, logInfoWithDescriptor, logSuccess } from '../utility/logging';
+import { iterateFilesAndModifyContent, moveFilesToDirectory } from '../utility/files';
+import { removeAttribute } from '../utility/html';
 import {
-  getNextSibling,
-  getPrevSibling,
-  getSourceNodes,
-} from '../utility/typescript';
+  findObjectIndexInArray,
+  jsonFormattingOptions,
+  readJson,
+  readJsonAsString,
+  removeJsonNode
+} from '../utility/json';
+import { logInfo, logInfoWithDescriptor, logSuccess } from '../utility/logging';
 import { applyRuleIf, finish, messageInfoRule, messageSuccessRule } from '../utility/util';
 import { validateLuxComponentsVersion, validateNodeVersion } from '../utility/validation';
 
 export const updateMajorVersion = '12';
-export const updateMinVersion = '11.5.0';
+export const updateMinVersion = '11.7.0';
 export const updateNodeMinVersion = '12.0.0';
 
 export function update(options: any): Rule {
@@ -36,9 +37,10 @@ export function updateProject(options: any): Rule {
   return (tree: Tree, _context: SchematicContext) => {
     return chain([
       messageInfoRule(`LUX-Components ${updateMajorVersion} werden aktualisiert...`),
-      updateBrowserList(options),
       updateAngularJson(options),
-      i18nCopyMessages(options),
+      updatePackageJson(options),
+      copyFiles(options),
+      removeLuxSelectedFilesAlwaysUseArray(options),
       updateDependencies(),
       messageSuccessRule(`LUX-Components ${updateMajorVersion} wurden aktualisiert.`)
     ]);
@@ -58,47 +60,12 @@ export function check(options: any): Rule {
   };
 }
 
-export function i18nCopyMessages(options: any): Rule {
+export function copyFiles(options: any): Rule {
   return chain([
-    messageInfoRule(`Sprachdateien werden kopiert...`),
+    messageInfoRule(`Dateien werden kopiert...`),
     moveFilesToDirectory(options, 'files/locale', 'src/locale'),
-    messageSuccessRule(`Sprachdateien wurden kopiert.`)
-  ]);
-}
-
-export function updateBrowserList(options: any): Rule {
-  return chain([
-    messageInfoRule(`Datei ".browserslistrc" wird aktualisiert...`),
-    (tree: Tree, context: SchematicContext) => {
-      const filePath = '/.browserslistrc';
-      const browserListContent = tree.read(filePath);
-      if (browserListContent) {
-        const content = (browserListContent as Buffer).toString();
-        if (content) {
-          let modifiedContent = '';
-
-          const lines = content.split('\n');
-          if (lines) {
-            lines.forEach((line) => {
-              if (line.trim().startsWith('IE 9-11')) {
-                modifiedContent += 'not IE 9-10' + '\n';
-                modifiedContent += 'IE 11' + '\n';
-              } else {
-                modifiedContent += line + '\n';
-              }
-            });
-
-            if (content !== modifiedContent) {
-              tree.overwrite(filePath, modifiedContent);
-              logInfo(`Einträge für den IE 9-10 entfernt.`);
-            }
-          }
-        }
-      } else {
-        logInfo(`Die Datei ".browserslistrc" konnte nicht gefunden werden.`);
-      }
-    },
-    messageSuccessRule(`Datei ".browserslistrc" wurde aktualisiert.`)
+    moveFilesToDirectory(options, 'files/root', '/'),
+    messageSuccessRule(`Dateien wurden kopiert.`)
   ]);
 }
 
@@ -106,10 +73,32 @@ export function updateAngularJson(options: any): Rule {
   return (tree: Tree, _context: SchematicContext) => {
     return chain([
       messageInfoRule(`Datei "angular.json" wird aktualisiert...`),
-      addThemeAssets(options),
+      updateBuildThemeAssets(options),
+      updateTestThemeAssets(options),
       removeThemeAssets(options),
       addNg2PdfViewer(options),
       messageSuccessRule(`Datei "angular.json" wurde aktualisiert.`)
+    ]);
+  };
+}
+
+export function updatePackageJson(options: any): Rule {
+  return (tree: Tree, _context: SchematicContext) => {
+    return chain([
+      messageInfoRule(`Datei "package.json" wird aktualisiert...`),
+      (tree: Tree, _context: SchematicContext) => {
+        const filePath = '/package.json';
+        const content = readJsonAsString(tree, filePath);
+
+        let modifiedContent = content;
+        modifiedContent = modifiedContent.replace(' --ivy', '');
+
+        if (content !== modifiedContent) {
+          logInfo(`Das Flag "--ivy" wurde aus dem Script "xi18n" entfernt.`);
+          tree.overwrite(filePath, modifiedContent);
+        }
+      },
+      messageSuccessRule(`Datei "package.json" wurde aktualisiert.`)
     ]);
   };
 }
@@ -154,308 +143,71 @@ export function addNg2PdfViewer(options: any): Rule {
   };
 }
 
-export function addThemeAssets(options: any): Rule {
+export function updateBuildThemeAssets(options: any): Rule {
   return (tree: Tree, context: SchematicContext) => {
-    const filePath = '/angular.json';
-    const value = {
-      glob: '*.css',
-      input: './node_modules/@ihk-gfi/lux-components-theme/prebuilt-themes',
-      output: './assets/themes'
-    };
-
-    let contentAsNode = readJson(tree, filePath);
-    const testAssetsNode = findNodeAtLocation(contentAsNode, [
-      'projects',
-      options.project,
-      'architect',
-      'test',
-      'options',
-      'assets'
-    ]);
-    if (testAssetsNode) {
-      const angularJson = readJsonAsString(tree, filePath);
-      const edits = modify(
-        angularJson,
-        ['projects', options.project, 'architect', 'test', 'options', 'assets', 0],
-        value,
-        { formattingOptions: jsonFormattingOptions, isArrayInsertion: true }
-      );
-      if (edits) {
-        tree.overwrite(filePath, applyEdits(angularJson, edits));
-        logInfo(`Neues LUX-Theme im Assets-Abschnitt (test) hinzugefügt.`);
-      }
-    }
-
-    contentAsNode = readJson(tree, filePath);
-    const buildAssetsNode = findNodeAtLocation(contentAsNode, [
-      'projects',
-      options.project,
-      'architect',
-      'build',
-      'options',
-      'assets'
-    ]);
-    if (buildAssetsNode) {
-      const angularJson = readJsonAsString(tree, filePath);
-      const edits = modify(
-        angularJson,
-        ['projects', options.project, 'architect', 'build', 'options', 'assets', 0],
-        value,
-        { formattingOptions: jsonFormattingOptions, isArrayInsertion: true }
-      );
-      if (edits) {
-        tree.overwrite(filePath, applyEdits(angularJson, edits));
-        logInfo(`Neues LUX-Theme im Assets-Abschnitt (build) hinzugefügt.`);
-      }
-    }
+    updateThemeAssetsIntern(tree, ['projects', options.project, 'architect', 'build', 'options', 'assets'], 'build');
   };
+}
+
+export function updateTestThemeAssets(options: any): Rule {
+  return (tree: Tree, context: SchematicContext) => {
+    updateThemeAssetsIntern(tree, ['projects', options.project, 'architect', 'test', 'options', 'assets'], 'test');
+  };
+}
+
+function updateThemeAssetsIntern(tree: Tree, jsonPath: string[], label: string) {
+  const filePath = '/angular.json';
+  const contentAsNode = readJson(tree, filePath);
+  const buildAssetsNode = findNodeAtLocation(contentAsNode, jsonPath);
+  if (buildAssetsNode) {
+    const arrayIndex = findObjectIndexInArray(buildAssetsNode, 'glob', '*.css');
+    if (arrayIndex >= 0) {
+      const angularJson = readJsonAsString(tree, filePath);
+      const edits = modify(
+        angularJson,
+        [...jsonPath, arrayIndex],
+        {
+          glob: '*(*min.css|*min.css.map)',
+          input: './node_modules/@ihk-gfi/lux-components-theme/prebuilt-themes',
+          output: './assets/themes'
+        },
+        { formattingOptions: jsonFormattingOptions, isArrayInsertion: false }
+      );
+      if (edits) {
+        tree.overwrite(filePath, applyEdits(angularJson, edits));
+        logInfo(`Den Abschnitt "${JSON.stringify(jsonPath)}" aktualisiert.`);
+      }
+    }
+  }
 }
 
 export function removeThemeAssets(options: any): Rule {
   return (tree: Tree, context: SchematicContext) => {
     const filePath = '/angular.json';
-    const value = 'src/theming/luxtheme.scss';
+    const jsonPath = ['projects', options.project, 'architect', 'build', 'configurations', 'es5'];
 
-    let contentAsNode = readJson(tree, filePath);
-    const testAssetsNode = findNodeAtLocation(contentAsNode, [
-      'projects',
-      options.project,
-      'architect',
-      'test',
-      'options',
-      'styles'
-    ]);
-    if (testAssetsNode && testAssetsNode.children) {
-      const assetArray = testAssetsNode.children as Array<any>;
-      const index = assetArray.findIndex((item) => item.value === value);
-
-      if (index >= 0) {
-        const angularJson = readJsonAsString(tree, filePath);
-        const edits = modify(
-          angularJson,
-          ['projects', options.project, 'architect', 'test', 'options', 'styles', index],
-          void 0,
-          { formattingOptions: jsonFormattingOptions }
-        );
-        if (edits) {
-          tree.overwrite(filePath, applyEdits(angularJson, edits));
-          logInfo(`Altes LUX-Theme aus dem Assets-Abschnitt (test) entfernt.`);
-        }
-      }
-    }
-
-    contentAsNode = readJson(tree, filePath);
-    const buildAssetsNode = findNodeAtLocation(contentAsNode, [
-      'projects',
-      options.project,
-      'architect',
-      'build',
-      'options',
-      'styles'
-    ]);
-    if (buildAssetsNode && buildAssetsNode.children) {
-      const assetArray = buildAssetsNode.children as Array<any>;
-      const index = assetArray.findIndex((item) => item.value === value);
-
-      if (index >= 0) {
-        const angularJson = readJsonAsString(tree, filePath);
-        const edits = modify(
-          angularJson,
-          ['projects', options.project, 'architect', 'build', 'options', 'styles', index],
-          void 0,
-          { formattingOptions: jsonFormattingOptions }
-        );
-        if (edits) {
-          tree.overwrite(filePath, applyEdits(angularJson, edits));
-          logInfo(`Altes LUX-Theme aus dem Assets-Abschnitt (build) entfernt.`);
-        }
-      }
-    }
+    removeJsonNode(tree, filePath, jsonPath);
   };
 }
 
-function updateConfigGenerateLuxTagIds(tree: Tree, filePath: string) {
-  const content = (tree.read(filePath) as Buffer).toString();
-  const fileName = filePath.substring(filePath.lastIndexOf('/') + 1, filePath.length);
-  const sourceFile = ts.createSourceFile(`${fileName}`, content, ts.ScriptTarget.Latest, true);
-  const nodes = getSourceNodes(sourceFile);
+export function removeLuxSelectedFilesAlwaysUseArray(options: any): Rule {
+  return chain([
+    messageInfoRule(`Das Attribut "luxSelectedFilesAlwaysUseArray" wird entfernt...`),
+    (tree: Tree, context: SchematicContext) => {
+      iterateFilesAndModifyContent(
+          tree,
+          options.path,
+          (filePath: string, content: string) => {
+            let result = removeAttribute(content, 'lux-file-list', "luxSelectedFilesAlwaysUseArray");;
 
-  const identifierNode = nodes.find(
-    (n) => n.kind === ts.SyntaxKind.Identifier && n.getText() === 'luxComponentsConfig'
-  );
-  if (identifierNode) {
-    const objectNode = identifierNode.parent
-      .getChildren()
-      .find((n) => n.kind === ts.SyntaxKind.ObjectLiteralExpression);
-    if (objectNode) {
-      const syntaxListNode = objectNode.getChildren().find((n) => n.kind === ts.SyntaxKind.SyntaxList);
-      if (syntaxListNode) {
-        const propertyAssignmentNodes = syntaxListNode
-          .getChildren()
-          .filter((n) => n.kind === ts.SyntaxKind.PropertyAssignment);
-        if (propertyAssignmentNodes) {
-          propertyAssignmentNodes.forEach((assignment) => {
-            const propertyIdentifierNode = assignment.getChildren().find((n) => n.kind === ts.SyntaxKind.Identifier);
-            if (propertyIdentifierNode && propertyIdentifierNode.getText() === 'generateLuxTagIds') {
-              const updateRecorder = tree.beginUpdate(filePath);
-              updateRecorder.remove(assignment.pos, assignment.end - assignment.pos);
-              updateRecorder.insertLeft(assignment.pos, '\n  generateLuxTagIds: environment.generateLuxTagIds');
-              if (!content.match(/import.*\{.*environment.*\}.*from.*/g)) {
-                updateRecorder.insertLeft(0, "import { environment } from '../environments/environment';\n");
-              }
-              tree.commitUpdate(updateRecorder);
-              logInfo(
-                `In der Konfiguration wurde der Wert "generateLuxTagIds: environment.generateLuxTagIds" eingetragen.`
-              );
+            if (content !== result.content) {
+              logInfo(filePath + ' wurde angepasst.')
+              tree.overwrite(filePath, result.content);
             }
-          });
-        }
-      }
-    }
-  }
-}
-
-function updateConfigLabelConfiguration(tree: Tree, filePath: string) {
-  const content = (tree.read(filePath) as Buffer).toString();
-  const fileName = filePath.substring(filePath.lastIndexOf('/') + 1, filePath.length);
-  const sourceFile = ts.createSourceFile(`${fileName}`, content, ts.ScriptTarget.Latest, true);
-  const nodes = getSourceNodes(sourceFile);
-
-  const identifierNode = nodes.find(
-    (n) => n.kind === ts.SyntaxKind.Identifier && n.getText() === 'luxComponentsConfig'
-  );
-  if (identifierNode) {
-    const objectNode = identifierNode.parent
-      .getChildren()
-      .find((n) => n.kind === ts.SyntaxKind.ObjectLiteralExpression);
-    if (objectNode) {
-      const syntaxListNode = objectNode.getChildren().find((n) => n.kind === ts.SyntaxKind.SyntaxList);
-      if (syntaxListNode) {
-        const propertyAssignmentNodes = syntaxListNode
-          .getChildren()
-          .filter((n) => n.kind === ts.SyntaxKind.PropertyAssignment);
-        if (propertyAssignmentNodes) {
-          propertyAssignmentNodes.forEach((assignment) => {
-            const propertyIdentifierNode = assignment.getChildren().find((n) => n.kind === ts.SyntaxKind.Identifier);
-            if (propertyIdentifierNode && propertyIdentifierNode.getText() === 'labelConfiguration') {
-              const prevSibling = getPrevSibling(assignment, ts.SyntaxKind.SyntaxList);
-              const nextSibling = getNextSibling(assignment, ts.SyntaxKind.SyntaxList);
-              const updateRecorder = tree.beginUpdate(filePath);
-              if (nextSibling) {
-                updateRecorder.remove(assignment.pos, nextSibling.end - assignment.pos);
-              } else {
-                if (prevSibling) {
-                  updateRecorder.remove(prevSibling.pos, assignment.end - assignment.pos);
-                } else {
-                  updateRecorder.remove(assignment.pos, assignment.end - assignment.pos);
-                }
-              }
-              logInfo(
-                `Aus der Konfiguration wurde die Property "labelConfiguration" entfernt, damit der Default verwendet wird.`
-              );
-              tree.commitUpdate(updateRecorder);
-            }
-          });
-        }
-      }
-    }
-  }
-}
-
-function deleteDisplayBindingDebugHint(tree: Tree, filePath: string) {
-  const content = (tree.read(filePath) as Buffer).toString();
-  const fileName = filePath.substring(filePath.lastIndexOf('/') + 1, filePath.length);
-  const sourceFile = ts.createSourceFile(`${fileName}`, content, ts.ScriptTarget.Latest, true);
-  const nodes = getSourceNodes(sourceFile);
-
-  const identifierNode = nodes.find(
-    (n) => n.kind === ts.SyntaxKind.Identifier && n.getText() === 'luxComponentsConfig'
-  );
-  if (identifierNode) {
-    const objectNode = identifierNode.parent
-      .getChildren()
-      .find((n) => n.kind === ts.SyntaxKind.ObjectLiteralExpression);
-    if (objectNode) {
-      const syntaxListNode = objectNode.getChildren().find((n) => n.kind === ts.SyntaxKind.SyntaxList);
-      if (syntaxListNode) {
-        const propertyAssignmentNodes = syntaxListNode
-          .getChildren()
-          .filter((n) => n.kind === ts.SyntaxKind.PropertyAssignment);
-        if (propertyAssignmentNodes) {
-          propertyAssignmentNodes.forEach((assignment) => {
-            const propertyIdentifierNode = assignment.getChildren().find((n) => n.kind === ts.SyntaxKind.Identifier);
-            if (propertyIdentifierNode && propertyIdentifierNode.getText() === 'displayBindingDebugHint') {
-              const prevSibling = getPrevSibling(assignment, ts.SyntaxKind.SyntaxList);
-              const nextSibling = getNextSibling(assignment, ts.SyntaxKind.SyntaxList);
-              const updateRecorder = tree.beginUpdate(filePath);
-              if (nextSibling) {
-                updateRecorder.remove(assignment.pos, nextSibling.end - assignment.pos);
-              } else {
-                if (prevSibling) {
-                  updateRecorder.remove(prevSibling.pos, assignment.end - prevSibling.pos);
-                } else {
-                  updateRecorder.remove(assignment.pos, assignment.end - assignment.pos);
-                }
-              }
-              logInfo(`Aus der Konfiguration wurde die Property "displayBindingDebugHint" entfernt.`);
-              tree.commitUpdate(updateRecorder);
-            }
-          });
-        }
-      }
-    }
-  }
-}
-
-function updateConfiglookupServiceUrl(tree: Tree, filePath: string) {
-  const content = (tree.read(filePath) as Buffer).toString();
-  const fileName = filePath.substring(filePath.lastIndexOf('/') + 1, filePath.length);
-  const sourceFile = ts.createSourceFile(`${fileName}`, content, ts.ScriptTarget.Latest, true);
-  const nodes = getSourceNodes(sourceFile);
-
-  const identifierNode = nodes.find(
-    (n) => n.kind === ts.SyntaxKind.Identifier && n.getText() === 'luxComponentsConfig'
-  );
-  if (identifierNode) {
-    const objectNode = identifierNode.parent
-      .getChildren()
-      .find((n) => n.kind === ts.SyntaxKind.ObjectLiteralExpression);
-    if (objectNode) {
-      const syntaxListNode = objectNode.getChildren().find((n) => n.kind === ts.SyntaxKind.SyntaxList);
-      if (syntaxListNode) {
-        const propertyAssignmentNodes = syntaxListNode
-          .getChildren()
-          .filter((n) => n.kind === ts.SyntaxKind.PropertyAssignment);
-        if (propertyAssignmentNodes) {
-          propertyAssignmentNodes.forEach((assignment) => {
-            const propertyIdentifierNode = assignment.getChildren().find((n) => n.kind === ts.SyntaxKind.Identifier);
-            const propertyStringNode = assignment.getChildren().find((n) => n.kind === ts.SyntaxKind.StringLiteral);
-            if (
-              propertyIdentifierNode &&
-              propertyIdentifierNode.getText() === 'lookupServiceUrl' &&
-              propertyStringNode &&
-              (propertyStringNode.getText() === "'/lookup/'" || propertyStringNode.getText() === '"/lookup/"')
-            ) {
-              const prevSibling = getPrevSibling(assignment, ts.SyntaxKind.SyntaxList);
-              const nextSibling = getNextSibling(assignment, ts.SyntaxKind.SyntaxList);
-              const updateRecorder = tree.beginUpdate(filePath);
-              if (nextSibling) {
-                updateRecorder.remove(assignment.pos, nextSibling.end - assignment.pos);
-              } else {
-                if (prevSibling) {
-                  updateRecorder.remove(prevSibling.pos, assignment.end - prevSibling.pos);
-                } else {
-                  updateRecorder.remove(assignment.pos, assignment.end - assignment.pos);
-                }
-              }
-              logInfo(
-                `Aus der Konfiguration wurde die Property "lookupServiceUrl" entfernt. Der Wert entspricht dem Defaultwert.`
-              );
-              tree.commitUpdate(updateRecorder);
-            }
-          });
-        }
-      }
-    }
-  }
+          },
+          '.component.html'
+      );
+    },
+    messageSuccessRule(`Das Attribut "luxSelectedFilesAlwaysUseArray" wird entfernt.`)
+  ]);
 }
