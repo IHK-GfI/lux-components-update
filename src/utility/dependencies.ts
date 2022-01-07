@@ -19,6 +19,32 @@ export interface NodeDependency {
 }
 
 /**
+ * Liefert die Dependency zurück, wenn es sie gibt, undefined sonst.
+ * @param tree
+ * @param name
+ */
+export function hasPackageJsonDependency(tree: Tree, name: string): NodeDependency | undefined {
+  const packageJsonNode = readJson(tree, '/package.json');
+  let dependency: NodeDependency | undefined = undefined;
+
+  [NodeDependencyType.Default, NodeDependencyType.Dev, NodeDependencyType.Optional, NodeDependencyType.Peer].forEach(
+    (depType) => {
+
+      let node = findNodeAtLocation(packageJsonNode, [depType.toString(), name]);
+      if (node) {
+        dependency = {
+          type   : depType,
+          name   : name,
+          version: node.value
+        };
+      }
+    }
+  );
+
+  return dependency;
+}
+
+/**
  * Versucht eine Dependency aus der package.json auslesen und gibt diese zurück.
  * @param tree
  * @param name
