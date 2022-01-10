@@ -7,6 +7,7 @@ import { appOptions, workspaceOptions } from '../utility/test';
 import { UtilConfig } from '../utility/util';
 import {
   copyFiles,
+  fixEmptyStyles,
   removeLuxSelectedFilesAlwaysUseArray,
   update,
   updateAngularJson,
@@ -93,25 +94,6 @@ describe('update', () => {
     });
   });
 
-  it('Sollte LUX-Components 12 einrichten', (done) => {
-    appTree.overwrite('/angular.json', testAngularJson);
-
-    callRule(updateAngularJson(testOptions), observableOf(appTree), context).subscribe(
-      (success) => {
-        const angularJson = success.read('/angular.json');
-        expect(angularJson).toBeDefined();
-
-        const content = angularJson?.toString();
-
-        expect(content).toContain('"glob": "*(*min.css|*min.css.map)"');
-        expect(content).not.toContain('"glob": "*.css",');
-        expect(content).not.toContain('"tsConfig": "src/tsconfig.app.ie.json"');
-        done();
-      },
-      (reason) => expect(reason).toBeUndefined()
-    );
-  });
-
   describe('[Rule] copyFiles', () => {
     it('Sollte die Dateien kopieren', (done) => {
       callRule(copyFiles(testOptions), observableOf(appTree), context).subscribe(
@@ -119,6 +101,27 @@ describe('update', () => {
           expect(success.exists(testOptions.path + '/src/locale/messages.xlf')).toBeTrue();
           expect(success.exists(testOptions.path + '/src/locale/messages.en.xlf')).toBeTrue();
           expect(success.exists(testOptions.path + '/.browserslistrc')).toBeTrue();
+          done();
+        },
+        (reason) => expect(reason).toBeUndefined()
+      );
+    });
+  });
+
+  describe('[Rule] updateAngularJson', () => {
+    it('Sollte die Datei "angular.json" anpassen', (done) => {
+      appTree.overwrite('/angular.json', testAngularJson);
+
+      callRule(updateAngularJson(testOptions), observableOf(appTree), context).subscribe(
+        (success) => {
+          const angularJson = success.read('/angular.json');
+          expect(angularJson).toBeDefined();
+
+          const content = angularJson?.toString();
+
+          expect(content).toContain('"glob": "*(*min.css|*min.css.map)"');
+          expect(content).not.toContain('"glob": "*.css",');
+          expect(content).not.toContain('"tsConfig": "src/tsconfig.app.ie.json"');
           done();
         },
         (reason) => expect(reason).toBeUndefined()
@@ -166,40 +169,41 @@ describe('update', () => {
 
   describe('[Rule] removeLuxSelectedFilesAlwaysUseArray', () => {
     it('Sollte die Datei "package.json" anpassen', (done) => {
-      appTree.create(
-        testOptions.path + '/src/app/abc.component.html',
-        `
-    <div fxFlex="auto" fxLayout="column">
-      <h3>Ohne ReactiveForm</h3>
-      <lux-file-list
-        testDirective
-        [luxLabel]="label"
-        [luxDownloadActionConfig]="downloadActionConfig"
-        [luxMaximumExtended]="maximumExtended"
-        [luxCapture]="capture"
-        [luxAccept]="accept"
-        [luxHint]=""
-        [luxHintShowOnlyOnFocus]="hintShowOnlyOnFocus"
-        [luxDnDActive]="dndActive"
-        [luxSelectedFiles]="selected"
-        [luxContentsAsBlob]="contentAsBlob"
-        [luxUploadReportProgress]="reportProgress"
-        (luxSelectedFilesChange)="onSelectedChange($event)"
-        [luxSelectedFilesAlwaysUseArray]="alwaysUseArray"
-        (luxFocusIn)="log(showOutputEvents, 'luxFocusIn', $event)"
-        (luxFocusOut)="log(showOutputEvents, 'luxFocusOut', $event)"
-        #filelistexamplewithoutform
-      >
-      </lux-file-list>
-    </div>
-        `
-      );
+      appTree.create(testOptions.path + '/src/app/abc.component.html', templateRemoveLuxSelectedFilesAlwaysUseArray);
 
       callRule(removeLuxSelectedFilesAlwaysUseArray(testOptions), observableOf(appTree), context).subscribe(
         (success) => {
           const componentHtml = success.read(testOptions.path + '/src/app/abc.component.html')?.toString();
           expect(componentHtml).toBeDefined();
           expect(componentHtml?.toString()).not.toContain('alwaysUseArray');
+
+          done();
+        },
+        (reason) => expect(reason).toBeUndefined()
+      );
+    });
+  });
+
+  describe('[Rule] fixEmptyStyles', () => {
+    it('Sollte die leeren Styles korrigieren', (done) => {
+      const filePath1 = testOptions.path + '/src/app/fix-empty-styles1.component.ts';
+      appTree.create(filePath1, templateFixEmptyStyles1);
+
+      const filePath2 = testOptions.path + '/src/app/fix-empty-styles2.component.ts';
+      appTree.create(filePath2, templateFixEmptyStyles2);
+
+      const filePath3 = testOptions.path + '/src/app/fix-empty-styles3.component.ts';
+      appTree.create(filePath3, templateFixEmptyStyles3);
+
+      const filePath4 = testOptions.path + '/src/app/fix-empty-styles4.component.ts';
+      appTree.create(filePath4, templateFixEmptyStyles4);
+
+      callRule(fixEmptyStyles(testOptions), observableOf(appTree), context).subscribe(
+        (success) => {
+          expect(success.read(filePath1)?.toString()).toContain('styles: []');
+          expect(success.read(filePath2)?.toString()).toContain('styles: []');
+          expect(success.read(filePath3)?.toString()).toContain('styles: []');
+          expect(success.read(filePath4)?.toString()).toContain('styles: []');
 
           done();
         },
@@ -406,3 +410,89 @@ const testAngularJson = `
 }
 
 `;
+
+const templateRemoveLuxSelectedFilesAlwaysUseArray = `
+    <div fxFlex="auto" fxLayout="column">
+      <h3>Ohne ReactiveForm</h3>
+      <lux-file-list
+        testDirective
+        [luxLabel]="label"
+        [luxDownloadActionConfig]="downloadActionConfig"
+        [luxMaximumExtended]="maximumExtended"
+        [luxCapture]="capture"
+        [luxAccept]="accept"
+        [luxHint]=""
+        [luxHintShowOnlyOnFocus]="hintShowOnlyOnFocus"
+        [luxDnDActive]="dndActive"
+        [luxSelectedFiles]="selected"
+        [luxContentsAsBlob]="contentAsBlob"
+        [luxUploadReportProgress]="reportProgress"
+        (luxSelectedFilesChange)="onSelectedChange($event)"
+        [luxSelectedFilesAlwaysUseArray]="alwaysUseArray"
+        (luxFocusIn)="log(showOutputEvents, 'luxFocusIn', $event)"
+        (luxFocusOut)="log(showOutputEvents, 'luxFocusOut', $event)"
+        #filelistexamplewithoutform
+      >
+      </lux-file-list>
+    </div>
+        `;
+
+const templateFixEmptyStyles1 = `
+  import { Component, ContentChild, TemplateRef } from '@angular/core';
+
+  @Component({
+    selector: 'lux-detail-view',
+    template: '',
+    styles: ['']
+  })
+  export class LuxDetailViewComponent {
+    @ContentChild(TemplateRef) tempRef: TemplateRef<any>;
+
+    constructor() {}
+}
+        `;
+
+const templateFixEmptyStyles2 = `
+  import { Component, ContentChild, TemplateRef } from '@angular/core';
+
+  @Component({
+    selector:'lux-detail-view',
+    template:'',
+    styles:['']
+  })
+  export class LuxDetailViewComponent {
+    @ContentChild(TemplateRef) tempRef: TemplateRef<any>;
+
+    constructor() {}
+}
+        `;
+
+const templateFixEmptyStyles3 = `
+  import { Component, ContentChild, TemplateRef } from '@angular/core';
+
+  @Component({
+    selector:'lux-detail-view',
+    template:'',
+    styles:  ['']
+  })
+  export class LuxDetailViewComponent {
+    @ContentChild(TemplateRef) tempRef: TemplateRef<any>;
+
+    constructor() {}
+}
+        `;
+
+const templateFixEmptyStyles4 = `
+  import { Component, ContentChild, TemplateRef } from "@angular/core";
+
+  @Component({
+    selector: "lux-detail-view",
+    template: "",
+    styles: [""]
+  })
+  export class LuxDetailViewComponent {
+    @ContentChild(TemplateRef) tempRef: TemplateRef<any>;
+
+    constructor() {}
+}
+        `;

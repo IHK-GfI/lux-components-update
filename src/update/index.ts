@@ -12,7 +12,7 @@ import {
   removeJsonNode
 } from '../utility/json';
 import { logInfo, logInfoWithDescriptor, logSuccess } from '../utility/logging';
-import { applyRuleIf, finish, messageInfoRule, messageSuccessRule } from '../utility/util';
+import { applyRuleIf, finish, messageInfoRule, messageSuccessRule, replaceAll } from '../utility/util';
 import { validateLuxComponentsVersion, validateNodeVersion } from '../utility/validation';
 
 export const updateMajorVersion = '12';
@@ -41,6 +41,7 @@ export function updateProject(options: any): Rule {
       updatePackageJson(options),
       copyFiles(options),
       removeLuxSelectedFilesAlwaysUseArray(options),
+      fixEmptyStyles(options),
       updateDependencies(),
       messageSuccessRule(`LUX-Components ${updateMajorVersion} wurden aktualisiert.`)
     ]);
@@ -209,5 +210,34 @@ export function removeLuxSelectedFilesAlwaysUseArray(options: any): Rule {
       );
     },
     messageSuccessRule(`Das Attribut "luxSelectedFilesAlwaysUseArray" wird entfernt.`)
+  ]);
+}
+
+/**
+ * Wenn eine Komponente einen leeren Style im styles-Array (styles: ['']) angegeben hat, führt dies zu dem folgenden Fehler:
+ * Error: PostCSS received undefined instead of CSS string
+ * Diese Methode repariert diesen Fehler, in dem der Leerstring entfernt wird.
+ *
+ * @param options
+ */
+export function fixEmptyStyles(options: any): Rule {
+  return chain([
+    messageInfoRule(`Die leeren Styles im @Component-Teil (styles: [''] => styles: []) werden korrigiert...`),
+    (tree: Tree, context: SchematicContext) => {
+      iterateFilesAndModifyContent(
+          tree,
+          options.path,
+          (filePath: string, content: string) => {
+            const modifiedContent = content.replace(/styles\s?:\s*\[('{2}|"{2})\]/g, 'styles: []');
+
+            if (modifiedContent !== content) {
+              logInfo(filePath + ' wurde angepasst.')
+              tree.overwrite(filePath, modifiedContent);
+            }
+          },
+          '.component.ts'
+      );
+    },
+    messageSuccessRule(`Die leeren Styles wurden korrigiert.`)
   ]);
 }
