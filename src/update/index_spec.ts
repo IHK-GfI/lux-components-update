@@ -8,6 +8,7 @@ import { UtilConfig } from '../utility/util';
 import {
   copyFiles,
   fixEmptyStyles,
+  removeDatepickerDefaultLocale,
   removeLuxSelectedFilesAlwaysUseArray,
   update,
   updateAngularJson,
@@ -204,6 +205,22 @@ describe('update', () => {
           expect(success.read(filePath2)?.toString()).toContain('styles: []');
           expect(success.read(filePath3)?.toString()).toContain('styles: []');
           expect(success.read(filePath4)?.toString()).toContain('styles: []');
+
+          done();
+        },
+        (reason) => expect(reason).toBeUndefined()
+      );
+    });
+  });
+
+  describe('[Rule] removeDatepickerDefaultLocale', () => {
+    it('Sollte die Defaultlocale "de-DE" entfernen', (done) => {
+      const filePath = testOptions.path + '/src/app/datepicker-default-locale.component.html';
+      appTree.create(filePath, templateRemoveDatepickerDefaultLocale);
+
+      callRule(removeDatepickerDefaultLocale(testOptions), observableOf(appTree), context).subscribe(
+        (success) => {
+          expect(success.read(filePath)?.toString()).not.toContain('luxLocale="de-DE"');
 
           done();
         },
@@ -496,3 +513,9 @@ const templateFixEmptyStyles4 = `
     constructor() {}
 }
         `;
+
+const templateRemoveDatepickerDefaultLocale = `
+  <lux-datepicker luxLabel="Datepicker" [luxCustomFilter]="myFilter" luxLocale="de-DE"></lux-datepicker>
+  <lux-datepicker luxLabel="Datepicker" luxMaxDate="02/02/2002" luxMinDate="02.02.2000" luxLocale="de-DE" [(luxValue)]="value"></lux-datepicker>  
+  <lux-datepicker luxLocale="de-DE" luxLabel="Datepicker" luxControlBinding="datepicker"></lux-datepicker>
+            `;

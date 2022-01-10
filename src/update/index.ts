@@ -12,7 +12,7 @@ import {
   removeJsonNode
 } from '../utility/json';
 import { logInfo, logInfoWithDescriptor, logSuccess } from '../utility/logging';
-import { applyRuleIf, finish, messageInfoRule, messageSuccessRule, replaceAll } from '../utility/util';
+import { applyRuleIf, escapeRegExp, finish, messageInfoRule, messageSuccessRule, replaceAll } from '../utility/util';
 import { validateLuxComponentsVersion, validateNodeVersion } from '../utility/validation';
 
 export const updateMajorVersion = '12';
@@ -42,6 +42,7 @@ export function updateProject(options: any): Rule {
       copyFiles(options),
       removeLuxSelectedFilesAlwaysUseArray(options),
       fixEmptyStyles(options),
+      removeDatepickerDefaultLocale(options),
       updateDependencies(),
       messageSuccessRule(`LUX-Components ${updateMajorVersion} wurden aktualisiert.`)
     ]);
@@ -196,17 +197,17 @@ export function removeLuxSelectedFilesAlwaysUseArray(options: any): Rule {
     messageInfoRule(`Das Attribut "luxSelectedFilesAlwaysUseArray" wird entfernt...`),
     (tree: Tree, context: SchematicContext) => {
       iterateFilesAndModifyContent(
-          tree,
-          options.path,
-          (filePath: string, content: string) => {
-            let result = removeAttribute(content, 'lux-file-list', "luxSelectedFilesAlwaysUseArray");;
+        tree,
+        options.path,
+        (filePath: string, content: string) => {
+          let result = removeAttribute(content, 'lux-file-list', 'luxSelectedFilesAlwaysUseArray');
 
-            if (content !== result.content) {
-              logInfo(filePath + ' wurde angepasst.')
-              tree.overwrite(filePath, result.content);
-            }
-          },
-          '.component.html'
+          if (content !== result.content) {
+            logInfo(filePath + ' wurde angepasst.');
+            tree.overwrite(filePath, result.content);
+          }
+        },
+        '.component.html'
       );
     },
     messageSuccessRule(`Das Attribut "luxSelectedFilesAlwaysUseArray" wird entfernt.`)
@@ -225,19 +226,41 @@ export function fixEmptyStyles(options: any): Rule {
     messageInfoRule(`Die leeren Styles im @Component-Teil (styles: [''] => styles: []) werden korrigiert...`),
     (tree: Tree, context: SchematicContext) => {
       iterateFilesAndModifyContent(
-          tree,
-          options.path,
-          (filePath: string, content: string) => {
-            const modifiedContent = content.replace(/styles\s?:\s*\[('{2}|"{2})\]/g, 'styles: []');
+        tree,
+        options.path,
+        (filePath: string, content: string) => {
+          const modifiedContent = content.replace(/styles\s?:\s*\[('{2}|"{2})\]/g, 'styles: []');
 
-            if (modifiedContent !== content) {
-              logInfo(filePath + ' wurde angepasst.')
-              tree.overwrite(filePath, modifiedContent);
-            }
-          },
-          '.component.ts'
+          if (modifiedContent !== content) {
+            logInfo(filePath + ' wurde angepasst.');
+            tree.overwrite(filePath, modifiedContent);
+          }
+        },
+        '.component.ts'
       );
     },
     messageSuccessRule(`Die leeren Styles wurden korrigiert.`)
+  ]);
+}
+
+export function removeDatepickerDefaultLocale(options: any): Rule {
+  return chain([
+    messageInfoRule(`Die explizit gesetzte Defaultlocale "de-DE" wird bei allen Datepickern entfernt...`),
+    (tree: Tree, context: SchematicContext) => {
+      iterateFilesAndModifyContent(
+        tree,
+        options.path,
+        (filePath: string, content: string) => {
+          const modifiedContent = content.replace(/\sluxLocale="de-DE"/g, '');
+
+          if (modifiedContent !== content) {
+            logInfo(filePath + ' wurde angepasst.');
+            tree.overwrite(filePath, modifiedContent);
+          }
+        },
+        '.component.html'
+      );
+    },
+    messageSuccessRule(`Die explizit gesetzte Defaultlocale "de-DE" wurde bei allen Datepickern entfernt.`)
   ]);
 }
