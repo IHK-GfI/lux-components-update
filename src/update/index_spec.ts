@@ -106,9 +106,6 @@ describe('update', () => {
         (success) => {
           const content = success.read('/angular.json')?.toString();
 
-          if (content) {
-            console.log('aaa', content);
-          }
           expect(content).toContain(
             '"allowedCommonJsDependencies": [\n              "ng2-pdf-viewer",\n              "hammerjs"\n            ]'
           );
@@ -174,9 +171,6 @@ describe('update', () => {
         (success) => {
           const content = success.read('/angular.json')?.toString();
 
-          if (content) {
-            console.log('aaa', content);
-          }
           expect(content).toContain(
             '"allowedCommonJsDependencies": [\n              "hammerjs",\n              "ng2-pdf-viewer"\n            ]'
           );
