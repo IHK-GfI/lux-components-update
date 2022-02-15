@@ -1,6 +1,6 @@
 {
   "name": "@ihk-gfi/lux-components-update",
-  "version": "11.9.0",
+  "version": "11.10.0",
   "description": "Schematics für die Aktualisierung von LUX-Applikationen",
   "scripts": {
     "build": "tsc -p tsconfig.json",
