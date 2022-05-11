@@ -24,6 +24,9 @@ import { update110800 } from '../update110800/index';
 import { update110900 } from '../update110900/index';
 import { update111000 } from '../update111000/index';
 import { update111100 } from '../update111100/index';
+import { update111200 } from '../update111200/index';
+import { update111300 } from '../update111300/index';
+import { update111400 } from '../update111400/index';
 import { iterateFilesAndModifyContent, moveFilesToDirectory } from '../utility/files';
 import { jsonFormattingOptions, readJson, readJsonAsString } from '../utility/json';
 import { logInfo } from '../utility/logging';
@@ -57,6 +60,9 @@ export function addLuxComponents(options: any): Rule {
       update110900(options),
       update111000(options),
       update111100(options),
+      update111200(options),
+      update111300(options),
+      update111400(options),
       finish(
         `Die LUX-Components ${updateMajorVersion} wurden erfolgreich eingerichtet.`,
         `${chalk.yellowBright('Fertig!')}`
