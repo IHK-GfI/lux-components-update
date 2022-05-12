@@ -1,5 +1,6 @@
-import { Tree } from '@angular-devkit/schematics';
+import { Rule, SchematicContext, Tree } from '@angular-devkit/schematics';
 import { applyEdits, findNodeAtLocation, FormattingOptions, modify, Node, parseTree } from 'jsonc-parser';
+import { types } from 'util';
 import { formattedSchematicsException, logInfo } from './logging';
 
 export const jsonFormattingOptions: FormattingOptions = {
@@ -69,6 +70,75 @@ export function appendScript(script: string, part: string, index?: number) {
   return newSkript;
 }
 
+export function updateJsonValue(options: any, filePath: string, jsonPath: string[], value: any, onlyUpdate = false): Rule {
+  return (tree: Tree, context: SchematicContext) => {
+    const found = findNodeAtLocation(readJson(tree, filePath), jsonPath);
+
+    if (!onlyUpdate || (onlyUpdate && found)) {
+      const jsonFile = readJsonAsString(tree, filePath);
+      const edits = modify(
+          jsonFile,
+          jsonPath,
+          value,
+          { formattingOptions: jsonFormattingOptions, isArrayInsertion: false}
+      );
+
+      if (edits) {
+        tree.overwrite(filePath, applyEdits(jsonFile, edits));
+        logInfo(`"${JSON.stringify(value)}" an der Stelle "${jsonPath.join('.')}" eingetragen.`);
+      }
+    }
+  };
+}
+
+export function updateJsonArray(options: any, filePath: string, jsonPath: string[], value: any, onlyUpdate = false, findFn?: (value: Node) => boolean): Rule {
+  return (tree: Tree, context: SchematicContext) => {
+
+    // Gibt es bereits eine passende Stelle?
+    let foundIndex = -1;
+    let childrenCount = -1;
+
+    const node = findNodeAtLocation(readJson(tree, filePath), jsonPath);
+    if (node && node.children) {
+      childrenCount = node.children.length;
+
+      if (!findFn && typeof value === 'string') {
+        // Sollte der Wert bereits im Array enthalten sein,
+        // kann man an dieser Stelle abbrechen und die
+        // Methode verlassen.
+        foundIndex = findStringIndexInArray(node, value);
+        if (foundIndex >= 0) {
+          return;
+        }
+      }
+
+      if (findFn) {
+        for (let i = 0; i < node.children.length; i++) {
+          if (findFn(node.children[ i ])) {
+            foundIndex = i;
+            break;
+          }
+        }
+      }
+    }
+
+    if (!onlyUpdate || (onlyUpdate && foundIndex >= 0)) {
+      const jsonFile = readJsonAsString(tree, filePath);
+      const edits = modify(
+          jsonFile,
+          [...jsonPath, foundIndex >= 0 ? foundIndex : childrenCount !== -1 ? childrenCount : 0],
+          value,
+          { formattingOptions: jsonFormattingOptions, isArrayInsertion: foundIndex === -1}
+      );
+
+      if (edits) {
+        tree.overwrite(filePath, applyEdits(jsonFile, edits));
+        logInfo(`"${JSON.stringify(value)}" an der Stelle "${jsonPath.join('.')}" hinzugefügt.`);
+      }
+    }
+  };
+}
+
 /**
  * Diese Methode liefert den Index im Array des Objekts mit der übergebenen Property zurück.
  *
@@ -94,6 +164,7 @@ export function findObjectIndexInArray(arrayNode: Node, propertyName: string, pr
   if (arrayNode.children) {
     for (let i = 0; i < arrayNode.children.length; i++) {
       const assetChild = arrayNode.children[i];
+
       if (assetChild.type === 'object' && assetChild.children && assetChild.children.length > 0) {
         const assetObjectChildren = assetChild.children;
         if (assetObjectChildren) {
@@ -119,6 +190,31 @@ export function findObjectIndexInArray(arrayNode: Node, propertyName: string, pr
   }
 
   return arrayIndex;
+}
+
+export function findObjectPropertyInArray(node: Node, propertyName: string, propertyValue: string): boolean {
+  let found = false;
+
+  if (node.type === 'object' && node.children && node.children.length > 0) {
+    const assetObjectChildren = node.children;
+    if (assetObjectChildren) {
+      for (let j = 0; j < assetObjectChildren.length; j++) {
+        if (assetObjectChildren[j].type === 'property') {
+          const propertyChildren = assetObjectChildren[j].children ?? [];
+          if (
+              propertyChildren.length > 1 &&
+              propertyChildren[0].value === propertyName &&
+              propertyChildren[1].value === propertyValue
+          ) {
+           found = true;
+            break;
+          }
+        }
+      }
+    }
+  }
+
+  return found;
 }
 
 /**

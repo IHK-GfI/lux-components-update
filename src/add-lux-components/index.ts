@@ -2,24 +2,103 @@ import { chain, Rule, SchematicContext, Tree } from '@angular-devkit/schematics'
 import * as chalk from 'chalk';
 import { applyEdits, Edit, modify } from 'jsonc-parser';
 import { updateDependencies } from '../update-dependencies/index';
-import { updateBuildThemeAssets, copyFiles, updateMajorVersion, updateNodeMinVersion } from '../update/index';
+import {
+  updateBuildThemeAssets,
+  copyFiles,
+  updateMajorVersion,
+  updateNodeMinVersion,
+  updateTestThemeAssets
+} from '../updates/update130000/index';
 import { iterateFilesAndModifyContent, moveFilesToDirectory } from '../utility/files';
-import { jsonFormattingOptions, readJson, readJsonAsString } from '../utility/json';
+import {
+  findObjectPropertyInArray,
+  jsonFormattingOptions,
+  readJson,
+  readJsonAsString,
+  updateJsonArray,
+  updateJsonValue
+} from '../utility/json';
 import { logInfo } from '../utility/logging';
 import { finish, messageInfoRule, messageSuccessRule, replaceAll, waitForTreeCallback } from '../utility/util';
 import { validateAngularVersion, validateNodeVersion } from '../utility/validation';
 
 export function addLuxComponents(options: any): Rule {
   return (tree: Tree, _context: SchematicContext) => {
+    const jsonPathAllowedCommonJS = ['projects', options.project, 'architect', 'build', 'options', 'allowedCommonJsDependencies'];
+    const jsonPathBudget = ['projects', options.project, 'architect', 'build', 'configurations', 'production', 'budgets'];
+    const budgetValue = {
+      "type": "initial",
+      "maximumWarning": "1mb",
+      "maximumError": "2mb"
+    };
+
+    const jsonPathAssetsBuild = ['projects', options.project, 'architect', 'build', 'options', 'assets'];
+    const jsonPathAssetsTest = ['projects', options.project, 'architect', 'test', 'options', 'assets'];
+    const assetsValues = [
+      {
+        glob: '*(*min.css|*min.css.map)',
+        input: './node_modules/@ihk-gfi/lux-components-theme/prebuilt-themes',
+        output: './assets/themes'
+      },
+      {
+        glob: "all.css",
+        input: "./node_modules/@fortawesome/fontawesome-free/css",
+        output: "./assets/icons/fontawesome/css"
+      },
+      {
+        glob: "*(*.eot|*.ttf|*.woff|*.woff2)",
+        input: "./node_modules/@fortawesome/fontawesome-free/webfonts",
+        output: "./assets/icons/fontawesome/webfonts"
+      },
+      {
+        glob: "material-design-icons(.css|.css.map)",
+        input: "./node_modules/material-design-icons-iconfont/dist",
+        output: "./assets/icons/material-icons"
+      },
+      {
+        glob: "*(*.eot|*.ttf|*.woff|*.woff2)",
+        input: "./node_modules/material-design-icons-iconfont/dist/fonts",
+        output: "./assets/icons/material-icons/fonts"
+      }
+    ];
+
+    const jsonPathOptimization = ['projects', options.project, 'architect', 'build', 'configurations', 'production', 'optimization'];
+    const jsonValueOptimization = {
+      "scripts": true,
+      "styles": {
+        "minify": true,
+        "inlineCritical": false
+      },
+      "fonts": true
+    };
+
+    const findBudgetFn = (node) => findObjectPropertyInArray(node, 'type', 'initial');
+
     return chain([
       check(),
       copyAppFiles(options),
       updatePackageJson(options),
       updateDependencies(),
-      updateBuildThemeAssets(options),
+
       updateIndexHtml(options),
       copyFiles(options),
       updateApp(options),
+      updateJsonValue(options, '/tsconfig.json', ['compilerOptions', 'strict'], false),
+      updateJsonValue(options, '/angular.json', jsonPathOptimization, jsonValueOptimization),
+      updateJsonArray(options, '/angular.json', jsonPathBudget, budgetValue, true,  findBudgetFn),
+      updateJsonArray(options, '/angular.json', jsonPathAssetsBuild, assetsValues[0]),
+      updateJsonArray(options, '/angular.json', jsonPathAssetsTest, assetsValues[0]),
+      updateJsonArray(options, '/angular.json', jsonPathAssetsBuild, assetsValues[1]),
+      updateJsonArray(options, '/angular.json', jsonPathAssetsTest, assetsValues[1]),
+      updateJsonArray(options, '/angular.json', jsonPathAssetsBuild, assetsValues[2]),
+      updateJsonArray(options, '/angular.json', jsonPathAssetsTest, assetsValues[2]),
+      updateJsonArray(options, '/angular.json', jsonPathAssetsBuild, assetsValues[3]),
+      updateJsonArray(options, '/angular.json', jsonPathAssetsTest, assetsValues[3]),
+      updateJsonArray(options, '/angular.json', jsonPathAssetsBuild, assetsValues[4]),
+      updateJsonArray(options, '/angular.json', jsonPathAssetsTest, assetsValues[4]),
+      updateJsonArray(options, '/angular.json', jsonPathAllowedCommonJS, 'hammerjs'),
+      updateJsonArray(options, '/angular.json', jsonPathAllowedCommonJS, 'ng2-pdf-viewer'),
+      updateJsonArray(options, '/angular.json', jsonPathAllowedCommonJS, 'pdfjs-dist'),
       finish(
         `Die LUX-Components ${updateMajorVersion} wurden erfolgreich eingerichtet.`,
         `${chalk.yellowBright('Fertig!')}`
@@ -50,14 +129,29 @@ export function updatePackageJson(options: any): Rule {
 
       const newValuesArr = [
         {
-          path: ['scripts', 'test_single_run'],
-          value: 'ng test --watch=false --browsers=ChromeHeadless',
-          message: `Skript "test_single_run" hinzugefügt.`
+          path: ['scripts', 'build-prod'],
+          value: 'ng build --configuration production --localize && npm run move-de-files',
+          message: `Skript "build-prod" hinzugefügt.`
+        },
+        {
+          path: ['scripts', 'test-headless'],
+          value: 'ng test --watch=false --browsers=ChromeHeadless --code-coverage=true',
+          message: `Skript "test-headless" hinzugefügt.`
         },
         {
           path: ['scripts', 'smoketest'],
-          value: 'npm run test_single_run && npm run build && npm run lint --bailOnLintError true',
+          value: 'npm run build-prod && npm run test-headless && npm run xi18n',
           message: `Skript "smoketest" hinzugefügt.`
+        },
+        {
+          path: ['scripts', 'move-de-files'],
+          value: 'node move-de-files.js',
+          message: `Skript "move-de-files" hinzugefügt.`
+        },
+        {
+          path: ['scripts', 'xi18n'],
+          value: 'ng extract-i18n --output-path src/locale',
+          message: `Skript "xi18n" hinzugefügt.`
         }
       ];
 

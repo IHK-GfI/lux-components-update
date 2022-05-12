@@ -134,9 +134,11 @@ export function updatePackageJsonDependency(tree: Tree, dependency: NodeDependen
 }
 
 export function deletePackageJsonDependency(tree: Tree, context: SchematicContext, dependency: NodeDependency) {
-  deleteLineFromFile(tree, context, '/package.json', dependency.name);
-  logInfo(
-    `Dependency ` + chalk.yellowBright(`${dependency.name}`) + ` wurde aus dem Abschnitt ${dependency.type} gelöscht.`
-  );
+  const changed = deleteLineFromFile(tree, context, '/package.json', dependency.name, false);
+  if (changed) {
+    logInfo(
+        `Dependency ` + chalk.yellowBright(`${ dependency.name }`) + ` wurde aus dem Abschnitt ${ dependency.type } gelöscht.`
+    );
+  }
 }
 

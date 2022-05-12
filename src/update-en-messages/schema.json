@@ -1,9 +1,9 @@
 {
   "$schema": "http://json-schema.org/schema",
-  "id": "luxUpdateSchema",
-  "title": "Aktualisiert das LUX-Componentsprojekt",
+  "$id": "updateEnMessagesSchema",
+  "title": "Aktualisiert die englischen Übersetzungen im Projekt.",
   "type": "object",
-  "description": "Aktualisiert das LUX-Componentsprojekt",
+  "description": "Aktualisiert die englischen Übersetzungen im Projekt.",
   "properties": {
     "project": {
       "type": "string",

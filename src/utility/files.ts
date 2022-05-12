@@ -21,7 +21,9 @@ import { logInfo, logInfoWithDescriptor, logSuccess } from './logging';
  * @param filePath
  * @param searchString
  */
-export function deleteLineFromFile(tree: Tree, context: SchematicContext, filePath: string, searchString: string) {
+export function deleteLineFromFile(tree: Tree, context: SchematicContext, filePath: string, searchString: string, withLog = true) {
+  let changed = false;
+
   const fileContent: Buffer | null = tree.read(filePath);
   if (fileContent) {
     // String der Datei erhalten
@@ -68,12 +70,19 @@ export function deleteLineFromFile(tree: Tree, context: SchematicContext, filePa
       content = content.replace(new RegExp('\r\n\r\n', 'g'), '\r\n');
 
       tree.overwrite(filePath, content);
+      changed = true;
     } else {
-      logInfo(`Die Datei "${filePath}" enthält den String "${searchString}" nicht.`);
+      if (withLog) {
+        logInfo(`Die Datei "${ filePath }" enthält den String "${ searchString }" nicht.`);
+      }
     }
   } else {
-    logInfo(`Die Datei "${filePath}" wurde nicht gefunden.`);
+    if (withLog) {
+      logInfo(`Die Datei "${ filePath }" wurde nicht gefunden.`);
+    }
   }
+
+  return changed;
 }
 
 /**

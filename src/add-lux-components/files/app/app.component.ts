@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
+import { LuxThemeService } from '@ihk-gfi/lux-components';
 
 @Component({
   selector: 'app-root',
@@ -8,6 +9,8 @@ import { Router } from '@angular/router';
 })
 export class AppComponent {
 
-  constructor(public router: Router) {}
+  constructor(public router: Router, themeService: LuxThemeService) {
+    themeService.loadTheme();
+  }
 
 }
