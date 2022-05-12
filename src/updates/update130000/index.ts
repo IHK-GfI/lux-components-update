@@ -5,7 +5,7 @@ import { updateDependencies } from '../../update-dependencies/index';
 import { deleteFile, iterateFilesAndModifyContent, moveFilesToDirectory } from '../../utility/files';
 import { removeAttribute } from '../../utility/html';
 import {
-    findObjectIndexInArray,
+    findObjectIndexInArray, findObjectPropertyInArray,
     jsonFormattingOptions,
     readJson,
     readJsonAsString,
@@ -13,8 +13,8 @@ import {
     updateJsonArray,
     updateJsonValue
 } from '../../utility/json';
-import { logInfo, logInfoWithDescriptor, logSuccess } from '../../utility/logging';
-import { applyRuleIf, finish, messageInfoRule, messageSuccessRule } from '../../utility/util';
+import { formattedSchematicsException, logInfo, logInfoWithDescriptor, logSuccess } from '../../utility/logging';
+import { applyRuleIf, finish, messageInfoRule, messageSuccessRule, replaceAll } from '../../utility/util';
 import { validateLuxComponentsVersion, validateNodeVersion } from '../../utility/validation';
 
 export const updateMajorVersion   = '13';
@@ -41,6 +41,8 @@ export function updateProject(options: any): Rule {
             messageInfoRule(`LUX-Components ${ updateMajorVersion } werden aktualisiert...`),
             updateAngularJson(options),
             updatePackageJson(options),
+            updateTsConfigJson(options),
+            updateIndexHtml(options),
             removeLuxSelectedFilesAlwaysUseArray(options),
             fixEmptyStyles(options),
             removeDatepickerDefaultLocale(options),
@@ -115,11 +117,20 @@ export function updateAngularJson(options: any): Rule {
         };
         const jsonPathDevelopmentServeDefault = ['projects', options.project, 'architect', 'serve', 'defaultConfiguration'];
 
+        const findGlobFn = (node) => findObjectPropertyInArray(node, 'glob', 'material-design-icons.css');
+        const jsonPathGlob = ['projects', options.project, 'architect', 'build', 'options', 'assets'];
+        const jsonValueGlob = {
+            "glob": "material-design-icons(.css|.css.map)",
+            "input": "./node_modules/material-design-icons-iconfont/dist",
+            "output": "./assets/icons/material-icons"
+        };
+
         return chain([
             messageInfoRule(`Datei "angular.json" wird aktualisiert...`),
             updateBuildThemeAssets(options),
             updateTestThemeAssets(options),
             removeThemeAssets(options),
+            updateJsonArray(options, '/angular.json', jsonPathGlob, jsonValueGlob, true,  findGlobFn),
             updateJsonValue(options, '/angular.json', jsonPathDevelopmentBuild, jsonValueDevelopmentBuild),
             updateJsonValue(options, '/angular.json', jsonPathDevelopmentServe, jsonValueDevelopmentServe),
             updateJsonValue(options, '/angular.json', jsonPathDevelopmentServeDefault, 'development'),
@@ -128,6 +139,39 @@ export function updateAngularJson(options: any): Rule {
             updateJsonArray(options, '/angular.json', jsonPathAllowedCommonJS, 'pdfjs-dist'),
             updateJsonValue(options, '/angular.json', jsonPathOptimization, jsonValueOptimization),
             messageSuccessRule(`Datei "angular.json" wurde aktualisiert.`)
+        ]);
+    };
+}
+
+export function updateTsConfigJson(options: any): Rule {
+    return (tree: Tree, _context: SchematicContext) => {
+        return chain([
+            messageInfoRule(`Datei "tsconfig.json" wird aktualisiert...`),
+            updateJsonValue(options, '/tsconfig.json', ['compilerOptions', 'allowSyntheticDefaultImports'], true),
+            messageSuccessRule(`Datei "tsconfig.json" wurde aktualisiert.`)
+        ]);
+    };
+}
+
+export function updateIndexHtml(options: any): Rule {
+    return (tree: Tree, _context: SchematicContext) => {
+        return chain([
+            messageInfoRule(`Datei "index.html" wird aktualisiert...`),
+            (tree: Tree, _context: SchematicContext) => {
+                const filePath = '/src/index.html';
+                const buffer = tree.read(filePath);
+                if (buffer) {
+                    const content       = buffer.toString();
+                    let modifiedContent = content;
+                    modifiedContent     = replaceAll(modifiedContent, 'rel="stylesheet"', 'rel="stylesheet preload"');
+
+                    if (content !== modifiedContent) {
+                        logInfo(`Den Wert "preload" ergänzt.`);
+                        tree.overwrite(filePath, modifiedContent);
+                    }
+                }
+            },
+            messageSuccessRule(`Datei "index.html" wurde aktualisiert.`)
         ]);
     };
 }

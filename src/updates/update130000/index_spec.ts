@@ -12,9 +12,9 @@ import {
     removeDatepickerDefaultLocale,
     removeLuxSelectedFilesAlwaysUseArray,
     update,
-    updateAngularJson,
+    updateAngularJson, updateIndexHtml,
     updateMajorVersion,
-    updatePackageJson
+    updatePackageJson, updateTsConfigJson
 } from './index';
 
 const collectionPath = path.join(__dirname, '../../collection.json');
@@ -173,6 +173,7 @@ module.exports = function (config) {
 
                     const content = angularJson?.toString();
 
+                    expect(content).toContain('"glob": "material-design-icons(.css|.css.map)"');
                     expect(content).toContain('"glob": "*(*min.css|*min.css.map)"');
                     expect(content).not.toContain('"glob": "*.css",');
                     expect(content).not.toContain('"tsConfig": "src/tsconfig.app.ie.json"');
@@ -214,6 +215,91 @@ module.exports = function (config) {
                     const packageJson = success.read('/package.json');
                     expect(packageJson).toBeDefined();
                     expect(packageJson?.toString()).toContain('"xi18n": "ng extract-i18n --output-path src/locale"');
+                    done();
+                },
+                (reason) => expect(reason).toBeUndefined()
+            );
+        });
+    });
+
+    describe('[Rule] updateTsConfigJson', () => {
+        it('Sollte die Datei "tsconfig.json" anpassen', (done) => {
+            appTree.overwrite(
+                '/tsconfig.json',
+                `
+ 
+{  
+  "compilerOptions": {
+    "baseUrl": "tslint.json",
+    "lib": [
+      "es2018",
+      "dom"
+    ],
+    "declaration": true,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    }
+  }
+        `
+            );
+
+            callRule(updateTsConfigJson(testOptions), observableOf(appTree), context).subscribe(
+                (success) => {
+                    const packageJson = success.read('/tsconfig.json');
+                    expect(packageJson).toBeDefined();
+                    expect(packageJson?.toString()).toContain('"allowSyntheticDefaultImports": true,');
+                    done();
+                },
+                (reason) => expect(reason).toBeUndefined()
+            );
+        });
+    });
+
+    describe('[Rule] updateIndexHtml', () => {
+        it('Sollte die Datei "index.html" anpassen', (done) => {
+            appTree.create(
+                '/src/index.html',
+                `
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <title>LUX Blueprint</title>
+  <base href="/">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="stylesheet" href="assets/icons/fontawesome/css/all.css">
+  <link rel="stylesheet" href="assets/icons/material-icons/material-design-icons.css">
+  <style>
+    .lux-no-js {
+      color: red;
+      font-size: 20px;
+      border: 1px solid red;
+      padding: 10px;
+    }
+  </style>
+</head>
+<body style="margin: 0">
+<noscript>
+  <div id="no-js" class="lux-no-js">
+    <p><b>Achtung, Javascript ist deaktiviert.</b></p>
+    <p>Bitte aktivieren Sie Javascript in Ihrem Browser, damit die Applikation funktionsf&auml;hig ist.</p>
+  </div>
+</noscript>
+  <lux-bp></lux-bp>
+</body>
+</html>
+        `
+            );
+
+            callRule(updateIndexHtml(testOptions), observableOf(appTree), context).subscribe(
+                (success) => {
+                    const indexHtml = success.read('/src/index.html');
+                    console.log('aaa', indexHtml?.toString());
+                    expect(indexHtml).toBeDefined();
+                    expect(indexHtml?.toString()).toContain('<link rel="stylesheet preload" href="assets/icons/fontawesome/css/all.css">');
+                    expect(indexHtml?.toString()).toContain('<link rel="stylesheet preload" href="assets/icons/material-icons/material-design-icons.css">');
                     done();
                 },
                 (reason) => expect(reason).toBeUndefined()
@@ -322,8 +408,13 @@ const testAngularJson = `
               "glob": "*.css",
               "input": "./node_modules/@ihk-gfi/lux-components-theme/prebuilt-themes",
               "output": "./assets/themes"
-            }
-          ],
+            },
+            {
+              "glob": "material-design-icons.css",
+              "input": "./node_modules/material-design-icons-iconfont/dist",
+              "output": "./assets/icons/material-icons"
+            }          
+           ],
           "styles": [
             "src/styles.scss"
           ],
