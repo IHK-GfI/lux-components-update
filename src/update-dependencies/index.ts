@@ -8,7 +8,7 @@ export function updateDependencies(): Rule {
     return chain([
         messageInfoRule(`Abhängigkeiten im 'dependencies'-Abschnitt (package.json) werden aktualisiert...`),
         updateDefaultDependencies(),
-        updateJsonValue(null, '/package.json', ['dependencies', '@ihk-gfi/lux-stammdaten'], 'file://C:\\Projekte\\luxsd\\stammdaten-ui-lib\\dist\\ihk-gfi-lux-stammdaten-13.0.0.tgz', true),
+        updateJsonValue(null, '/package.json', ['dependencies', '@ihk-gfi/lux-stammdaten'], '13.0.0', true),
         messageSuccessRule(`Abhängigkeiten im 'dependencies'-Abschnitt (package.json) wurden aktualisiert.`),
 
         messageInfoRule(`Abhängigkeiten im 'devDependencies'-Abschnitt (package.json) werden aktualisiert...`),
@@ -39,7 +39,7 @@ export function updateDefaultDependencies(): Rule {
                 { type: NodeDependencyType.Default, version: '13.3.7', name: '@angular/router' },
                 { type: NodeDependencyType.Default, version: '13.3.7', name: '@angular/cdk' },
                 { type: NodeDependencyType.Default, version: '13.3.7', name: '@angular/material' },
-                { type: NodeDependencyType.Default, version: '13.0.0-beta.38', name: '@angular/flex-layout' },
+                { type: NodeDependencyType.Default, version: '13.0.0-beta.37', name: '@angular/flex-layout' },
                 { type: NodeDependencyType.Default, version: '5.15.4', name: '@fortawesome/fontawesome-free' },
                 { type: NodeDependencyType.Default, version: '6.5.0', name: 'material-design-icons-iconfont' },
                 { type: NodeDependencyType.Default, version: '7.5.5', name: 'rxjs' },
@@ -78,7 +78,7 @@ export function updateDevDependencies(): Rule {
                 { type: NodeDependencyType.Dev, version: '1.2.3', name: 'eslint-plugin-prefer-arrow' },
                 { type: NodeDependencyType.Dev, version: '13.3.5', name: '@angular-devkit/build-angular' },
                 { type: NodeDependencyType.Dev, version: '13.3.7', name: '@angular/compiler-cli' },
-                { type: NodeDependencyType.Dev, version: '13.3.7', name: '@angular/cli' },
+                { type: NodeDependencyType.Dev, version: '13.3.5', name: '@angular/cli' },
                 { type: NodeDependencyType.Dev, version: '13.3.7', name: '@angular/language-service' },
                 { type: NodeDependencyType.Dev, version: '13.3.7', name: '@angular/elements' },
                 { type: NodeDependencyType.Dev, version: '1.1.19', name: '@compodoc/compodoc' },

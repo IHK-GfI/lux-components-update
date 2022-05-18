@@ -49,7 +49,7 @@ describe('update130000', () => {
         it('Sollte einen Fehler werfen, wenn Version < n - 1', () => {
             updatePackageJsonDependency(appTree, {
                 type   : NodeDependencyType.Default,
-                version: '11.13.0',
+                version: '11.14.0',
                 name   : '@ihk-gfi/lux-components'
             });
             Object.defineProperty(process.versions, 'node', {
@@ -79,7 +79,7 @@ describe('update130000', () => {
                 "lux-components"
               ],
               "dependencies": {
-                "@ihk-gfi/lux-components": "11.13.0"
+                "@ihk-gfi/lux-components": "11.14.0"
               }
             }
         `
@@ -296,10 +296,10 @@ module.exports = function (config) {
             callRule(updateIndexHtml(testOptions), observableOf(appTree), context).subscribe(
                 (success) => {
                     const indexHtml = success.read('/src/index.html');
-                    console.log('aaa', indexHtml?.toString());
+
                     expect(indexHtml).toBeDefined();
-                    expect(indexHtml?.toString()).toContain('<link rel="stylesheet preload" href="assets/icons/fontawesome/css/all.css">');
-                    expect(indexHtml?.toString()).toContain('<link rel="stylesheet preload" href="assets/icons/material-icons/material-design-icons.css">');
+                    expect(indexHtml?.toString()).toContain('<link rel="stylesheet preload" as="style" type="text/css" href="assets/icons/fontawesome/css/all.css">');
+                    expect(indexHtml?.toString()).toContain('<link rel="stylesheet preload" as="style" type="text/css" href="assets/icons/material-icons/material-design-icons.css">');
                     done();
                 },
                 (reason) => expect(reason).toBeUndefined()

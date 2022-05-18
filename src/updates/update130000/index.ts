@@ -13,12 +13,12 @@ import {
     updateJsonArray,
     updateJsonValue
 } from '../../utility/json';
-import { formattedSchematicsException, logInfo, logInfoWithDescriptor, logSuccess } from '../../utility/logging';
+import { logInfo, logInfoWithDescriptor, logSuccess } from '../../utility/logging';
 import { applyRuleIf, finish, messageInfoRule, messageSuccessRule, replaceAll } from '../../utility/util';
 import { validateLuxComponentsVersion, validateNodeVersion } from '../../utility/validation';
 
 export const updateMajorVersion   = '13';
-export const updateMinVersion     = '11.13.0';
+export const updateMinVersion     = '11.14.0';
 export const updateNodeMinVersion = '16.0.0';
 
 export function update(options: any): Rule {
@@ -27,6 +27,7 @@ export function update(options: any): Rule {
             check(options),
             applyRuleIf(updateMinVersion, updateProject(options)),
             finish(
+                false,
                 `${ chalk.yellowBright(
                     'Wichtig!!!'
                 ) } Hinweise im Update Guide beachten -> https://github.com/IHK-GfI/lux-components/wiki/update-guide-${ updateMajorVersion }`
@@ -163,7 +164,7 @@ export function updateIndexHtml(options: any): Rule {
                 if (buffer) {
                     const content       = buffer.toString();
                     let modifiedContent = content;
-                    modifiedContent     = replaceAll(modifiedContent, 'rel="stylesheet"', 'rel="stylesheet preload"');
+                    modifiedContent     = replaceAll(modifiedContent, 'rel="stylesheet"', 'rel="stylesheet preload" as="style" type="text/css"');
 
                     if (content !== modifiedContent) {
                         logInfo(`Den Wert "preload" ergänzt.`);
