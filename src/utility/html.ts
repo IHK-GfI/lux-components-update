@@ -1,6 +1,8 @@
-const cheerio = require('cheerio');
+import { replaceAll } from './util';
 
-const luxCherioParserOptions = { xmlMode: true, decodeEntities: false, selfClosingTags: false };
+const cheerio = require('cheerio');
+const luxCheerioParserOptions = { xmlMode: true, decodeEntities: false, selfClosingTags: false };
+const emptyPlaceholderToken = '@20c44b9d-45e1-447a-a141-1de0695c9c35@';
 
 export class CheerioInfo {
   content: string;
@@ -21,17 +23,18 @@ export class CheerioInfo {
  * @param attrValue
  */
 export function addAttribute(content: string, selector: string, attrName: string, attrValue: string): CheerioInfo {
-  const $ = cheerio.load(content, luxCherioParserOptions);
-
-  const result = new CheerioInfo(content);
+  let newContent = preProcessing(content);
+  const $ = cheerio.load(newContent, luxCheerioParserOptions);
+  const result = new CheerioInfo(newContent);
 
   $(selector).each(function (i, elem) {
-    $(elem).attr(attrName, attrValue);
+    $(elem).attr(attrName, attrValue ? attrValue : emptyPlaceholderToken);
     result.updated = true;
   });
 
   if (result.updated) {
     result.content = $.xml();
+    result.content = postProcessing(result.content);
   }
 
   return result;
@@ -46,17 +49,39 @@ export function addAttribute(content: string, selector: string, attrName: string
  * @param attrValue
  */
 export function appendAttribute(content: string, selector: string, attrName: string, attrValue: string): CheerioInfo {
-  const $ = cheerio.load(content, luxCherioParserOptions);
-
-  const result = new CheerioInfo(content);
+  let newContent = preProcessing(content);
+  const $ = cheerio.load(newContent, luxCheerioParserOptions);
+  const result = new CheerioInfo(newContent);
 
   $(selector).each(function (i, elem) {
-    $(elem).attr(attrName, $(elem).attr(attrName) + attrValue);
-    result.updated = true;
+    const attrNameNoBinding = attrName;
+    if ($(elem).attr(attrNameNoBinding)) {
+      $(elem).attr(attrNameNoBinding, $(elem).attr(attrNameNoBinding) + attrValue);
+      result.updated = true;
+    }
+
+    const attrNameDataBinding = '[' + attrName + ']';
+    if ($(elem).attr(attrNameDataBinding)) {
+      $(elem).attr(attrNameDataBinding, $(elem).attr(attrNameDataBinding) + attrValue);
+      result.updated = true;
+    }
+
+    const attrNameTwoWayBinding = '[(' + attrName + ')]';
+    if ($(elem).attr(attrNameTwoWayBinding)) {
+      $(elem).attr(attrNameTwoWayBinding, $(elem).attr(attrNameTwoWayBinding) + attrValue);
+      result.updated = true;
+    }
+
+    const attrNameEventBinding = '(' + attrName + ')';
+    if ($(elem).attr(attrNameEventBinding)) {
+      $(elem).attr(attrNameEventBinding, $(elem).attr(attrNameEventBinding) + attrValue);
+      result.updated = true;
+    }
   });
 
   if (result.updated) {
     result.content = $.xml();
+    result.content = postProcessing(result.content);
   }
 
   return result;
@@ -70,10 +95,16 @@ export function appendAttribute(content: string, selector: string, attrName: str
  * @param attrNameOld Ein beliebiger Attributname (z.B. luxItem).
  * @param attrNameNew Ein beliebiger neuer Attributname.
  */
-export function renameAttribute(  content: string,  selector: string,  attrNameOld: string,  attrNameNew: string): CheerioInfo {
-  const $ = cheerio.load(content, luxCherioParserOptions);
+export function renameAttribute(
+  content: string,
+  selector: string,
+  attrNameOld: string,
+  attrNameNew: string
+): CheerioInfo {
+  let newContent = preProcessing(content);
+  const $ = cheerio.load(newContent, luxCheerioParserOptions);
 
-  const result = new CheerioInfo(content);
+  const result = new CheerioInfo(newContent);
 
   $(selector).each(function (i, elem) {
     const attrNameNoBindingOld = attrNameOld;
@@ -81,7 +112,7 @@ export function renameAttribute(  content: string,  selector: string,  attrNameO
     const attrValueNoBinding = $(elem).attr(attrNameNoBindingOld);
     if (attrValueNoBinding) {
       $(elem).removeAttr(attrNameNoBindingOld);
-      $(elem).attr(attrNameNoBindingNew, attrValueNoBinding);
+      $(elem).attr(attrNameNoBindingNew, attrValueNoBinding ? attrValueNoBinding : emptyPlaceholderToken);
       result.updated = true;
     }
 
@@ -90,7 +121,7 @@ export function renameAttribute(  content: string,  selector: string,  attrNameO
     const attrNameDataBindingValue = $(elem).attr(attrNameDataBindingOld);
     if (attrNameDataBindingValue) {
       $(elem).removeAttr(attrNameDataBindingOld);
-      $(elem).attr(attrNameDataBindingNew, attrNameDataBindingValue);
+      $(elem).attr(attrNameDataBindingNew, attrNameDataBindingValue ? attrNameDataBindingValue : emptyPlaceholderToken);
       result.updated = true;
     }
 
@@ -99,7 +130,7 @@ export function renameAttribute(  content: string,  selector: string,  attrNameO
     const attrValueTwoWayBinding = $(elem).attr(attrNameTwoWayBindingOld);
     if (attrValueTwoWayBinding) {
       $(elem).removeAttr(attrNameTwoWayBindingOld);
-      $(elem).attr(attrNameTwoWayBindingNew, attrValueTwoWayBinding);
+      $(elem).attr(attrNameTwoWayBindingNew, attrValueTwoWayBinding ? attrValueTwoWayBinding : emptyPlaceholderToken);
       result.updated = true;
     }
 
@@ -108,13 +139,14 @@ export function renameAttribute(  content: string,  selector: string,  attrNameO
     const attrValueEventBinding = $(elem).attr(attrNameEventBindingOld);
     if (attrValueEventBinding) {
       $(elem).removeAttr(attrNameEventBindingOld);
-      $(elem).attr(attrNameEventBindingNew, attrValueEventBinding);
+      $(elem).attr(attrNameEventBindingNew, attrValueEventBinding ? attrValueEventBinding : emptyPlaceholderToken);
       result.updated = true;
     }
   });
 
   if (result.updated) {
     result.content = $.xml();
+    result.content = postProcessing(result.content);
   }
 
   return result;
@@ -129,38 +161,40 @@ export function renameAttribute(  content: string,  selector: string,  attrNameO
  * @param attrValue Ein beliebiger Wert.
  */
 export function updateAttribute(content: string, selector: string, attrName: string, attrValue: string): CheerioInfo {
-  const $ = cheerio.load(content, luxCherioParserOptions);
+  let newContent = preProcessing(content);
+  const $ = cheerio.load(newContent, luxCheerioParserOptions);
 
-  const result = new CheerioInfo(content);
+  const result = new CheerioInfo(newContent);
 
   $(selector).each(function (i, elem) {
     const attrNameNoBinding = attrName;
     if ($(elem).attr(attrNameNoBinding)) {
-      $(elem).attr(attrNameNoBinding, attrValue);
+      $(elem).attr(attrNameNoBinding, attrValue ? attrValue : emptyPlaceholderToken);
       result.updated = true;
     }
 
     const attrNameDataBinding = '[' + attrName + ']';
     if ($(elem).attr(attrNameDataBinding)) {
-      $(elem).attr(attrNameDataBinding, attrValue);
+      $(elem).attr(attrNameDataBinding, attrValue ? attrValue : emptyPlaceholderToken);
       result.updated = true;
     }
 
     const attrNameTwoWayBinding = '[(' + attrName + ')]';
     if ($(elem).attr(attrNameTwoWayBinding)) {
-      $(elem).attr(attrNameTwoWayBinding, attrValue);
+      $(elem).attr(attrNameTwoWayBinding, attrValue ? attrValue : emptyPlaceholderToken);
       result.updated = true;
     }
 
     const attrNameEventBinding = '(' + attrName + ')';
     if ($(elem).attr(attrNameEventBinding)) {
-      $(elem).attr(attrNameEventBinding, attrValue);
+      $(elem).attr(attrNameEventBinding, attrValue ? attrValue : emptyPlaceholderToken);
       result.updated = true;
     }
   });
 
   if (result.updated) {
     result.content = $.xml();
+    result.content = postProcessing(result.content);
   }
 
   return result;
@@ -174,39 +208,81 @@ export function updateAttribute(content: string, selector: string, attrName: str
  * @param attrName Ein beliebiger Attributname (z.B. luxListItem).
  */
 export function removeAttribute(content: string, selector: string, attrName: string): CheerioInfo {
-  const $ = cheerio.load(content, luxCherioParserOptions);
+  let newContent = preProcessing(content);
+  const $ = cheerio.load(newContent, luxCheerioParserOptions);
 
-  const result = new CheerioInfo(content);
+  const result = new CheerioInfo(newContent);
 
   $(selector).each(function (i, elem) {
     const attrNameNoBinding = attrName;
+    let updated = false;
+
     if ($(elem).attr(attrNameNoBinding)) {
       $(elem).removeAttr(attrNameNoBinding);
-      result.updated = true;
+      updated = true;
     }
 
     const attrNameDataBinding = '[' + attrName + ']';
     if ($(elem).attr(attrNameDataBinding)) {
       $(elem).removeAttr(attrNameDataBinding);
-      result.updated = true;
+      updated = true;
     }
 
     const attrNameTwoWayBinding = '[(' + attrName + ')]';
     if ($(elem).attr(attrNameTwoWayBinding)) {
       $(elem).removeAttr(attrNameTwoWayBinding);
-      result.updated = true;
+      updated = true;
     }
 
     const attrNameEventBinding = '(' + attrName + ')';
     if ($(elem).attr(attrNameEventBinding)) {
       $(elem).removeAttr(attrNameEventBinding);
+      updated = true;
+    }
+
+    if (updated) {
       result.updated = true;
     }
   });
 
   if (result.updated) {
     result.content = $.xml();
+    result.content = postProcessing(result.content);
   }
 
   return result;
 }
+
+function preProcessing(content: string) {
+  return replaceAll(content, '=""', `="${emptyPlaceholderToken}"`);
+}
+
+function postProcessing(content: string) {
+  let resultContent = content;
+
+  // Entferne alle leeren Werte die von Cheerio hinzugefügt wurden.
+  resultContent = replaceAll(resultContent, `=""`, '');
+  // Setze alle Attribute wieder auf leer (="") die initial bereits leer waren oder gezielt auf leer gesetzt wurden.
+  resultContent = replaceAll(resultContent, `${emptyPlaceholderToken}`, '');
+  // Entferne alle Closing-Tags von den Void-Tags.
+  resultContent = replaceAll(resultContent, '</input>', '');
+  resultContent = replaceAll(resultContent, '</area>', '');
+  resultContent = replaceAll(resultContent, '</br>', '');
+  resultContent = replaceAll(resultContent, '</base>', '');
+  resultContent = replaceAll(resultContent, '</col>', '');
+  resultContent = replaceAll(resultContent, '</embed>', '');
+  resultContent = replaceAll(resultContent, '</hr>', '');
+  resultContent = replaceAll(resultContent, '</img>', '');
+  resultContent = replaceAll(resultContent, '</link>', '');
+  resultContent = replaceAll(resultContent, '</meta>', '');
+  resultContent = replaceAll(resultContent, '</param>', '');
+  resultContent = replaceAll(resultContent, '</source>', '');
+  resultContent = replaceAll(resultContent, '</track>', '');
+  resultContent = replaceAll(resultContent, '</wbr>', '');
+
+  return resultContent;
+}
+
+const getAllAttributes = function (node) {
+  return node.attributes || Object.keys(node.attribs).map((name) => ({ name, value: node.attribs[name] }));
+};

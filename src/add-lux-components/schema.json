@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/schema",
-  "id": "addLuxComponentsSchema",
+  "$id": "addLuxComponentsSchema",
   "title": "Fügt die LUX-Components zum Projekt hinzu",
   "type": "object",
   "description": "Fügt die LUX-Components zum Projekt hinzu",

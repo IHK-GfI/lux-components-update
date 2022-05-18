@@ -3,67 +3,104 @@ import * as chalk from 'chalk';
 import { applyEdits, Edit, modify } from 'jsonc-parser';
 import { updateDependencies } from '../update-dependencies/index';
 import {
-  addThemeAssets,
-  i18nCopyMessages,
-  i18nUpdateAngularJson,
-  i18nUpdatePackageJson,
-  updateAppComponent,
+  updateBuildThemeAssets,
+  copyFiles,
   updateMajorVersion,
-  updateNodeMinVersion
-} from '../update/index';
-import { update110001 } from '../update110001/index';
-import { update110100 } from '../update110100/index';
-import { update110101 } from '../update110101/index';
-import { update110200 } from '../update110200/index';
-import { update110300 } from '../update110300/index';
-import { update110400 } from '../update110400/index';
-import { update110500 } from '../update110500';
-import { update110600 } from '../update110600/index';
-import { update110700 } from '../update110700/index';
-import { update110800 } from '../update110800/index';
-import { update110900 } from '../update110900/index';
-import { update111000 } from '../update111000/index';
-import { update111100 } from '../update111100/index';
-import { update111200 } from '../update111200/index';
-import { update111300 } from '../update111300/index';
-import { update111400 } from '../update111400/index';
+  updateNodeMinVersion,
+  updateTestThemeAssets
+} from '../updates/update130000/index';
 import { iterateFilesAndModifyContent, moveFilesToDirectory } from '../utility/files';
-import { jsonFormattingOptions, readJson, readJsonAsString } from '../utility/json';
+import {
+  findObjectPropertyInArray,
+  jsonFormattingOptions,
+  readJson,
+  readJsonAsString,
+  updateJsonArray,
+  updateJsonValue
+} from '../utility/json';
 import { logInfo } from '../utility/logging';
 import { finish, messageInfoRule, messageSuccessRule, replaceAll, waitForTreeCallback } from '../utility/util';
 import { validateAngularVersion, validateNodeVersion } from '../utility/validation';
 
 export function addLuxComponents(options: any): Rule {
   return (tree: Tree, _context: SchematicContext) => {
+    const jsonPathAllowedCommonJS = ['projects', options.project, 'architect', 'build', 'options', 'allowedCommonJsDependencies'];
+    const jsonPathBudget = ['projects', options.project, 'architect', 'build', 'configurations', 'production', 'budgets'];
+    const budgetValue = {
+      "type": "initial",
+      "maximumWarning": "1mb",
+      "maximumError": "2mb"
+    };
+
+    const jsonPathAssetsBuild = ['projects', options.project, 'architect', 'build', 'options', 'assets'];
+    const jsonPathAssetsTest = ['projects', options.project, 'architect', 'test', 'options', 'assets'];
+    const assetsValues = [
+      {
+        glob: '*(*min.css|*min.css.map)',
+        input: './node_modules/@ihk-gfi/lux-components-theme/prebuilt-themes',
+        output: './assets/themes'
+      },
+      {
+        glob: "all.css",
+        input: "./node_modules/@fortawesome/fontawesome-free/css",
+        output: "./assets/icons/fontawesome/css"
+      },
+      {
+        glob: "*(*.eot|*.ttf|*.woff|*.woff2)",
+        input: "./node_modules/@fortawesome/fontawesome-free/webfonts",
+        output: "./assets/icons/fontawesome/webfonts"
+      },
+      {
+        glob: "material-design-icons(.css|.css.map)",
+        input: "./node_modules/material-design-icons-iconfont/dist",
+        output: "./assets/icons/material-icons"
+      },
+      {
+        glob: "*(*.eot|*.ttf|*.woff|*.woff2)",
+        input: "./node_modules/material-design-icons-iconfont/dist/fonts",
+        output: "./assets/icons/material-icons/fonts"
+      }
+    ];
+
+    const jsonPathOptimization = ['projects', options.project, 'architect', 'build', 'configurations', 'production', 'optimization'];
+    const jsonValueOptimization = {
+      "scripts": true,
+      "styles": {
+        "minify": true,
+        "inlineCritical": false
+      },
+      "fonts": true
+    };
+
+    const findBudgetFn = (node) => findObjectPropertyInArray(node, 'type', 'initial');
+
     return chain([
       check(),
       copyAppFiles(options),
       updatePackageJson(options),
       updateDependencies(),
-      addThemeAssets(options),
-      updateAppComponent(options),
+
       updateIndexHtml(options),
-      i18nUpdatePackageJson(options),
-      i18nUpdateAngularJson(options),
-      i18nCopyMessages(options),
+      copyFiles(options),
       updateApp(options),
-      update110001(options),
-      update110100(options),
-      update110101(options),
-      update110200(options),
-      update110300(options),
-      update110400(options),
-      update110500(options),
-      update110600(options),
-      update110700(options),
-      update110800(options),
-      update110900(options),
-      update111000(options),
-      update111100(options),
-      update111200(options),
-      update111300(options),
-      update111400(options),
+      updateJsonValue(options, '/tsconfig.json', ['compilerOptions', 'strict'], false),
+      updateJsonValue(options, '/angular.json', jsonPathOptimization, jsonValueOptimization),
+      updateJsonArray(options, '/angular.json', jsonPathBudget, budgetValue, true,  findBudgetFn),
+      updateJsonArray(options, '/angular.json', jsonPathAssetsBuild, assetsValues[0]),
+      updateJsonArray(options, '/angular.json', jsonPathAssetsTest, assetsValues[0]),
+      updateJsonArray(options, '/angular.json', jsonPathAssetsBuild, assetsValues[1]),
+      updateJsonArray(options, '/angular.json', jsonPathAssetsTest, assetsValues[1]),
+      updateJsonArray(options, '/angular.json', jsonPathAssetsBuild, assetsValues[2]),
+      updateJsonArray(options, '/angular.json', jsonPathAssetsTest, assetsValues[2]),
+      updateJsonArray(options, '/angular.json', jsonPathAssetsBuild, assetsValues[3]),
+      updateJsonArray(options, '/angular.json', jsonPathAssetsTest, assetsValues[3]),
+      updateJsonArray(options, '/angular.json', jsonPathAssetsBuild, assetsValues[4]),
+      updateJsonArray(options, '/angular.json', jsonPathAssetsTest, assetsValues[4]),
+      updateJsonArray(options, '/angular.json', jsonPathAllowedCommonJS, 'hammerjs'),
+      updateJsonArray(options, '/angular.json', jsonPathAllowedCommonJS, 'ng2-pdf-viewer'),
+      updateJsonArray(options, '/angular.json', jsonPathAllowedCommonJS, 'pdfjs-dist'),
       finish(
+          true,
         `Die LUX-Components ${updateMajorVersion} wurden erfolgreich eingerichtet.`,
         `${chalk.yellowBright('Fertig!')}`
       )
@@ -92,18 +129,40 @@ export function updatePackageJson(options: any): Rule {
       const filePath = `/package.json`;
 
       const newValuesArr = [
-        { path: ['scripts', 'test_single_run'], value: 'ng test --watch=false --browsers=ChromeHeadless', message: `Skript "test_single_run" hinzugefügt.`},
-        { path: ['scripts', 'smoketest'], value: 'npm run test_single_run && npm run build && npm run lint --bailOnLintError true', message: `Skript "smoketest" hinzugefügt.`}
+        {
+          path: ['scripts', 'build-prod'],
+          value: 'ng build --configuration production --localize && npm run move-de-files',
+          message: `Skript "build-prod" hinzugefügt.`
+        },
+        {
+          path: ['scripts', 'test-headless'],
+          value: 'ng test --watch=false --browsers=ChromeHeadless --code-coverage=true',
+          message: `Skript "test-headless" hinzugefügt.`
+        },
+        {
+          path: ['scripts', 'smoketest'],
+          value: 'npm run build-prod && npm run test-headless && npm run xi18n',
+          message: `Skript "smoketest" hinzugefügt.`
+        },
+        {
+          path: ['scripts', 'move-de-files'],
+          value: 'node move-de-files.js',
+          message: `Skript "move-de-files" hinzugefügt.`
+        },
+        {
+          path: ['scripts', 'xi18n'],
+          value: 'ng extract-i18n --output-path src/locale',
+          message: `Skript "xi18n" hinzugefügt.`
+        }
       ];
 
-      newValuesArr.forEach(change => {
+      newValuesArr.forEach((change) => {
         const tsConfigJson = readJsonAsString(tree, filePath);
-        const edits: Edit[] = modify(tsConfigJson, change.path, change.value, { formattingOptions: jsonFormattingOptions })
+        const edits: Edit[] = modify(tsConfigJson, change.path, change.value, {
+          formattingOptions: jsonFormattingOptions
+        });
 
-        tree.overwrite(
-          filePath,
-          applyEdits(tsConfigJson, edits)
-        );
+        tree.overwrite(filePath, applyEdits(tsConfigJson, edits));
 
         logInfo(change.message);
       });
@@ -153,22 +212,29 @@ export function updateApp(options: any): Rule {
       const filePath = `/package.json`;
 
       const newValuesArr = [
-        { path: ['scripts', 'move-de-files'], value: 'node move-de-files.js', message: `Skript "move-de-files" hinzugefügt.`},
-        { path: ['scripts', 'build'], value: 'ng build --aot --localize && npm run move-de-files', message: `Skript "build" angepasst.`},
-        { path: ['scripts', 'build-aot'], value: undefined, message: ``},
-        { path: ['scripts', 'buildzentral'], value: undefined, message: ``},
-        { path: ['devDependencies', 'fs-extra'], value: '^10.0.0', message: `devDependencies "fs-extra" hinzugefügt.`},
-        { path: ['devDependencies', 'del'], value: '^6.0.0', message: `devDependencies "del" hinzugefügt.`}
+        {
+          path: ['scripts', 'move-de-files'],
+          value: 'node move-de-files.js',
+          message: `Skript "move-de-files" hinzugefügt.`
+        },
+        {
+          path: ['scripts', 'build'],
+          value: 'ng build --aot --localize && npm run move-de-files',
+          message: `Skript "build" angepasst.`
+        },
+        { path: ['scripts', 'build-aot'], value: undefined, message: `` },
+        { path: ['scripts', 'buildzentral'], value: undefined, message: `` },
+        { path: ['devDependencies', 'fs-extra'], value: '^10.0.0', message: `devDependencies "fs-extra" hinzugefügt.` },
+        { path: ['devDependencies', 'del'], value: '^6.0.0', message: `devDependencies "del" hinzugefügt.` }
       ];
 
-      newValuesArr.forEach(change => {
+      newValuesArr.forEach((change) => {
         const tsConfigJson = readJsonAsString(tree, filePath);
-        const edits: Edit[] = modify(tsConfigJson, change.path, change.value, { formattingOptions: jsonFormattingOptions })
+        const edits: Edit[] = modify(tsConfigJson, change.path, change.value, {
+          formattingOptions: jsonFormattingOptions
+        });
 
-        tree.overwrite(
-          filePath,
-          applyEdits(tsConfigJson, edits)
-        );
+        tree.overwrite(filePath, applyEdits(tsConfigJson, edits));
 
         logInfo(change.message);
       });
@@ -181,17 +247,20 @@ export function updateApp(options: any): Rule {
       const filePath = `/angular.json`;
 
       const newValuesArr = [
-        { path: ['projects', options.project, 'architect', 'build', 'options', 'outputPath'], value: 'dist', message: `Property "outputPath" auf "dist" gesetzt.`},
+        {
+          path: ['projects', options.project, 'architect', 'build', 'options', 'outputPath'],
+          value: 'dist',
+          message: `Property "outputPath" auf "dist" gesetzt.`
+        }
       ];
 
-      newValuesArr.forEach(change => {
+      newValuesArr.forEach((change) => {
         const tsConfigJson = readJsonAsString(tree, filePath);
-        const edits: Edit[] = modify(tsConfigJson, change.path, change.value, { formattingOptions: jsonFormattingOptions })
+        const edits: Edit[] = modify(tsConfigJson, change.path, change.value, {
+          formattingOptions: jsonFormattingOptions
+        });
 
-        tree.overwrite(
-          filePath,
-          applyEdits(tsConfigJson, edits)
-        );
+        tree.overwrite(filePath, applyEdits(tsConfigJson, edits));
 
         logInfo(change.message);
       });

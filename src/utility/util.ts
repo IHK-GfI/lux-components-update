@@ -58,7 +58,7 @@ export const waitForTreeCallback = (tree, callback, waitMS: number = UtilConfig.
  * @param context
  * @param messages
  */
-export const runInstallAndLogToDos: (context, messages) => void = (context: SchematicContext, messages) => {
+export const runInstallAndLogToDos: (context, messages, runNpmInstall) => void = (context: SchematicContext, messages, runNpmInstall) => {
   // diese log-Ausgaben werden erst ganz zum Schluss ausgeführt (nach Update und npm-install logs)
   process.addListener('exit', () => {
     if (messages) {
@@ -68,8 +68,10 @@ export const runInstallAndLogToDos: (context, messages) => void = (context: Sche
     }
   });
 
-  // npm install starten
-  context.addTask(new NodePackageInstallTask());
+  if (runNpmInstall) {
+    // npm install starten
+    context.addTask(new NodePackageInstallTask());
+  }
 };
 
 export function updateI18nFile(tree: Tree, language: string, insertTransUnitId: string, translations: string) {
@@ -132,9 +134,9 @@ export function messageSuccessRule(message: any): Rule {
   };
 }
 
-export function finish(...messages: string[]): Rule {
+export function finish(runNpmInstall: boolean, ...messages: string[]): Rule {
   return (tree: Tree, context: SchematicContext) => {
-    runInstallAndLogToDos(context, messages);
+    runInstallAndLogToDos(context, messages, runNpmInstall);
     return tree;
   };
 }

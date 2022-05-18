@@ -1,9 +1,9 @@
 {
   "$schema": "http://json-schema.org/schema",
-  "$id": "updateDependenciesSchema",
-  "title": "Aktualisiert die Abhängigkeiten im LUX-Componentsprojekt",
+  "$id": "updateEnMessagesSchema",
+  "title": "Aktualisiert die englischen Übersetzungen im Projekt.",
   "type": "object",
-  "description": "Aktualisiert die Abhängigkeiten im LUX-Componentsprojekt",
+  "description": "Aktualisiert die englischen Übersetzungen im Projekt.",
   "properties": {
     "project": {
       "type": "string",
