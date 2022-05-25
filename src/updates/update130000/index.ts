@@ -121,7 +121,7 @@ export function updateAngularJson(options: any): Rule {
         const findGlobFn = (node) => findObjectPropertyInArray(node, 'glob', 'material-design-icons.css');
         const jsonPathGlob = ['projects', options.project, 'architect', 'build', 'options', 'assets'];
         const jsonValueGlob = {
-            "glob": "material-design-icons(.css|.css.map)",
+            "glob": "material-design-icons.css*",
             "input": "./node_modules/material-design-icons-iconfont/dist",
             "output": "./assets/icons/material-icons"
         };

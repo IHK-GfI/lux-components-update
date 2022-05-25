@@ -173,7 +173,7 @@ module.exports = function (config) {
 
                     const content = angularJson?.toString();
 
-                    expect(content).toContain('"glob": "material-design-icons(.css|.css.map)"');
+                    expect(content).toContain('"glob": "material-design-icons.css*"');
                     expect(content).toContain('"glob": "*(*min.css|*min.css.map)"');
                     expect(content).not.toContain('"glob": "*.css",');
                     expect(content).not.toContain('"tsConfig": "src/tsconfig.app.ie.json"');
