@@ -51,7 +51,7 @@ export function addLuxComponents(options: any): Rule {
         output: "./assets/icons/fontawesome/webfonts"
       },
       {
-        glob: "material-design-icons(.css|.css.map)",
+        glob: "material-design-icons.css*",
         input: "./node_modules/material-design-icons-iconfont/dist",
         output: "./assets/icons/material-icons"
       },
