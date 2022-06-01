@@ -151,11 +151,19 @@ module.exports = function (config) {
 
             callRule(fixKarmaConf(testOptions), observableOf(appTree), context).subscribe(
                 (success) => {
-                    const content = success?.toString();
+                    const content = success.read(testOptions.path + '/karma.conf.js')?.toString();
 
-                    expect(content).not.toContain('require(\'karma-coverage-istanbul-reporter\'),');
-                    expect(content).not.toContain('require(\'karma-coverage\'),');
-                    done();
+                    expect(content).toBeDefined();
+
+                    if (content) {
+                      expect(content).toContain('require(\'karma-coverage\'),');
+                      expect(content).toContain('coverageReporter: {');
+                      expect(content).toContain('reporters: [\'progress\', \'coverage\'],');
+                      expect(content).not.toContain('require(\'karma-coverage-istanbul-reporter\'),');
+                      expect(content).not.toContain('coverageIstanbulReporter');
+                      expect(content).not.toContain('fixWebpackSourcePaths');
+                      done();
+                    }
                 },
                 (reason) => expect(reason).toBeUndefined()
             );

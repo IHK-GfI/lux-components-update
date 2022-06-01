@@ -331,7 +331,9 @@ export function fixKarmaConf(options: any): Rule {
                 tree,
                 options.path,
                 (filePath: string, content: string) => {
-                    const modifiedContent = content.replace(/require\('karma-coverage-istanbul-reporter'\),/g, 'require(\'karma-coverage\'),');
+                    let modifiedContent = content.replace(/require\('karma-coverage-istanbul-reporter'\),/g, 'require(\'karma-coverage\'),');
+                    modifiedContent = modifiedContent.replace(/coverageIstanbulReporter\:.*\{(.|\n)*\},/gim, karmaCoverageReporter)
+                    modifiedContent = modifiedContent.replace(/reporters\:(.*)],/gim, karmaReporters)
 
                     if (modifiedContent !== content) {
                         logInfo(filePath + ' wurde angepasst.');
@@ -344,3 +346,13 @@ export function fixKarmaConf(options: any): Rule {
         messageSuccessRule(`Datei "karma.conf.js" wurde aktualisiert.`)
     ]);
 }
+
+const karmaCoverageReporter = `coverageReporter: {
+      dir: require('path').join(__dirname, 'coverage'),
+      reporters: [
+        {type: 'html', subdir: '.'},
+        {type: 'lcovonly', subdir: '.'}
+      ]
+    },`;
+
+const karmaReporters = `reporters: ['progress', 'coverage'],`;
