@@ -202,7 +202,8 @@ module.exports = function (config) {
               "version": "0.0.32",
               "scripts": {
                 "build": "tsc -p tsconfig.json",
-                "test": "npm run build && jasmine src/**/*_spec.js"
+                "test": "npm run build && jasmine src/**/*_spec.js",
+                "compodoc": "./node_modules/.bin/compodoc -p tsconfig.json",
               },
               "keywords": [
                 "schematics",
@@ -223,6 +224,7 @@ module.exports = function (config) {
                     const packageJson = success.read('/package.json');
                     expect(packageJson).toBeDefined();
                     expect(packageJson?.toString()).toContain('"xi18n": "ng extract-i18n --output-path src/locale"');
+                    expect(packageJson?.toString()).toContain('"compodoc": "compodoc -p tsconfig.json",');
                     done();
                 },
                 (reason) => expect(reason).toBeUndefined()

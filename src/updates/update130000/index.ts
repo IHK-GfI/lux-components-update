@@ -189,9 +189,13 @@ export function updatePackageJson(options: any): Rule {
                 modifiedContent     = modifiedContent.replace(' --ivy', '');
                 modifiedContent     = modifiedContent.replace(' --plugin @ihk-gfi/lux-components/ie11-lazy-modules-plugin.js', '');
                 modifiedContent     = modifiedContent.replace(' npm run lint --bailOnLintError true', ' npm run lint');
+                modifiedContent     = modifiedContent.replace('./node_modules/.bin/compodoc -p tsconfig.json', 'compodoc -p tsconfig.json');
 
                 if (content !== modifiedContent) {
                     logInfo(`Das Flag "--ivy" wurde aus dem Script "xi18n" entfernt.`);
+                    logInfo(`Das Plugin "ie11-lazy-modules-plugin.js" wurde entfernt.`);
+                    logInfo(`Das lint-Skript wurde angepasst.`);
+                    logInfo(`Das compodoc-Skript wurde angepasst.`);
                     tree.overwrite(filePath, modifiedContent);
                 }
             },
