@@ -332,7 +332,7 @@ export function fixKarmaConf(options: any): Rule {
                 options.path,
                 (filePath: string, content: string) => {
                     let modifiedContent = content.replace(/require\('karma-coverage-istanbul-reporter'\),/g, 'require(\'karma-coverage\'),');
-                    modifiedContent = modifiedContent.replace(/coverageIstanbulReporter\:.*\{(.|\n)*\},/gim, karmaCoverageReporter)
+                    modifiedContent = modifiedContent.replace(/coverageIstanbulReporter\:.*\{([\s\S])*\},/gim, karmaCoverageReporter)
                     modifiedContent = modifiedContent.replace(/reporters\:(.*)],/gim, karmaReporters)
 
                     if (modifiedContent !== content) {
