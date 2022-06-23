@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/schema",
-  "id": "luxUpdate130100Schema",
+  "$id": "luxUpdate130100Schema",
   "title": "Aktualisiert das LUX-Componentsprojekt",
   "type": "object",
   "description": "Aktualisiert das LUX-Componentsprojekt",
