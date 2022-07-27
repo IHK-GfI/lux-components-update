@@ -1,6 +1,5 @@
 import { Rule, SchematicContext, Tree } from '@angular-devkit/schematics';
 import { applyEdits, findNodeAtLocation, FormattingOptions, modify, Node, parseTree } from 'jsonc-parser';
-import { types } from 'util';
 import { formattedSchematicsException, logInfo } from './logging';
 
 export const jsonFormattingOptions: FormattingOptions = {
@@ -85,7 +84,7 @@ export function updateJsonValue(options: any, filePath: string, jsonPath: string
 
       if (edits) {
         tree.overwrite(filePath, applyEdits(jsonFile, edits));
-        logInfo(`"${JSON.stringify(value)}" an der Stelle "${jsonPath.join('.')}" eingetragen.`);
+        logInfo(`${getLogValue(value)} an der Stelle "${jsonPath.join('.')}" eingetragen.`);
       }
     }
   };
@@ -262,4 +261,8 @@ export function removeJsonNode(tree: Tree, filePath: string, jsonPath: (string |
       logInfo(message);
     }
   }
+}
+
+function getLogValue(value: any) {
+  return typeof value === 'string' && value.startsWith('') && value.endsWith('') ? JSON.stringify(value) : '"' + JSON.stringify(value) + '"';
 }
