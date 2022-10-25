@@ -447,7 +447,7 @@ export function showTree(node: ts.Node, indent: string = '    '): void {
   }
 }
 
-export function findChild(node: ts.Node, kind: ts.SyntaxKind, text?: string, depth: number = 100): ts.Node | undefined {
+export function findChild(node: ts.Node, kind: ts.SyntaxKind, text?: string): ts.Node | undefined {
   if (node.kind === kind && (!text || node.getText() === text)) {
       return node;
     } else {
@@ -493,7 +493,7 @@ export function getConstructor(tree: Tree, filePath: string) {
   return findChild(getSyntaxListOfClass(tree, filePath), ts.SyntaxKind.Constructor);
 }
 
-export function getMethod(tree: Tree, filePath: string, methodeName): ts.Node | undefined {
+export function getMethod(tree: Tree, filePath: string, methodeName: string): ts.Node | undefined {
   return findChild(getSyntaxListOfClass(tree, filePath), ts.SyntaxKind.MethodDeclaration, methodeName);
 }
 
@@ -510,7 +510,7 @@ export function addParameter(tree: Tree, filePath: string, syntaxListNode: ts.No
   tree.commitUpdate(updateRecorder);
 }
 
-export function addMethod(tree: Tree, filePath: string, syntaxListNode: ts.Node, method: string) {
+export function addMethod(tree: Tree, filePath: string, _syntaxListNode: ts.Node, method: string) {
   const syntaxList = getSyntaxListOfClass(tree, filePath);
   const methodNodes = syntaxList.getChildren().filter(n => n.kind === ts.SyntaxKind.MethodDeclaration);
 

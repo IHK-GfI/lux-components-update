@@ -1,6 +1,6 @@
 import { chain, Rule, SchematicContext, Tree } from '@angular-devkit/schematics';
 import * as chalk from 'chalk';
-import { applyEdits, findNodeAtLocation, modify } from 'jsonc-parser';
+import { applyEdits, findNodeAtLocation, modify, Node } from 'jsonc-parser';
 import { updateDependencies } from '../../update-dependencies/index';
 import { deleteFile, iterateFilesAndModifyContent, moveFilesToDirectory } from '../../utility/files';
 import { removeAttribute } from '../../utility/html';
@@ -22,7 +22,7 @@ export const updateMinVersion     = '11.14.0';
 export const updateNodeMinVersion = '16.0.0';
 
 export function update(options: any): Rule {
-    return (tree: Tree, _context: SchematicContext) => {
+    return (_tree: Tree, _context: SchematicContext) => {
         return chain([
             check(options),
             applyRuleIf(updateMinVersion, updateProject(options)),
@@ -37,7 +37,7 @@ export function update(options: any): Rule {
 }
 
 export function updateProject(options: any): Rule {
-    return (tree: Tree, _context: SchematicContext) => {
+    return (_tree: Tree, _context: SchematicContext) => {
         return chain([
             messageInfoRule(`LUX-Components ${ updateMajorVersion } werden aktualisiert...`),
             updateAngularJson(options),
@@ -56,7 +56,7 @@ export function updateProject(options: any): Rule {
     };
 }
 
-export function check(options: any): Rule {
+export function check(_options: any): Rule {
     return (tree: Tree, _context: SchematicContext) => {
         logInfoWithDescriptor(`Vorbedingungen werden geprüft...`);
 
@@ -91,7 +91,7 @@ export function copyFiles(options: any): Rule {
 }
 
 export function updateAngularJson(options: any): Rule {
-    return (tree: Tree, _context: SchematicContext) => {
+    return (_tree: Tree, _context: SchematicContext) => {
         const jsonPathAllowedCommonJS = ['projects', options.project, 'architect', 'build', 'options', 'allowedCommonJsDependencies'];
         const jsonPathOptimization    = ['projects', options.project, 'architect', 'build', 'configurations', 'production', 'optimization'];
         const jsonValueOptimization   = {
@@ -118,7 +118,7 @@ export function updateAngularJson(options: any): Rule {
         };
         const jsonPathDevelopmentServeDefault = ['projects', options.project, 'architect', 'serve', 'defaultConfiguration'];
 
-        const findGlobFn = (node) => findObjectPropertyInArray(node, 'glob', 'material-design-icons.css');
+        const findGlobFn = (node: Node) => findObjectPropertyInArray(node, 'glob', 'material-design-icons.css');
         const jsonPathGlob = ['projects', options.project, 'architect', 'build', 'options', 'assets'];
         const jsonValueGlob = {
             "glob": "material-design-icons.css*",
@@ -145,7 +145,7 @@ export function updateAngularJson(options: any): Rule {
 }
 
 export function updateTsConfigJson(options: any): Rule {
-    return (tree: Tree, _context: SchematicContext) => {
+    return (_tree: Tree, _context: SchematicContext) => {
         return chain([
             messageInfoRule(`Datei "tsconfig.json" wird aktualisiert...`),
             updateJsonValue(options, '/tsconfig.json', ['compilerOptions', 'allowSyntheticDefaultImports'], true),
@@ -154,8 +154,8 @@ export function updateTsConfigJson(options: any): Rule {
     };
 }
 
-export function updateIndexHtml(options: any): Rule {
-    return (tree: Tree, _context: SchematicContext) => {
+export function updateIndexHtml(_options: any): Rule {
+    return (_tree: Tree, _context: SchematicContext) => {
         return chain([
             messageInfoRule(`Datei "index.html" wird aktualisiert...`),
             (tree: Tree, _context: SchematicContext) => {
@@ -177,8 +177,8 @@ export function updateIndexHtml(options: any): Rule {
     };
 }
 
-export function updatePackageJson(options: any): Rule {
-    return (tree: Tree, _context: SchematicContext) => {
+export function updatePackageJson(_options: any): Rule {
+    return (_tree: Tree, _context: SchematicContext) => {
         return chain([
             messageInfoRule(`Datei "package.json" wird aktualisiert...`),
             (tree: Tree, _context: SchematicContext) => {
@@ -208,18 +208,18 @@ export function updatePackageJson(options: any): Rule {
 }
 
 export function updateBuildThemeAssets(options: any): Rule {
-    return (tree: Tree, context: SchematicContext) => {
-        updateThemeAssetsIntern(tree, ['projects', options.project, 'architect', 'build', 'options', 'assets'], 'build');
+    return (tree: Tree, _context: SchematicContext) => {
+        updateThemeAssetsIntern(tree, ['projects', options.project, 'architect', 'build', 'options', 'assets']);
     };
 }
 
 export function updateTestThemeAssets(options: any): Rule {
-    return (tree: Tree, context: SchematicContext) => {
-        updateThemeAssetsIntern(tree, ['projects', options.project, 'architect', 'test', 'options', 'assets'], 'test');
+    return (tree: Tree, _context: SchematicContext) => {
+        updateThemeAssetsIntern(tree, ['projects', options.project, 'architect', 'test', 'options', 'assets']);
     };
 }
 
-function updateThemeAssetsIntern(tree: Tree, jsonPath: string[], label: string) {
+function updateThemeAssetsIntern(tree: Tree, jsonPath: string[]) {
     const filePath        = '/angular.json';
     const contentAsNode   = readJson(tree, filePath);
     const buildAssetsNode = findNodeAtLocation(contentAsNode, jsonPath);
@@ -246,7 +246,7 @@ function updateThemeAssetsIntern(tree: Tree, jsonPath: string[], label: string) 
 }
 
 export function removeThemeAssets(options: any): Rule {
-    return (tree: Tree, context: SchematicContext) => {
+    return (tree: Tree, _context: SchematicContext) => {
         const filePath = '/angular.json';
         const jsonPath = ['projects', options.project, 'architect', 'build', 'configurations', 'es5'];
 
@@ -257,7 +257,7 @@ export function removeThemeAssets(options: any): Rule {
 export function removeLuxSelectedFilesAlwaysUseArray(options: any): Rule {
     return chain([
         messageInfoRule(`Das Attribut "luxSelectedFilesAlwaysUseArray" wird entfernt...`),
-        (tree: Tree, context: SchematicContext) => {
+        (tree: Tree, _context: SchematicContext) => {
             iterateFilesAndModifyContent(
                 tree,
                 options.path,
@@ -286,7 +286,7 @@ export function removeLuxSelectedFilesAlwaysUseArray(options: any): Rule {
 export function fixEmptyStyles(options: any): Rule {
     return chain([
         messageInfoRule(`Die leeren Styles im @Component-Teil (styles: [''] => styles: []) werden korrigiert...`),
-        (tree: Tree, context: SchematicContext) => {
+        (tree: Tree, _context: SchematicContext) => {
             iterateFilesAndModifyContent(
                 tree,
                 options.path,
@@ -308,7 +308,7 @@ export function fixEmptyStyles(options: any): Rule {
 export function removeDatepickerDefaultLocale(options: any): Rule {
     return chain([
         messageInfoRule(`Die explizit gesetzte Defaultlocale "de-DE" wird bei allen Datepickern entfernt...`),
-        (tree: Tree, context: SchematicContext) => {
+        (tree: Tree, _context: SchematicContext) => {
             iterateFilesAndModifyContent(
                 tree,
                 options.path,
@@ -330,7 +330,7 @@ export function removeDatepickerDefaultLocale(options: any): Rule {
 export function fixKarmaConf(options: any): Rule {
     return chain([
         messageInfoRule(`Datei "karma.conf.js" wird aktualisiert...`),
-        (tree: Tree, context: SchematicContext) => {
+        (tree: Tree, _context: SchematicContext) => {
             iterateFilesAndModifyContent(
                 tree,
                 options.path,

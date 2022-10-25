@@ -1,13 +1,11 @@
 import { chain, Rule, SchematicContext, Tree } from '@angular-devkit/schematics';
 import * as chalk from 'chalk';
-import { applyEdits, Edit, modify } from 'jsonc-parser';
+import { applyEdits, Edit, modify, Node } from 'jsonc-parser';
 import { updateDependencies } from '../update-dependencies/index';
 import {
-  updateBuildThemeAssets,
   copyFiles,
   updateMajorVersion,
   updateNodeMinVersion,
-  updateTestThemeAssets
 } from '../updates/update130000/index';
 import { iterateFilesAndModifyContent, moveFilesToDirectory } from '../utility/files';
 import {
@@ -23,7 +21,7 @@ import { finish, messageInfoRule, messageSuccessRule, replaceAll, waitForTreeCal
 import { validateAngularVersion, validateNodeVersion } from '../utility/validation';
 
 export function addLuxComponents(options: any): Rule {
-  return (tree: Tree, _context: SchematicContext) => {
+  return (_tree: Tree, _context: SchematicContext) => {
     const jsonPathAllowedCommonJS = ['projects', options.project, 'architect', 'build', 'options', 'allowedCommonJsDependencies'];
     const jsonPathBudget = ['projects', options.project, 'architect', 'build', 'configurations', 'production', 'budgets'];
     const budgetValue = {
@@ -72,7 +70,7 @@ export function addLuxComponents(options: any): Rule {
       "fonts": true
     };
 
-    const findBudgetFn = (node) => findObjectPropertyInArray(node, 'type', 'initial');
+    const findBudgetFn = (node: Node) => findObjectPropertyInArray(node, 'type', 'initial');
 
     return chain([
       check(),
@@ -114,7 +112,7 @@ export function addLuxComponents(options: any): Rule {
 export function check(): Rule {
   return (tree: Tree, context: SchematicContext) => {
     return waitForTreeCallback(tree, () => {
-      validateAngularVersion(tree, context, `^${+updateMajorVersion}.0.0`);
+      validateAngularVersion(tree, `^${ +updateMajorVersion }.0.0`);
       validateNodeVersion(context, updateNodeMinVersion);
 
       return tree;
@@ -122,10 +120,10 @@ export function check(): Rule {
   };
 }
 
-export function updatePackageJson(options: any): Rule {
+export function updatePackageJson(_options: any): Rule {
   return chain([
     messageInfoRule(`package.json wird aktualisiert...`),
-    (tree: Tree, context: SchematicContext) => {
+    (tree: Tree, _context: SchematicContext) => {
       const filePath = `/package.json`;
 
       const newValuesArr = [
@@ -176,7 +174,7 @@ export function updatePackageJson(options: any): Rule {
 export function updateIndexHtml(options: any): Rule {
   return chain([
     messageInfoRule(`index.html wird aktualisiert...`),
-    (tree: Tree, context: SchematicContext) => {
+    (tree: Tree, _context: SchematicContext) => {
       iterateFilesAndModifyContent(
         tree,
         options.path,
@@ -208,7 +206,7 @@ export function copyAppFiles(options: any): Rule {
 export function updateApp(options: any): Rule {
   return chain([
     messageInfoRule(`App-Dateien wird angepasst...`),
-    (tree: Tree, context: SchematicContext) => {
+    (tree: Tree, _context: SchematicContext) => {
       const filePath = `/package.json`;
 
       const newValuesArr = [
@@ -243,7 +241,7 @@ export function updateApp(options: any): Rule {
 
       return tree;
     },
-    (tree: Tree, context: SchematicContext) => {
+    (tree: Tree, _context: SchematicContext) => {
       const filePath = `/angular.json`;
 
       const newValuesArr = [

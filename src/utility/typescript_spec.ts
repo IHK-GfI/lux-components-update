@@ -1,4 +1,3 @@
-import { SchematicContext } from '@angular-devkit/schematics';
 import { SchematicTestRunner, UnitTestTree } from '@angular-devkit/schematics/testing';
 import * as path from 'path';
 import { appOptions, workspaceOptions } from '../utility/test';
@@ -18,7 +17,6 @@ const collectionPath = path.join(__dirname, '../collection.json');
 describe('typescript', () => {
   let appTree: UnitTestTree;
   let runner: SchematicTestRunner;
-  let context: SchematicContext;
 
   const testOptions: any = {};
 

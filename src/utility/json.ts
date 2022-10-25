@@ -1,6 +1,5 @@
 import { Rule, SchematicContext, Tree } from '@angular-devkit/schematics';
 import { applyEdits, findNodeAtLocation, FormattingOptions, modify, Node, parseTree } from 'jsonc-parser';
-import { types } from 'util';
 import { formattedSchematicsException, logInfo } from './logging';
 
 export const jsonFormattingOptions: FormattingOptions = {
@@ -70,8 +69,8 @@ export function appendScript(script: string, part: string, index?: number) {
   return newSkript;
 }
 
-export function updateJsonValue(options: any, filePath: string, jsonPath: string[], value: any, onlyUpdate = false): Rule {
-  return (tree: Tree, context: SchematicContext) => {
+export function updateJsonValue(_options: any, filePath: string, jsonPath: string[], value: any, onlyUpdate = false): Rule {
+  return (tree: Tree, _context: SchematicContext) => {
     const found = findNodeAtLocation(readJson(tree, filePath), jsonPath);
 
     if (!onlyUpdate || (onlyUpdate && found)) {
@@ -91,8 +90,8 @@ export function updateJsonValue(options: any, filePath: string, jsonPath: string
   };
 }
 
-export function updateJsonArray(options: any, filePath: string, jsonPath: string[], value: any, onlyUpdate = false, findFn?: (value: Node) => boolean): Rule {
-  return (tree: Tree, context: SchematicContext) => {
+export function updateJsonArray(_options: any, filePath: string, jsonPath: string[], value: any, onlyUpdate = false, findFn?: (value: Node) => boolean): Rule {
+  return (tree: Tree, _context: SchematicContext) => {
 
     // Gibt es bereits eine passende Stelle?
     let foundIndex = -1;

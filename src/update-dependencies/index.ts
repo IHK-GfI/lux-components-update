@@ -22,7 +22,7 @@ export function updateDependencies(): Rule {
 }
 
 export function updateDefaultDependencies(): Rule {
-    return (tree: Tree, context: SchematicContext) => {
+    return (tree: Tree, _context: SchematicContext) => {
         return waitForTreeCallback(tree, () => {
             const dependencies: NodeDependency[] = [
                 { type: NodeDependencyType.Default, version: '' + updateMajorVersion + '.0.0', name: '@ihk-gfi/lux-components' },
@@ -62,7 +62,7 @@ export function updateDefaultDependencies(): Rule {
 }
 
 export function updateDevDependencies(): Rule {
-    return (tree: Tree, context: SchematicContext) => {
+    return (tree: Tree, _context: SchematicContext) => {
         return waitForTreeCallback(tree, () => {
             const devDependencies: NodeDependency[] = [
                 { type: NodeDependencyType.Dev, version: '13.2.1', name: '@angular-eslint/builder' },

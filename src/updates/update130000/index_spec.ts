@@ -1,4 +1,4 @@
-import { callRule, SchematicContext } from '@angular-devkit/schematics';
+import { callRule, SchematicContext, Tree } from '@angular-devkit/schematics';
 import { SchematicTestRunner, UnitTestTree } from '@angular-devkit/schematics/testing';
 import * as path from 'path';
 import { of as observableOf } from 'rxjs';
@@ -30,9 +30,7 @@ describe('update130000', () => {
         runner = new SchematicTestRunner('schematics', collectionPath);
 
         appTree = await runner.runExternalSchematicAsync('@schematics/angular', 'workspace', workspaceOptions).toPromise();
-        appTree = await runner
-            .runExternalSchematicAsync('@schematics/angular', 'application', appOptions, appTree)
-            .toPromise();
+        appTree = await runner.runExternalSchematicAsync('@schematics/angular', 'application', appOptions, appTree).toPromise();
 
         UtilConfig.defaultWaitMS = 0;
 
@@ -57,7 +55,7 @@ describe('update130000', () => {
             });
 
             callRule(update(testOptions), observableOf(appTree), context).subscribe(
-                (success) => {
+                () => {
                 },
                 (reason) => expect(reason.toString()).toContain('wird nicht unterstützt.')
             );
@@ -100,7 +98,7 @@ describe('update130000', () => {
     describe('[Rule] copyFiles', () => {
         it('Sollte die Dateien kopieren', (done) => {
             callRule(copyFiles(testOptions), observableOf(appTree), context).subscribe(
-                (success) => {
+                (success: Tree) => {
                     expect(success.exists(testOptions.path + '/.browserslistrc')).toBeTrue();
                     done();
                 },
@@ -150,7 +148,7 @@ module.exports = function (config) {
             );
 
             callRule(fixKarmaConf(testOptions), observableOf(appTree), context).subscribe(
-                (success) => {
+                (success: Tree) => {
                     const content = success.read(testOptions.path + '/karma.conf.js')?.toString();
 
                     expect(content).toBeDefined();
@@ -175,7 +173,7 @@ module.exports = function (config) {
             appTree.overwrite('/angular.json', testAngularJson);
 
             callRule(updateAngularJson(testOptions), observableOf(appTree), context).subscribe(
-                (success) => {
+                (success: Tree) => {
                     const angularJson = success.read('/angular.json');
                     expect(angularJson).toBeDefined();
 
@@ -220,7 +218,7 @@ module.exports = function (config) {
             );
 
             callRule(updatePackageJson(testOptions), observableOf(appTree), context).subscribe(
-                (success) => {
+                (success: Tree) => {
                     const packageJson = success.read('/package.json');
                     expect(packageJson).toBeDefined();
                     expect(packageJson?.toString()).toContain('"xi18n": "ng extract-i18n --output-path src/locale"');
@@ -254,7 +252,7 @@ module.exports = function (config) {
             );
 
             callRule(updateTsConfigJson(testOptions), observableOf(appTree), context).subscribe(
-                (success) => {
+                (success: Tree) => {
                     const packageJson = success.read('/tsconfig.json');
                     expect(packageJson).toBeDefined();
                     expect(packageJson?.toString()).toContain('"allowSyntheticDefaultImports": true,');
@@ -304,7 +302,7 @@ module.exports = function (config) {
             );
 
             callRule(updateIndexHtml(testOptions), observableOf(appTree), context).subscribe(
-                (success) => {
+                (success: Tree) => {
                     const indexHtml = success.read('/src/index.html');
 
                     expect(indexHtml).toBeDefined();
@@ -322,7 +320,7 @@ module.exports = function (config) {
             appTree.create(testOptions.path + '/src/app/abc.component.html', templateRemoveLuxSelectedFilesAlwaysUseArray);
 
             callRule(removeLuxSelectedFilesAlwaysUseArray(testOptions), observableOf(appTree), context).subscribe(
-                (success) => {
+                (success: Tree) => {
                     const componentHtml = success.read(testOptions.path + '/src/app/abc.component.html')?.toString();
                     expect(componentHtml).toBeDefined();
                     expect(componentHtml?.toString()).not.toContain('alwaysUseArray');
@@ -349,7 +347,7 @@ module.exports = function (config) {
             appTree.create(filePath4, templateFixEmptyStyles4);
 
             callRule(fixEmptyStyles(testOptions), observableOf(appTree), context).subscribe(
-                (success) => {
+                (success: Tree) => {
                     expect(success.read(filePath1)?.toString()).toContain('styles: []');
                     expect(success.read(filePath2)?.toString()).toContain('styles: []');
                     expect(success.read(filePath3)?.toString()).toContain('styles: []');
@@ -368,7 +366,7 @@ module.exports = function (config) {
             appTree.create(filePath, templateRemoveDatepickerDefaultLocale);
 
             callRule(removeDatepickerDefaultLocale(testOptions), observableOf(appTree), context).subscribe(
-                (success) => {
+                (success: Tree) => {
                     expect(success.read(filePath)?.toString()).not.toContain('luxLocale="de-DE"');
 
                     done();

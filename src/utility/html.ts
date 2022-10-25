@@ -1,3 +1,4 @@
+import { Node } from 'cheerio';
 import { replaceAll } from './util';
 
 const cheerio = require('cheerio');
@@ -27,7 +28,7 @@ export function addAttribute(content: string, selector: string, attrName: string
   const $ = cheerio.load(newContent, luxCheerioParserOptions);
   const result = new CheerioInfo(newContent);
 
-  $(selector).each(function (i, elem) {
+  $(selector).each(function (_i: number, elem: Node) {
     $(elem).attr(attrName, attrValue ? attrValue : emptyPlaceholderToken);
     result.updated = true;
   });
@@ -53,7 +54,7 @@ export function appendAttribute(content: string, selector: string, attrName: str
   const $ = cheerio.load(newContent, luxCheerioParserOptions);
   const result = new CheerioInfo(newContent);
 
-  $(selector).each(function (i, elem) {
+  $(selector).each(function (_i: number, elem: Node) {
     const attrNameNoBinding = attrName;
     if ($(elem).attr(attrNameNoBinding)) {
       $(elem).attr(attrNameNoBinding, $(elem).attr(attrNameNoBinding) + attrValue);
@@ -106,7 +107,7 @@ export function renameAttribute(
 
   const result = new CheerioInfo(newContent);
 
-  $(selector).each(function (i, elem) {
+  $(selector).each(function (_i: number, elem: Node) {
     const attrNameNoBindingOld = attrNameOld;
     const attrNameNoBindingNew = attrNameNew;
     const attrValueNoBinding = $(elem).attr(attrNameNoBindingOld);
@@ -166,7 +167,7 @@ export function updateAttribute(content: string, selector: string, attrName: str
 
   const result = new CheerioInfo(newContent);
 
-  $(selector).each(function (i, elem) {
+  $(selector).each(function (_i: number, elem: Node) {
     const attrNameNoBinding = attrName;
     if ($(elem).attr(attrNameNoBinding)) {
       $(elem).attr(attrNameNoBinding, attrValue ? attrValue : emptyPlaceholderToken);
@@ -213,7 +214,7 @@ export function removeAttribute(content: string, selector: string, attrName: str
 
   const result = new CheerioInfo(newContent);
 
-  $(selector).each(function (i, elem) {
+  $(selector).each(function (_i: number, elem: Node) {
     const attrNameNoBinding = attrName;
     let updated = false;
 
@@ -282,7 +283,3 @@ function postProcessing(content: string) {
 
   return resultContent;
 }
-
-const getAllAttributes = function (node) {
-  return node.attributes || Object.keys(node.attribs).map((name) => ({ name, value: node.attribs[name] }));
-};

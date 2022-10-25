@@ -35,7 +35,7 @@ function updateEnMessagesIntern(): Rule {
     <body>                
 `;
 
-        fnAPPDe('trans-unit').each((i, element) => {
+        fnAPPDe('trans-unit').each((_i, element) => {
             const id = fnAPPDe(element).attr('id');
             if (id?.startsWith('luxc.')) {
                 const transUnit = fnLCEEn(`trans-unit[id="${ id }"]`).first();
