@@ -11,6 +11,7 @@ export class AppComponent {
 
   constructor(public router: Router, themeService: LuxThemeService) {
     themeService.loadTheme();
+    router.initialNavigation();
   }
 
 }

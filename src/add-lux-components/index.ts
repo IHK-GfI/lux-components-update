@@ -3,10 +3,9 @@ import * as chalk from 'chalk';
 import { applyEdits, Edit, modify, Node } from 'jsonc-parser';
 import { updateDependencies } from '../update-dependencies/index';
 import {
-  copyFiles,
   updateMajorVersion,
   updateNodeMinVersion,
-} from '../updates/update130000/index';
+} from '../updates/update140000/index';
 import { iterateFilesAndModifyContent, moveFilesToDirectory } from '../utility/files';
 import {
   findObjectPropertyInArray,
@@ -70,6 +69,17 @@ export function addLuxComponents(options: any): Rule {
       "fonts": true
     };
 
+    const jsonPathLang = ['projects', options.project, 'i18n'];
+    const jsonValueLang =  {
+      "sourceLocale": {
+        "code": "de",
+        "baseHref": "/"
+      },
+      "locales": {
+        "en": "src/locale/messages.en.xlf"
+      }
+    };
+
     const findBudgetFn = (node: Node) => findObjectPropertyInArray(node, 'type', 'initial');
 
     return chain([
@@ -79,26 +89,27 @@ export function addLuxComponents(options: any): Rule {
       updateDependencies(),
 
       updateIndexHtml(options),
-      copyFiles(options),
       updateApp(options),
-      updateJsonValue(options, '/tsconfig.json', ['compilerOptions', 'strict'], false),
-      updateJsonValue(options, '/angular.json', jsonPathOptimization, jsonValueOptimization),
-      updateJsonArray(options, '/angular.json', jsonPathBudget, budgetValue, true,  findBudgetFn),
-      updateJsonArray(options, '/angular.json', jsonPathAssetsBuild, assetsValues[0]),
-      updateJsonArray(options, '/angular.json', jsonPathAssetsTest, assetsValues[0]),
-      updateJsonArray(options, '/angular.json', jsonPathAssetsBuild, assetsValues[1]),
-      updateJsonArray(options, '/angular.json', jsonPathAssetsTest, assetsValues[1]),
-      updateJsonArray(options, '/angular.json', jsonPathAssetsBuild, assetsValues[2]),
-      updateJsonArray(options, '/angular.json', jsonPathAssetsTest, assetsValues[2]),
-      updateJsonArray(options, '/angular.json', jsonPathAssetsBuild, assetsValues[3]),
-      updateJsonArray(options, '/angular.json', jsonPathAssetsTest, assetsValues[3]),
-      updateJsonArray(options, '/angular.json', jsonPathAssetsBuild, assetsValues[4]),
-      updateJsonArray(options, '/angular.json', jsonPathAssetsTest, assetsValues[4]),
-      updateJsonArray(options, '/angular.json', jsonPathAllowedCommonJS, 'hammerjs'),
-      updateJsonArray(options, '/angular.json', jsonPathAllowedCommonJS, 'ng2-pdf-viewer'),
-      updateJsonArray(options, '/angular.json', jsonPathAllowedCommonJS, 'pdfjs-dist'),
+      updateJsonValue('/tsconfig.json', ['compilerOptions', 'strict'], true),
+      updateJsonValue('/angular.json', jsonPathLang, jsonValueLang),
+      updateJsonValue('/angular.json', jsonPathOptimization, jsonValueOptimization),
+      updateJsonArray('/angular.json', jsonPathBudget, budgetValue, true, findBudgetFn),
+      updateJsonArray('/angular.json', jsonPathAssetsBuild, assetsValues[0]),
+      updateJsonArray('/angular.json', jsonPathAssetsTest, assetsValues[0]),
+      updateJsonArray('/angular.json', jsonPathAssetsBuild, assetsValues[1]),
+      updateJsonArray('/angular.json', jsonPathAssetsTest, assetsValues[1]),
+      updateJsonArray('/angular.json', jsonPathAssetsBuild, assetsValues[2]),
+      updateJsonArray('/angular.json', jsonPathAssetsTest, assetsValues[2]),
+      updateJsonArray('/angular.json', jsonPathAssetsBuild, assetsValues[3]),
+      updateJsonArray('/angular.json', jsonPathAssetsTest, assetsValues[3]),
+      updateJsonArray('/angular.json', jsonPathAssetsBuild, assetsValues[4]),
+      updateJsonArray('/angular.json', jsonPathAssetsTest, assetsValues[4]),
+      updateJsonArray('/angular.json', jsonPathAllowedCommonJS, 'hammerjs'),
+      updateJsonArray('/angular.json', jsonPathAllowedCommonJS, 'ng2-pdf-viewer'),
+      updateJsonArray('/angular.json', jsonPathAllowedCommonJS, 'pdfjs-dist'),
+      updateJsonArray('/angular.json', jsonPathAllowedCommonJS, 'dompurify'),
       finish(
-          true,
+        true,
         `Die LUX-Components ${updateMajorVersion} wurden erfolgreich eingerichtet.`,
         `${chalk.yellowBright('Fertig!')}`
       )
@@ -196,8 +207,10 @@ export function copyAppFiles(options: any): Rule {
   return chain([
     messageInfoRule(`App-Dateien werden angelegt...`),
     moveFilesToDirectory(options, 'files/app', 'src/app'),
+    moveFilesToDirectory(options, 'files/assets', 'src/assets'),
     moveFilesToDirectory(options, 'files/environments', 'src/environments'),
-    moveFilesToDirectory(options, 'files/scripts', '/'),
+    moveFilesToDirectory(options, 'files/locale', '/src/locale'),
+    moveFilesToDirectory(options, 'files/root', '/'),
     moveFilesToDirectory(options, 'files/src', '/src'),
     messageSuccessRule(`App-Dateien wurden angelegt.`)
   ]);

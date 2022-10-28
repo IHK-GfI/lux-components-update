@@ -37,7 +37,7 @@ describe('json', () => {
 
             appTree.create(filePath, updateJsonValueAdd);
 
-            callRule(updateJsonValue(testOptions, filePath, ['projects', 'lux-components', 'architect', 'build', 'options', 'aaa'], 'bbb'), observableOf(appTree), context).subscribe(
+            callRule(updateJsonValue(filePath, ['projects', 'lux-components', 'architect', 'build', 'options', 'aaa'], 'bbb'), observableOf(appTree), context).subscribe(
                 (success: Tree) => {
                     const content = success.read(filePath)?.toString();
                     expect(content).toContain('"aaa": "bbb');
@@ -51,7 +51,7 @@ describe('json', () => {
 
             appTree.create(filePath, updateJsonValueReplace);
 
-            callRule(updateJsonValue(testOptions, filePath, ['projects', 'lux-components', 'architect', 'build', 'options', 'aaa'], false), observableOf(appTree), context).subscribe(
+            callRule(updateJsonValue(filePath, ['projects', 'lux-components', 'architect', 'build', 'options', 'aaa'], false), observableOf(appTree), context).subscribe(
                 (success: Tree) => {
                     const content = success.read(filePath)?.toString();
                     expect(content).toContain('"aaa": false');
@@ -67,12 +67,20 @@ describe('json', () => {
 
             appTree.create(filePath, updateJsonArrNoArray);
 
-            callRule(updateJsonArray(testOptions, filePath, ['projects', 'lux-components', 'architect', 'build', 'options', 'assets'], 'aaa'), observableOf(appTree), context).subscribe(
-                (success: Tree) => {
-                    const content = success.read(filePath)?.toString();
-                    expect(content).toContain('"assets": [\n              "aaa"\n            ]\n');
-                },
-                (reason) => expect(reason).toBeUndefined()
+            callRule(
+              updateJsonArray(
+                filePath,
+                ['projects', 'lux-components', 'architect', 'build', 'options', 'assets'],
+                'aaa'
+              ),
+              observableOf(appTree),
+              context
+            ).subscribe(
+              (success: Tree) => {
+                const content = success.read(filePath)?.toString();
+                expect(content).toContain('"assets": [\n              "aaa"\n            ]\n');
+              },
+              (reason) => expect(reason).toBeUndefined()
             );
         });
 
@@ -81,12 +89,20 @@ describe('json', () => {
 
             appTree.create(filePath, updateJsonArrEmptyArray);
 
-            callRule(updateJsonArray(testOptions, filePath, ['projects', 'lux-components', 'architect', 'build', 'options', 'assets'], 'aaa'), observableOf(appTree), context).subscribe(
-                (success: Tree) => {
-                    const content = success.read(filePath)?.toString();
-                    expect(content).toContain('"assets": [\n              "aaa"\n            ],\n');
-                },
-                (reason) => expect(reason).toBeUndefined()
+            callRule(
+              updateJsonArray(
+                filePath,
+                ['projects', 'lux-components', 'architect', 'build', 'options', 'assets'],
+                'aaa'
+              ),
+              observableOf(appTree),
+              context
+            ).subscribe(
+              (success: Tree) => {
+                const content = success.read(filePath)?.toString();
+                expect(content).toContain('"assets": [\n              "aaa"\n            ],\n');
+              },
+              (reason) => expect(reason).toBeUndefined()
             );
         });
 
@@ -95,16 +111,26 @@ describe('json', () => {
 
             appTree.create(filePath, updateJsonArrDoubleEntry);
 
-            callRule(updateJsonArray(testOptions, filePath, ['projects', 'lux-components', 'architect', 'build', 'options', 'assets'], 'aaa'), observableOf(appTree), context).subscribe(
-                (success: Tree) => {
-                    const content = success.read(filePath)?.toString();
-                    expect(content).toContain('"assets": [\n' +
-                                              '              "aaa",\n' +
-                                              '              "bbb",\n' +
-                                              '              "ccc"\n' +
-                                              '            ]');
-                },
-                (reason) => expect(reason).toBeUndefined()
+            callRule(
+              updateJsonArray(
+                filePath,
+                ['projects', 'lux-components', 'architect', 'build', 'options', 'assets'],
+                'aaa'
+              ),
+              observableOf(appTree),
+              context
+            ).subscribe(
+              (success: Tree) => {
+                const content = success.read(filePath)?.toString();
+                expect(content).toContain(
+                  '"assets": [\n' +
+                    '              "aaa",\n' +
+                    '              "bbb",\n' +
+                    '              "ccc"\n' +
+                    '            ]'
+                );
+              },
+              (reason) => expect(reason).toBeUndefined()
             );
         });
 
@@ -113,16 +139,26 @@ describe('json', () => {
 
             appTree.create(filePath, updateJsonArrAppendArray);
 
-            callRule(updateJsonArray(testOptions, filePath, ['projects', 'lux-components', 'architect', 'build', 'options', 'assets'], 'bbb'), observableOf(appTree), context).subscribe(
-                (success: Tree) => {
-                    const content = success.read(filePath)?.toString();
-                    expect(content).toContain('"assets": [\n' +
-                                              '              "aaa",\n' +
-                                              '              "bbb",\n' +
-                                              '              "ccc"\n' +
-                                              '            ]');
-                },
-                (reason) => expect(reason).toBeUndefined()
+            callRule(
+              updateJsonArray(
+                filePath,
+                ['projects', 'lux-components', 'architect', 'build', 'options', 'assets'],
+                'bbb'
+              ),
+              observableOf(appTree),
+              context
+            ).subscribe(
+              (success: Tree) => {
+                const content = success.read(filePath)?.toString();
+                expect(content).toContain(
+                  '"assets": [\n' +
+                    '              "aaa",\n' +
+                    '              "bbb",\n' +
+                    '              "ccc"\n' +
+                    '            ]'
+                );
+              },
+              (reason) => expect(reason).toBeUndefined()
             );
         });
 
@@ -131,16 +167,28 @@ describe('json', () => {
 
             appTree.create(filePath, updateJsonArrReplaceValue);
 
-            callRule(updateJsonArray(testOptions, filePath, ['projects', 'lux-components', 'architect', 'build', 'options', 'assets'], 'new', true, (node) => node.value === 'bbb'), observableOf(appTree), context).subscribe(
-                (success: Tree) => {
-                    const content = success.read(filePath)?.toString();
-                    expect(content).toContain('"assets": [\n' +
-                                              '              "aaa",\n' +
-                                              '              "new",\n' +
-                                              '              "ccc"\n' +
-                                              '            ]');
-                },
-                (reason) => expect(reason).toBeUndefined()
+            callRule(
+              updateJsonArray(
+                filePath,
+                ['projects', 'lux-components', 'architect', 'build', 'options', 'assets'],
+                'new',
+                true,
+                (node) => node.value === 'bbb'
+              ),
+              observableOf(appTree),
+              context
+            ).subscribe(
+              (success: Tree) => {
+                const content = success.read(filePath)?.toString();
+                expect(content).toContain(
+                  '"assets": [\n' +
+                    '              "aaa",\n' +
+                    '              "new",\n' +
+                    '              "ccc"\n' +
+                    '            ]'
+                );
+              },
+              (reason) => expect(reason).toBeUndefined()
             );
         });
 
@@ -155,13 +203,23 @@ describe('json', () => {
                 "maximumError": "2mb"
             };
 
-            callRule(updateJsonArray(testOptions, filePath, ['projects', 'lux-components', 'architect', 'build', 'options', 'budgets'], newValue, true, (node) => findObjectPropertyInArray(node, 'type', 'initial')), observableOf(appTree), context).subscribe(
-                (success: Tree) => {
-                    const content = success.read(filePath)?.toString();
-                    expect(content).toContain('"maximumWarning": "1mb"');
-                    expect(content).toContain('"maximumError": "2mb"');
-                },
-                (reason) => expect(reason).toBeUndefined()
+            callRule(
+              updateJsonArray(
+                filePath,
+                ['projects', 'lux-components', 'architect', 'build', 'options', 'budgets'],
+                newValue,
+                true,
+                (node) => findObjectPropertyInArray(node, 'type', 'initial')
+              ),
+              observableOf(appTree),
+              context
+            ).subscribe(
+              (success: Tree) => {
+                const content = success.read(filePath)?.toString();
+                expect(content).toContain('"maximumWarning": "1mb"');
+                expect(content).toContain('"maximumError": "2mb"');
+              },
+              (reason) => expect(reason).toBeUndefined()
             );
         });
 
@@ -170,16 +228,28 @@ describe('json', () => {
 
             appTree.create(filePath, updateJsonArrReplaceValue);
 
-            callRule(updateJsonArray(testOptions, filePath, ['projects', 'lux-components', 'architect', 'build', 'options', 'assets'], 'new', true, (node) => node.value === 'notThere'), observableOf(appTree), context).subscribe(
-                (success: Tree) => {
-                    const content = success.read(filePath)?.toString();
-                    expect(content).toContain('"assets": [\n' +
-                                              '              "aaa",\n' +
-                                              '              "bbb",\n' +
-                                              '              "ccc"\n' +
-                                              '            ]');
-                },
-                (reason) => expect(reason).toBeUndefined()
+            callRule(
+              updateJsonArray(
+                filePath,
+                ['projects', 'lux-components', 'architect', 'build', 'options', 'assets'],
+                'new',
+                true,
+                (node) => node.value === 'notThere'
+              ),
+              observableOf(appTree),
+              context
+            ).subscribe(
+              (success: Tree) => {
+                const content = success.read(filePath)?.toString();
+                expect(content).toContain(
+                  '"assets": [\n' +
+                    '              "aaa",\n' +
+                    '              "bbb",\n' +
+                    '              "ccc"\n' +
+                    '            ]'
+                );
+              },
+              (reason) => expect(reason).toBeUndefined()
             );
         });
     });

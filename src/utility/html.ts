@@ -1,7 +1,6 @@
-import { Node } from 'cheerio';
+import { Node, load } from 'cheerio';
 import { replaceAll } from './util';
 
-const cheerio = require('cheerio');
 const luxCheerioParserOptions = { xmlMode: true, decodeEntities: false, selfClosingTags: false };
 const emptyPlaceholderToken = '@20c44b9d-45e1-447a-a141-1de0695c9c35@';
 
@@ -25,7 +24,7 @@ export class CheerioInfo {
  */
 export function addAttribute(content: string, selector: string, attrName: string, attrValue: string): CheerioInfo {
   let newContent = preProcessing(content);
-  const $ = cheerio.load(newContent, luxCheerioParserOptions);
+  const $ = load(newContent, luxCheerioParserOptions);
   const result = new CheerioInfo(newContent);
 
   $(selector).each(function (_i: number, elem: Node) {
@@ -51,7 +50,7 @@ export function addAttribute(content: string, selector: string, attrName: string
  */
 export function appendAttribute(content: string, selector: string, attrName: string, attrValue: string): CheerioInfo {
   let newContent = preProcessing(content);
-  const $ = cheerio.load(newContent, luxCheerioParserOptions);
+  const $ = load(newContent, luxCheerioParserOptions);
   const result = new CheerioInfo(newContent);
 
   $(selector).each(function (_i: number, elem: Node) {
@@ -103,7 +102,7 @@ export function renameAttribute(
   attrNameNew: string
 ): CheerioInfo {
   let newContent = preProcessing(content);
-  const $ = cheerio.load(newContent, luxCheerioParserOptions);
+  const $ = load(newContent, luxCheerioParserOptions);
 
   const result = new CheerioInfo(newContent);
 
@@ -163,7 +162,7 @@ export function renameAttribute(
  */
 export function updateAttribute(content: string, selector: string, attrName: string, attrValue: string): CheerioInfo {
   let newContent = preProcessing(content);
-  const $ = cheerio.load(newContent, luxCheerioParserOptions);
+  const $ = load(newContent, luxCheerioParserOptions);
 
   const result = new CheerioInfo(newContent);
 
@@ -210,7 +209,7 @@ export function updateAttribute(content: string, selector: string, attrName: str
  */
 export function removeAttribute(content: string, selector: string, attrName: string): CheerioInfo {
   let newContent = preProcessing(content);
-  const $ = cheerio.load(newContent, luxCheerioParserOptions);
+  const $ = load(newContent, luxCheerioParserOptions);
 
   const result = new CheerioInfo(newContent);
 
