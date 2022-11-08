@@ -2,7 +2,8 @@ import { chain, Rule, SchematicContext, Tree } from '@angular-devkit/schematics'
 import * as chalk from 'chalk';
 import { updateDependencies } from '../../update-dependencies/index';
 import { iterateFilesAndModifyContent, moveFilesToDirectory } from '../../utility/files';
-import { renameAttribute } from '../../utility/html';
+import { HtmlManipulator as Html } from '../../utility/html/html-manipulator';
+import { renameAttrFn } from '../../utility/html/manipulator-functions';
 import { logInfo, logInfoWithDescriptor, logSuccess } from '../../utility/logging';
 import { applyRuleIf, finish, messageInfoRule, messageSuccessRule } from '../../utility/util';
 import { validateLuxComponentsVersion, validateNodeVersion } from '../../utility/validation';
@@ -47,13 +48,13 @@ export function renameLuxSelectedFiles(options: any): Rule {
         options.path,
         (filePath: string, content: string) => {
           let result = content;
-          result = renameAttribute(result, 'lux-file-input', 'luxSelectedFiles', 'luxSelected').content;
-          result = renameAttribute(result, 'lux-file-list', 'luxSelectedFiles', 'luxSelected').content;
-          result = renameAttribute(result, 'lux-file-upload', 'luxSelectedFiles', 'luxSelected').content;
+          result = Html.transform(result, 'lux-file-input', renameAttrFn('luxSelectedFiles', 'luxSelected'));
+          result = Html.transform(result, 'lux-file-list', renameAttrFn('luxSelectedFiles', 'luxSelected'));
+          result = Html.transform(result, 'lux-file-upload', renameAttrFn('luxSelectedFiles', 'luxSelected'));
 
-          result = renameAttribute(result, 'lux-file-input', 'luxSelectedFilesChange', 'luxSelectedChange').content;
-          result = renameAttribute(result, 'lux-file-list', 'luxSelectedFilesChange', 'luxSelectedChange').content;
-          result = renameAttribute(result, 'lux-file-upload', 'luxSelectedFilesChange', 'luxSelectedChange').content;
+          result = Html.transform(result, 'lux-file-input', renameAttrFn('luxSelectedFilesChange', 'luxSelectedChange'));
+          result = Html.transform(result, 'lux-file-list', renameAttrFn('luxSelectedFilesChange', 'luxSelectedChange'));
+          result = Html.transform(result, 'lux-file-upload', renameAttrFn('luxSelectedFilesChange', 'luxSelectedChange'));
 
           if (content !== result) {
             logInfo(filePath + ' wurde angepasst.');

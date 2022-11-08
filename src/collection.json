@@ -20,6 +20,11 @@
       "description": "Fügt die LUX-Components zum Projekt hinzu",
       "factory": "./add-lux-components/index#addLuxComponents",
       "schema": "./add-lux-components/schema.json"
+    },
+    "change-theme-to-authentic": {
+      "description": "Wechselt zum Authentic-Theme",
+      "factory": "./theme/change-theme-to-authentic/index#changeToThemeAuthentic",
+      "schema": "./theme/change-theme-to-authentic/schema.json"
     }
   }
 }

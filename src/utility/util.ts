@@ -18,8 +18,11 @@ export function escapeRegExp(str: string) {
   return str.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, '\\$1');
 }
 
+export function replaceFirst(str: string, find: string, replace: string) {
+  return str.replace(new RegExp(escapeRegExp(find), 'm'), replace);
+}
 export function replaceAll(str: string, find: string, replace: string) {
-  return str.replace(new RegExp(escapeRegExp(find), 'g'), replace);
+  return str.replace(new RegExp(escapeRegExp(find), 'gm'), replace);
 }
 
 /**

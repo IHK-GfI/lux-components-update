@@ -1,132 +1,261 @@
-import { addAttribute, appendAttribute, removeAttribute, renameAttribute, updateAttribute } from './html';
+import { ATTR_NOT_PROCESSED, HtmlManipulator as Html } from './html-manipulator';
+import {
+  addAttrFn,
+  appendAttrFn,
+  removeAttrFn,
+  removeElementFn,
+  renameAttrFn,
+  renameElementFn,
+  updateAttrFn,
+  updateAttrIfFn
+} from './manipulator-functions';
 
 describe('html', () => {
+  describe('Not-Processed-Attribut', () => {
+    it('Sollte das Not-Processed-Attribut setzen', () => {
+      let content = templateNotProcessedAttr001;
+      content = Html.prepare(content, 'lux-card');
+
+      expect(content).toEqual(resultNotProcessedAttr001);
+    });
+  });
+
+  describe('Count', () => {
+    it('Sollte die korrekte Anzahl zurückliefern', () => {
+      const content = templateCount001;
+
+      expect(Html.count(content, 'lux-card')).toEqual(3);
+    });
+  });
+
+  describe('renameSelector', () => {
+    it('Sollte den Selector gelöscht haben', () => {
+      let content = '<div><lux-app-header></lux-app-header></div>';
+      content = Html.transform(content, 'lux-app-header', removeElementFn);
+      content = Html.transform(content, 'div', removeElementFn);
+
+      expect(content).toEqual('');
+    });
+
+    it('Sollte keinen Subselector löschen', () => {
+      let content = '<div><lux-app-header></lux-app-header><lux-app-header-ac></lux-app-header-ac></div>';
+      content = Html.transform(content, 'lux-app-header', removeElementFn);
+
+      expect(content).toEqual('<div><lux-app-header-ac></lux-app-header-ac></div>');
+    });
+
+    it('Sollte den Selector ersetzen - Alles in einer Zeile - Ohne Attribute', () => {
+      let content = '<lux-app-header></lux-app-header>';
+      content = Html.transform(content, 'lux-app-header', renameElementFn('lux-app-header-ac'));
+
+      expect(content).toEqual('<lux-app-header-ac></lux-app-header-ac>');
+    });
+
+    it('Sollte keine Subselectoren ersetzen', () => {
+      let content = '<lux-app-header></lux-app-header>';
+      content = Html.transform(content, 'lux-app', renameElementFn('lux-app'));
+
+      expect(content).toEqual('<lux-app-header></lux-app-header>');
+    });
+
+    it('Sollte den Selector ersetzen - Alles in einer Zeile - Mit Attribut', () => {
+      let content = '<lux-app-header luxTitle="Lorem ipsum"></lux-app-header>';
+      content = Html.transform(content, 'lux-app-header', renameElementFn('lux-app-header-ac'));
+
+      expect(content).toEqual('<lux-app-header-ac luxTitle="Lorem ipsum"></lux-app-header-ac>');
+    });
+
+    it('Sollte den Selector ersetzen - Alles in einer Zeile - Mit Leerzeichen', () => {
+      let content = '<lux-app-header ></lux-app-header >';
+      content = Html.transform(content, 'lux-app-header', renameElementFn('lux-app-header-ac'));
+
+      expect(content).toEqual('<lux-app-header-ac ></lux-app-header-ac >');
+    });
+
+    it('Sollte den Selector ersetzen - Mehrere Zeilen - Ohne Leerzeichen', () => {
+      let content = `<lux-app-header
+></lux-app-header>`;
+      content = Html.transform(content, 'lux-app-header', renameElementFn('lux-app-header-ac'));
+
+      expect(content).toEqual(`<lux-app-header-ac
+></lux-app-header-ac>`);
+    });
+
+    it('Sollte den Selector ersetzen - 2 Zeilen - Mit Leerzeichen', () => {
+      let content = `<lux-app-header 
+></lux-app-header>`;
+      content = Html.transform(content, 'lux-app-header', renameElementFn('lux-app-header-ac'));
+
+      expect(content).toEqual(`<lux-app-header-ac 
+></lux-app-header-ac>`);
+    });
+
+    it('Sollte den Selector ersetzen - 3 Zeilen - Ohne Leerzeichen', () => {
+      let content = `<lux-app-header
+>
+</lux-app-header>`;
+      content = Html.transform(content, 'lux-app-header', renameElementFn('lux-app-header-ac'));
+
+      expect(content).toEqual(`<lux-app-header-ac
+>
+</lux-app-header-ac>`);
+    });
+  });
+
   describe('addAttribute', () => {
     it('Sollte sollte das Attribut luxTest1..5 hinzufügen', () => {
-      let result = addAttribute(templateAdd001, 'lux-table', 'luxTest1', '123');
-      result = addAttribute(result.content, 'lux-table', '[luxTest2]', '123');
-      result = addAttribute(result.content, 'lux-table', '(luxTest3)', '123');
-      result = addAttribute(result.content, 'lux-table', '[(luxTest4)]', '123');
-      result = addAttribute(result.content, 'lux-table', 'luxTest5', '');
+      let result = templateAdd001;
+      result = Html.transform(result, 'lux-table', addAttrFn('luxTest1', '123'));
+      result = Html.transform(result, 'lux-table', addAttrFn('[luxTest2]', '123'));
+      result = Html.transform(result, 'lux-table', addAttrFn('(luxTest3)', '123'));
+      result = Html.transform(result, 'lux-table', addAttrFn('[(luxTest4)]', '123'));
+      result = Html.transform(result, 'lux-table', addAttrFn('luxTest5', ''));
 
-      expect(result.content).toContain('luxTest1="123"');
-      expect(result.content).toContain('[luxTest2]="123"');
-      expect(result.content).toContain('(luxTest3)="123"');
-      expect(result.content).toContain('[(luxTest4)]="123"');
-      expect(result.content).toContain('luxTest5=""');
-      expect(result.content).not.toContain('let-element=""');
-      expect(result.content).toContain('#testId ');
-      expect(result.content).not.toContain('#testId=""');
-      expect(result.content).toContain('testDirective ');
-      expect(result.content).not.toContain('testDirective=""');
+      expect(result).toContain('luxTest1="123"');
+      expect(result).toContain('[luxTest2]="123"');
+      expect(result).toContain('(luxTest3)="123"');
+      expect(result).toContain('[(luxTest4)]="123"');
+      expect(result).toContain('luxTest5=""');
+      expect(result).not.toContain('let-element=""');
+      expect(result).toContain('#testId\n');
+      expect(result).not.toContain('#testId=""');
+      expect(result).toContain('testDirective\n');
+      expect(result).not.toContain('testDirective=""');
     });
   });
 
   describe('updateAttribute', () => {
     it('Sollte sollte das Attribut luxTest1..5 updaten', () => {
-      let result = updateAttribute(templateUpdate001, 'lux-file-list', 'luxTest1', 'abc');
-      result = updateAttribute(result.content, 'lux-file-list', 'luxTest2', 'true');
-      result = updateAttribute(result.content, 'lux-file-list', 'luxTest3', 'onNewClick($event, param1)');
-      result = updateAttribute(result.content, 'lux-file-list', 'luxTest4', 'newValue4');
-      result = updateAttribute(result.content, 'lux-file-list', 'luxTest5', '');
+      let result = templateUpdate001;
+      result = Html.transform(result, 'lux-file-list', updateAttrFn('luxTest1', 'abc'));
+      result = Html.transform(result, 'lux-file-list', updateAttrFn('luxTest2', 'true'));
+      result = Html.transform(result, 'lux-file-list', updateAttrFn('luxTest3', 'onNewClick($event, param1)'));
+      result = Html.transform(result, 'lux-file-list', updateAttrFn('luxTest4', 'newValue4'));
+      result = Html.transform(result, 'lux-file-list', updateAttrFn('luxTest5', ''));
 
-      expect(result.content).toContain('luxTest1="abc"');
-      expect(result.content).toContain('[luxTest2]="true"');
-      expect(result.content).toContain('(luxTest3)="onNewClick($event, param1)"');
-      expect(result.content).toContain('[(luxTest4)]="newValue4"');
-      expect(result.content).toContain('[(luxTest5)]=""');
-      expect(result.content).not.toContain('let-element=""');
-      expect(result.content).toContain('#testId>');
-      expect(result.content).not.toContain('#testId=""');
-      expect(result.content).toContain('testDirective ');
-      expect(result.content).not.toContain('testDirective=""');
+      expect(result).toContain('luxTest1="abc"');
+      expect(result).toContain('[luxTest2]="true"');
+      expect(result).toContain('(luxTest3)="onNewClick($event, param1)"');
+      expect(result).toContain('[(luxTest4)]="newValue4"');
+      expect(result).toContain('[(luxTest5)]=""');
+      expect(result).not.toContain('let-element=""');
+      expect(result).toContain('#testId\n');
+      expect(result).not.toContain('#testId=""');
+      expect(result).toContain('testDirective\n');
+      expect(result).not.toContain('testDirective=""');
+    });
+  });
+
+  describe('updateIfAttribute', () => {
+    it('Sollte sollte das Attribut luxTest1..5 updaten', () => {
+      let result = templateUpdate002;
+      result = Html.transform(result, '*[luxIconName]', updateAttrIfFn('luxIconName', 'fas fa-user', 'lux-interface-user-single'));
+
+      expect(result).toContain('luxIconName="lux-interface-user-single"');
+      expect(result).not.toContain('luxIconName="fas fa-user"');
+
+      result = Html.transform(result, '*[luxIconName]', updateAttrIfFn('luxIconName', 'lux-interface-user-single', 'fas fa-user'));
+
+      expect(result).toEqual(templateUpdate002);
+    });
+
+    it('Sollte die Attribute von geschachtelten Elemente ersetzen ', () => {
+      let result = templateUpdate003;
+      result = Html.transform(result, '*[luxIconName]', updateAttrIfFn('luxIconName', 'fas fa-user', 'lux-interface-user-single'));
+
+      expect(result).toEqual(
+        '<lux-icon luxIconName="lux-interface-user-single"><lux-icon luxIconName="lux-interface-user-single"></lux-icon></lux-icon>'
+      );
     });
   });
 
   describe('appendAttribute', () => {
     it('Sollte sollte das Attribut luxTest1..5 ergänzen', () => {
-      let result = appendAttribute(templateAppend001, 'lux-file-list', 'luxTest1', '_suffix');
-      result = appendAttribute(result.content, 'lux-file-list', 'luxTest2', '_suffix');
-      result = appendAttribute(result.content, 'lux-file-list', 'luxTest3', '_suffix');
-      result = appendAttribute(result.content, 'lux-file-list', 'luxTest4', '_suffix');
-      result = appendAttribute(result.content, 'lux-file-list', 'luxTest5', '_suffix');
+      let result = templateAppend001;
+      result = Html.transform(result, 'lux-file-list', appendAttrFn('luxTest1', '_suffix'));
+      result = Html.transform(result, 'lux-file-list', appendAttrFn('luxTest2', '_suffix'));
+      result = Html.transform(result, 'lux-file-list', appendAttrFn('luxTest3', '_suffix'));
+      result = Html.transform(result, 'lux-file-list', appendAttrFn('luxTest4', '_suffix'));
+      result = Html.transform(result, 'lux-file-list', appendAttrFn('luxTest5', '_suffix'));
 
-      expect(result.content).toContain('luxTest1="value1_suffix"');
-      expect(result.content).toContain('[luxTest2]="value2_suffix"');
-      expect(result.content).toContain('(luxTest3)="value3_suffix"');
-      expect(result.content).toContain('[(luxTest4)]="value4_suffix"');
-      expect(result.content).toContain('[(luxTest5)]="_suffix"');
-      expect(result.content).not.toContain('let-element=""');
-      expect(result.content).toContain('#testId>');
-      expect(result.content).not.toContain('#testId=""');
-      expect(result.content).toContain('testDirective ');
-      expect(result.content).not.toContain('testDirective=""');
+      expect(result).toContain('luxTest1="value1_suffix"');
+      expect(result).toContain('[luxTest2]="value2_suffix"');
+      expect(result).toContain('(luxTest3)="value3_suffix"');
+      expect(result).toContain('[(luxTest4)]="value4_suffix"');
+      expect(result).toContain('[(luxTest5)]="_suffix"');
+      expect(result).not.toContain('let-element=""');
+      expect(result).toContain('#testId\n');
+      expect(result).not.toContain('#testId=""');
+      expect(result).toContain('testDirective\n');
+      expect(result).not.toContain('testDirective=""');
     });
   });
 
   describe('renameAttribute', () => {
     it('Sollte sollte das Attribut luxTest1..5 umbenennen', () => {
-      let result = renameAttribute(templateRename001, 'mat-chip-list', 'luxTest1', 'luxTestNeu1');
-      result = renameAttribute(result.content, 'mat-chip-list', 'luxTest2', 'luxTestNeu2');
-      result = renameAttribute(result.content, 'mat-chip-list', 'luxTest3', 'luxTestNeu3');
-      result = renameAttribute(result.content, 'mat-chip-list', 'luxTest4', 'luxTestNeu4');
-      result = renameAttribute(result.content, 'mat-chip-list', 'luxTest5', 'luxTestNeu5');
+      let result = templateRename001;
+      result = Html.transform(result, 'mat-chip-list', renameAttrFn('luxTest1', 'luxTestNeu1'));
+      result = Html.transform(result, 'mat-chip-list', renameAttrFn('luxTest2', 'luxTestNeu2'));
+      result = Html.transform(result, 'mat-chip-list', renameAttrFn('luxTest3', 'luxTestNeu3'));
+      result = Html.transform(result, 'mat-chip-list', renameAttrFn('luxTest4', 'luxTestNeu4'));
+      result = Html.transform(result, 'mat-chip-list', renameAttrFn('luxTest5', 'luxTestNeu5'));
 
-      expect(result.content).toContain('luxTestNeu1="123"');
-      expect(result.content).not.toContain('luxTest1="123"');
-      expect(result.content).toContain('[luxTestNeu2]="123"');
-      expect(result.content).not.toContain('luxTest2="123"');
-      expect(result.content).toContain('(luxTestNeu3)="123"');
-      expect(result.content).not.toContain('luxTest3="123"');
-      expect(result.content).toContain('[(luxTestNeu4)]="123"');
-      expect(result.content).not.toContain('luxTest4="123"');
-      expect(result.content).toContain('[(luxTestNeu5)]=""');
-      expect(result.content).not.toContain('luxTest5=""');
-      expect(result.content).toContain('#testId ');
-      expect(result.content).not.toContain('#testId=""');
-      expect(result.content).toContain('testDirective ');
-      expect(result.content).not.toContain('testDirective=""');
-      expect(result.content).not.toContain('></input>');
+      expect(result).toContain('luxTestNeu1="123"');
+      expect(result).not.toContain('luxTest1="123"');
+      expect(result).toContain('[luxTestNeu2]="123"');
+      expect(result).not.toContain('luxTest2="123"');
+      expect(result).toContain('(luxTestNeu3)="123"');
+      expect(result).not.toContain('luxTest3="123"');
+      expect(result).toContain('[(luxTestNeu4)]="123"');
+      expect(result).not.toContain('luxTest4="123"');
+      expect(result).toContain('[(luxTestNeu5)]=""');
+      expect(result).not.toContain('luxTest5=""');
+      expect(result).toContain('#testId\n');
+      expect(result).not.toContain('#testId=""');
+      expect(result).toContain('testDirective\n');
+      expect(result).not.toContain('testDirective=""');
+      expect(result).not.toContain('></input>');
     });
 
     it('Sollte sollte keine End-Tags für Void-Elements hinzufügen', () => {
-      const result = renameAttribute(templateRename002, 'input', 'typeWrong', 'type');
+      const result = Html.transform(templateRename002, 'input', renameAttrFn('typeWrong', 'type'));
 
-      expect(result.content).not.toContain('></input>');
-      expect(result.content).not.toContain('></area>');
-      expect(result.content).not.toContain('></base>');
-      expect(result.content).not.toContain('></br>');
-      expect(result.content).not.toContain('></col>');
-      expect(result.content).not.toContain('></embed>');
-      expect(result.content).not.toContain('></hr>');
-      expect(result.content).not.toContain('></img>');
-      expect(result.content).not.toContain('></link>');
-      expect(result.content).not.toContain('></meta>');
-      expect(result.content).not.toContain('></param>');
-      expect(result.content).not.toContain('></source>');
-      expect(result.content).not.toContain('></track>');
-      expect(result.content).not.toContain('></wbr>');
+      expect(result).not.toContain('></input>');
+      expect(result).not.toContain('></area>');
+      expect(result).not.toContain('></base>');
+      expect(result).not.toContain('></br>');
+      expect(result).not.toContain('></col>');
+      expect(result).not.toContain('></embed>');
+      expect(result).not.toContain('></hr>');
+      expect(result).not.toContain('></img>');
+      expect(result).not.toContain('></link>');
+      expect(result).not.toContain('></meta>');
+      expect(result).not.toContain('></param>');
+      expect(result).not.toContain('></source>');
+      expect(result).not.toContain('></track>');
+      expect(result).not.toContain('></wbr>');
     });
   });
 
   describe('removeAttribute', () => {
     it('Sollte sollte das Attribut luxTest1..5 entfernen', () => {
-      let result = removeAttribute(templateRemove001, 'lux-file-list', 'luxTest1');
-      result = removeAttribute(result.content, 'lux-file-list', 'luxTest2');
-      result = removeAttribute(result.content, 'lux-file-list', 'luxTest3');
-      result = removeAttribute(result.content, 'lux-file-list', 'luxTest4');
-      result = removeAttribute(result.content, 'lux-file-list', 'luxTest5');
+      let result = templateRemove001;
+      result = Html.transform(result, 'lux-file-list', removeAttrFn('luxTest1'));
+      result = Html.transform(result, 'lux-file-list', removeAttrFn('luxTest2'));
+      result = Html.transform(result, 'lux-file-list', removeAttrFn('luxTest3'));
+      result = Html.transform(result, 'lux-file-list', removeAttrFn('luxTest4'));
+      result = Html.transform(result, 'lux-file-list', removeAttrFn('luxTest5'));
 
-      expect(result.content).not.toContain('luxTest1');
-      expect(result.content).not.toContain('luxTest2');
-      expect(result.content).not.toContain('luxTest3');
-      expect(result.content).not.toContain('luxTest4');
-      expect(result.content).not.toContain('luxTest5');
-      expect(result.content).toContain('testDirective ');
-      expect(result.content).not.toContain('testDirective=""');
-      expect(result.content).toContain('#filelistexamplewithoutform>');
-      expect(result.content).not.toContain('#filelistexamplewithoutform=""');
-      expect(result.content).toContain('[luxHint]=""');
+      expect(result).not.toContain('luxTest1');
+      expect(result).not.toContain('luxTest2');
+      expect(result).not.toContain('luxTest3');
+      expect(result).not.toContain('luxTest4');
+      expect(result).not.toContain('luxTest5');
+      expect(result).toContain('testDirective\n');
+      expect(result).not.toContain('testDirective=""');
+      expect(result).toContain('#filelistexamplewithoutform\n');
+      expect(result).not.toContain('#filelistexamplewithoutform=""');
+      expect(result).toContain('[luxHint]=""');
     });
   });
 });
@@ -518,7 +647,7 @@ const templateUpdate001 = `
 <div fxFlex="auto" fxLayout="column">
       <h3>Ohne ReactiveForm</h3>
       <lux-file-list
-        testDirective 
+        testDirective
         [luxLabel]="label"
         [luxDownloadActionConfig]="downloadActionConfig"
         [luxMaximumExtended]="maximumExtended"
@@ -538,17 +667,31 @@ const templateUpdate001 = `
         [(luxTest5)]="value5"
         (luxFocusIn)="log(showOutputEvents, 'luxFocusIn', $event)"
         (luxFocusOut)="log(showOutputEvents, 'luxFocusOut', $event)"
-        #testId 
+        #testId
       >
       </lux-file-list>
     </div>
             `;
 
+const templateUpdate002 = `
+<lux-icon
+  luxIconName="fas fa-user"
+  [luxIconSize]="iconSize"
+  [luxPadding]="padding"
+  [luxMargin]="margin"
+  [luxRounded]="rounded"
+  [luxColor]="color"
+  >
+</lux-icon>
+`;
+
+const templateUpdate003 = `<lux-icon luxIconName="fas fa-user"><lux-icon luxIconName="fas fa-user"></lux-icon></lux-icon>`;
+
 const templateAppend001 = `
 <div fxFlex="auto" fxLayout="column">
       <h3>Ohne ReactiveForm</h3>
       <lux-file-list
-        testDirective 
+        testDirective
         [luxLabel]="label"
         [luxDownloadActionConfig]="downloadActionConfig"
         [luxMaximumExtended]="maximumExtended"
@@ -568,8 +711,41 @@ const templateAppend001 = `
         [(luxTest5)]=""
         (luxFocusIn)="log(showOutputEvents, 'luxFocusIn', $event)"
         (luxFocusOut)="log(showOutputEvents, 'luxFocusOut', $event)"
-        #testId 
+        #testId
       >
       </lux-file-list>
     </div>
             `;
+
+const templateNotProcessedAttr001 = `
+<div><lux-card><lux-card-content>Lorem ipsum</lux-card-content></lux-card>
+  <lux-card luxTitle="Test">
+    <lux-card-content>
+      <p>Lorem ipsum</p>
+      <lux-card><lux-card-content>Lorem ipsum</lux-card-content></lux-card>
+    </lux-card-content>
+  </lux-card>
+</div>
+`;
+
+const resultNotProcessedAttr001 = `
+<div><lux-card ${ATTR_NOT_PROCESSED}><lux-card-content>Lorem ipsum</lux-card-content></lux-card>
+  <lux-card ${ATTR_NOT_PROCESSED} luxTitle="Test">
+    <lux-card-content>
+      <p>Lorem ipsum</p>
+      <lux-card ${ATTR_NOT_PROCESSED}><lux-card-content>Lorem ipsum</lux-card-content></lux-card>
+    </lux-card-content>
+  </lux-card>
+</div>
+`;
+
+const templateCount001 = `
+<div><lux-card><lux-card-content>Lorem ipsum</lux-card-content></lux-card>
+  <lux-card luxTitle="Test">
+    <lux-card-content>
+      <p>Lorem ipsum</p>
+      <lux-card><lux-card-content>Lorem ipsum</lux-card-content></lux-card>
+    </lux-card-content>
+  </lux-card>
+</div>
+`;
