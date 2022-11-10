@@ -4,7 +4,7 @@ import { iterateFilesAndModifyContent } from '../../utility/files';
 import { Hit } from '../../utility/html/hit';
 import { HtmlManipulator as Html } from '../../utility/html/html-manipulator';
 import { removeAttrFn, removeElementFn, renameElementFn } from '../../utility/html/manipulator-functions';
-import { logError, logInfo } from '../../utility/logging';
+import { logError, logInfo, logWarn } from '../../utility/logging';
 import { finish, messageInfoRule, messageSuccessRule, replaceFirst } from '../../utility/util';
 
 export function update(options: any): Rule {
@@ -121,7 +121,7 @@ const updateIconAttrFn = (filePath: string, ac: boolean) => {
         logInfo(`${filePath}: Das Icon "${iconName}" -> ${ac ? found.newName : found.oldName}`);
       } else {
         if (!iconName.startsWith('lux-')) {
-          logError(`${filePath}: Das Icon "${iconName}" konnte nicht ersetzt werden.`);
+          logWarn(`${filePath}: Das Icon "${iconName}" konnte nicht ersetzt werden.`);
         }
       }
     }
@@ -449,7 +449,7 @@ const luxIcons: LuxIcon[] = [
   new LuxIcon('fa-user-cog', 'lux-cog'),
   new LuxIcon('fa-user-edit', 'lux-interface-user-edit'),
   new LuxIcon('fa-user-friends', 'lux-interface-user-multiple'),
-  // new LuxIcon('fa-user-graduate', ''),
+  new LuxIcon('fa-user-graduate', 'lux-graduate'),
   new LuxIcon('fa-user-minus', 'lux-interface-user-remove'),
   new LuxIcon('fa-user-plus', 'lux-interface-user-add'),
   new LuxIcon('fa-user-secret', 'lux-interface-user-lock'),
