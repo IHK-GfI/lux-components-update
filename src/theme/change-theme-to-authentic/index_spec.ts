@@ -75,7 +75,7 @@ describe('update140000', () => {
   });
 
   describe('[Rule] changeToAcComponents', () => {
-    it('Sollte sollte auf das Authentic-Theme wechseln', (done) => {
+    it('Sollte auf das Authentic-Theme wechseln', (done) => {
       const appComponentHtmlFilePath = testOptions.path + '/changeThemeToAuthentic/Test.component.html';
       appTree.create(appComponentHtmlFilePath, appComponentHtmlContent);
 
@@ -120,12 +120,6 @@ describe('update140000', () => {
           expect(content).not.toContain('</lux-side-nav-item');
           expect(content).toContain('<lux-app-header-ac-nav-menu-item');
           expect(content).toContain('</lux-app-header-ac-nav-menu-item');
-
-          expect(content).not.toContain('luxIconName="fa-power-off"');
-          expect(content).not.toContain('luxIconName="far fa-building"');
-          expect(content).not.toContain('luxIconName="fas fa-bell"');
-          expect(content).not.toContain('luxIconName="fas fa-home"');
-          expect(content).not.toContain('luxIconName="far fa-lightbulb"');
 
           done();
         },

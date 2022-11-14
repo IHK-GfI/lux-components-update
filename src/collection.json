@@ -13,7 +13,6 @@
     },
     "update-en-messages": {
       "description": "Aktualisiert die englischen Übersetzungen im Projekt",
-      "factory": "./update-en-messages/index#updateEnMessages",
       "schema": "./update-en-messages/schema.json"
     },
     "add-lux-components": {
@@ -25,6 +24,11 @@
       "description": "Wechselt zum Authentic-Theme",
       "factory": "./theme/change-theme-to-authentic/index#changeToThemeAuthentic",
       "schema": "./theme/change-theme-to-authentic/schema.json"
+    },
+    "change-to-lux-icons": {
+      "description": "Die neuen LUX-Icons werden im Projekt eingerichtet",
+      "factory": "./theme/change-to-lux-icons/index#changeToLuxIcons",
+      "schema": "./theme/change-to-lux-icons/schema.json"
     }
   }
 }
