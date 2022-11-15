@@ -76,12 +76,12 @@ describe('update140000', () => {
 
   describe('[Rule] changeToAcComponents', () => {
     it('Sollte auf das Authentic-Theme wechseln', (done) => {
-      const appComponentHtmlFilePath = testOptions.path + '/changeThemeToAuthentic/Test.component.html';
-      appTree.create(appComponentHtmlFilePath, appComponentHtmlContent);
+      const filePath = testOptions.path + '/changeThemeToAuthentic/Test.component.html';
+      appTree.create(filePath, appComponentHtmlContent);
 
       callRule(changeToAcComponents(testOptions), observableOf(appTree), context).subscribe({
         next: (success) => {
-          const content = success.read(appComponentHtmlFilePath)?.toString();
+          const content = success.read(filePath)?.toString();
 
           expect(content).not.toContain('<lux-side-nav-header');
           expect(content).not.toContain('<lux-side-nav-footer');
@@ -120,6 +120,22 @@ describe('update140000', () => {
           expect(content).not.toContain('</lux-side-nav-item');
           expect(content).toContain('<lux-app-header-ac-nav-menu-item');
           expect(content).toContain('</lux-app-header-ac-nav-menu-item');
+
+          done();
+        },
+        error: (reason) => expect(reason).toBeUndefined()
+      });
+    });
+
+    it('Sollte auf den Authentic-Master-Detail wechseln', (done) => {
+      const filePath = testOptions.path + '/changeThemeToAuthentic/MasterDetail.component.html';
+      appTree.create(filePath, masterDetailContent);
+
+      callRule(changeToAcComponents(testOptions), observableOf(appTree), context).subscribe({
+        next: (success) => {
+          const content = success.read(filePath)?.toString();
+
+          expect(content).toEqual(masterDetailResult);
 
           done();
         },
@@ -232,4 +248,74 @@ const appComponentHtmlContent = `
       <lux-menu-item luxLabel="Abmelden" luxIconName="fa-power-off" luxTagId="abmelden-menu-item"></lux-menu-item>
     </lux-app-header-right-nav>
   </lux-app-header>
+`;
+
+const masterDetailContent = `
+<lux-master-detail fxFill [luxMasterSpinnerDelay]="500" luxEmptyIconDetail="fas fa-pen" luxEmptyIconMaster="fas fa-pen"
+                     luxEmptyLabelDetail="Kein Detail selektiert!" [luxMasterIsLoading]="masterIsLoading"
+                     luxEmptyLabelMaster="Keine Masterelemente gefunden!" [luxSelectedDetail]="masterSelected"
+                     [luxMasterList]="masterItems" (luxSelectedDetailChange)="loadData($event)"
+                     (luxScrolled)="loadFurtherEntries()">
+  <lux-master-header-content>
+    <h2>Master Header</h2>
+  </lux-master-header-content>
+
+  <lux-master-simple luxTitleProp="title" luxSubTitleProp="subtitle">
+    <ng-template #luxSimpleIcon let-master>
+      <lux-icon [luxIconName]="master.icon"></lux-icon>
+    </ng-template>
+    <ng-template #luxSimpleContent let-master>
+      {{master.content}}
+    </ng-template>
+  </lux-master-simple>
+
+  <lux-detail-view>
+    <ng-template let-detail>
+      <lux-card [luxTitle]="detail.title" fxFill>
+        <lux-card-content>
+          {{ detail.content }}
+        </lux-card-content>
+      </lux-card>
+    </ng-template>
+  </lux-detail-view>
+
+  <lux-master-footer>
+    <h2>Master-Footer</h2>
+  </lux-master-footer>
+</lux-master-detail>
+`;
+
+const masterDetailResult = `
+<lux-master-detail-ac fxFill [luxMasterSpinnerDelay]="500" luxEmptyIconDetail="fas fa-pen" luxEmptyIconMaster="fas fa-pen"
+                     luxEmptyLabelDetail="Kein Detail selektiert!" [luxMasterIsLoading]="masterIsLoading"
+                     luxEmptyLabelMaster="Keine Masterelemente gefunden!" [luxSelectedDetail]="masterSelected"
+                     [luxMasterList]="masterItems" (luxSelectedDetailChange)="loadData($event)"
+                     (luxScrolled)="loadFurtherEntries()">
+  <lux-master-header-content-ac>
+    <h2>Master Header</h2>
+  </lux-master-header-content-ac>
+
+  <lux-master-list-ac luxTitleProp="title" luxSubTitleProp="subtitle">
+    <ng-template #luxSimpleIcon let-master>
+      <lux-icon [luxIconName]="master.icon"></lux-icon>
+    </ng-template>
+    <ng-template #luxSimpleContent let-master>
+      {{master.content}}
+    </ng-template>
+  </lux-master-list-ac>
+
+  <lux-detail-view-ac>
+    <ng-template let-detail>
+      <lux-card [luxTitle]="detail.title" fxFill>
+        <lux-card-content>
+          {{ detail.content }}
+        </lux-card-content>
+      </lux-card>
+    </ng-template>
+  </lux-detail-view-ac>
+
+  <lux-master-footer-ac>
+    <h2>Master-Footer</h2>
+  </lux-master-footer-ac>
+</lux-master-detail-ac>
 `;

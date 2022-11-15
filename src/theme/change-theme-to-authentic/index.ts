@@ -93,6 +93,14 @@ class LuxComponent {
 }
 
 const luxComponents: LuxComponent[] = [
+  new LuxComponent('lux-master-detail', 'lux-master-detail-ac'),
+  new LuxComponent('lux-detail-view', 'lux-detail-view-ac'),
+  new LuxComponent('lux-detail-wrapper', 'lux-detail-wrapper-ac'),
+  new LuxComponent('lux-detail-header', 'lux-detail-header-ac'),
+  new LuxComponent('lux-master-header', 'lux-master-header-ac'),
+  new LuxComponent('lux-master-header-content', 'lux-master-header-content-ac'),
+  new LuxComponent('lux-master-footer', 'lux-master-footer-ac'),
+  new LuxComponent('lux-master-simple', 'lux-master-list-ac'),
   new LuxComponent('lux-app-header', 'lux-app-header-ac'),
   new LuxComponent('lux-app-header-action-nav-item', 'lux-app-header-ac-action-nav-item'),
   new LuxComponent('lux-app-header-action-nav-item-custom', 'lux-app-header-ac-action-nav-item-custom'),
@@ -101,7 +109,7 @@ const luxComponents: LuxComponent[] = [
   new LuxComponent('lux-app-header-right-nav', 'lux-app-header-ac-user-menu'),
   new LuxComponent('lux-side-nav', 'lux-app-header-ac-nav-menu'),
   new LuxComponent('lux-side-nav-item', 'lux-app-header-ac-nav-menu-item'),
-  new LuxComponent('lux-tile', 'lux-tile-authentic'),
+  new LuxComponent('lux-tile', 'lux-tile-ac'),
   new LuxComponent('lux-autocomplete', 'lux-autocomplete-ac'),
   new LuxComponent('lux-checkbox', 'lux-checkbox-ac'),
   new LuxComponent('lux-chips', 'lux-chips-ac'),
