@@ -1,10 +1,12 @@
 import { callRule, SchematicContext } from '@angular-devkit/schematics';
 import { SchematicTestRunner, UnitTestTree } from '@angular-devkit/schematics/testing';
+import { findNodeAtLocation, getNodeValue } from 'jsonc-parser';
 import * as path from 'path';
 import { of as observableOf } from 'rxjs';
+import { readJson } from '../../utility/json';
 import { appOptions, workspaceOptions } from '../../utility/test';
 import { UtilConfig } from '../../utility/util';
-import { changeToLuxIcons } from './index';
+import { changeToLuxIcons, iconAssetBlock } from './index';
 
 describe('update140000', () => {
   let appTree: UnitTestTree;
@@ -38,12 +40,12 @@ describe('update140000', () => {
 
   describe('[Rule] changeToLuxIcons', () => {
     it('Sollte auf die neuen Icons wechseln', (done) => {
-      const appComponentHtmlFilePath = testOptions.path + '/changeToLuxIcons/Test.component.html';
-      appTree.create(appComponentHtmlFilePath, appComponentHtmlContent);
+      const filePath = testOptions.path + '/changeToLuxIcons/Test.component.html';
+      appTree.create(filePath, appComponentHtmlContent);
 
       callRule(changeToLuxIcons(testOptions), observableOf(appTree), context).subscribe({
         next: (success) => {
-          const content = success.read(appComponentHtmlFilePath)?.toString();
+          const content = success.read(filePath)?.toString();
 
           expect(content).toContain('luxIconName="lux-control-button-power-1"');
           expect(content).toContain('luxIconName="lux-factory"');
@@ -56,6 +58,30 @@ describe('update140000', () => {
           expect(content).not.toContain('luxIconName="fas fa-bell"');
           expect(content).not.toContain('luxIconName="fas fa-home"');
           expect(content).not.toContain('luxIconName="far fa-lightbulb"');
+
+          done();
+        },
+        error: (reason) => expect(reason).toBeUndefined()
+      });
+    });
+
+    it('Sollte den LUX-Iconpfad in den Assets-Abschnitten ergänzen', (done) => {
+      const filePath = './angular.json';
+      appTree.overwrite(filePath, angularJsonIconAssets);
+
+      callRule(changeToLuxIcons(testOptions), observableOf(appTree), context).subscribe({
+        next: (success) => {
+          const assetPath = ['projects', testOptions.project, 'architect', 'build', 'options', 'assets'];
+          const node = findNodeAtLocation(readJson(success, filePath), assetPath);
+          expect(node).toBeDefined();
+          expect(node?.children?.length).toBe(3);
+          expect(JSON.stringify(getNodeValue(node!.children![2]))).toBe(JSON.stringify(iconAssetBlock));
+
+          const testAssetPath = ['projects', testOptions.project, 'architect', 'test', 'options', 'assets'];
+          const testNode = findNodeAtLocation(readJson(success, filePath), testAssetPath);
+          expect(testNode).toBeDefined();
+          expect(testNode?.children?.length).toBe(3);
+          expect(JSON.stringify(getNodeValue(testNode!.children![2]))).toBe(JSON.stringify(iconAssetBlock));
 
           done();
         },
@@ -127,4 +153,68 @@ const appComponentHtmlContent = `
       <lux-menu-item luxLabel="Abmelden" luxIconName="fa-power-off" luxTagId="abmelden-menu-item"></lux-menu-item>
     </lux-app-header-right-nav>
   </lux-app-header>
+`;
+
+const angularJsonIconAssets = `
+{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "newProjectRoot": "projects",
+  "projects": {
+    "bar": {
+      "root": "",
+      "sourceRoot": "src",
+      "projectType": "application",
+      "i18n": {
+        "sourceLocale": {
+          "code": "de",
+          "baseHref": "/"
+        },
+        "locales": {
+          "en": "src/locale/messages.en.xlf"
+        }
+      },
+      "architect": {
+        "build": {
+          "builder": "ngx-build-plus:browser",
+          "options": {
+            "outputPath": "dist",
+            "index": "src/index.html",
+            "main": "src/main.ts",
+            "tsConfig": "src/tsconfig.app.json",
+            "polyfills": "src/polyfills.ts",
+            "localize": [
+              "de"
+            ],
+            "i18nMissingTranslation": "error",
+            "assets": [
+              "src/assets",
+              "src/favicon.ico"
+            ],
+            "styles": [
+              "src/styles.scss"
+            ]
+          },
+        },
+        "test": {
+          "builder": "ngx-build-plus:karma",
+          "options": {
+            "main": "src/test.ts",
+            "karmaConfig": "./karma.conf.js",
+            "polyfills": "src/polyfills.ts",
+            "tsConfig": "src/tsconfig.spec.json",
+            "scripts": [],
+            "styles": [
+              "src/styles.scss"
+            ],
+            "assets": [
+              "src/assets",
+              "src/favicon.ico"
+            ]
+          }
+        }
+      }
+    }
+  }
+}
 `;
