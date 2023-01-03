@@ -18,6 +18,11 @@
         (luxClicked)="router.navigate(['/profil'])"
       >
       </lux-side-nav-item>
+      <lux-side-nav-footer>
+        <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="8px" class="lux-mt-3">
+          <lux-link-plain luxLabel="Lizenzhinweis" [luxRaised]="true" (luxClicked)="goToLicenseHint()"></lux-link-plain>
+        </div>
+      </lux-side-nav-footer>
     </lux-side-nav>
   </lux-app-header>
 

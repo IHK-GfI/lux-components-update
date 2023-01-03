@@ -8,6 +8,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import {
   LuxActionModule,
+  LuxMarkdownModule,
   LuxCommonModule,
   LuxComponentsConfigModule,
   LuxComponentsConfigParameters,
@@ -26,6 +27,7 @@ import { AppComponent } from './app.component';
 import { ErrorComponent } from './error/error.component';
 import { HomeComponent } from './home/home.component';
 import { ProfilComponent } from './profil/profil.component';
+import { LicenseHintComponent } from './base/license-hint/license-hint.component';
 
 registerLocaleData(localeDE, localeDeExtra);
 
@@ -34,7 +36,7 @@ const luxComponentsConfig: LuxComponentsConfigParameters = {
 };
 
 @NgModule({
-  declarations: [AppComponent, HomeComponent, ErrorComponent, ProfilComponent],
+  declarations: [AppComponent, HomeComponent, ErrorComponent, ProfilComponent, LicenseHintComponent],
   imports: [
     BrowserModule,
     BrowserAnimationsModule,
@@ -49,6 +51,7 @@ const luxComponentsConfig: LuxComponentsConfigParameters = {
     LuxPipesModule,
     LuxPopupsModule,
     LuxErrorModule,
+    LuxMarkdownModule,
     FlexLayoutModule,
     LuxComponentsConfigModule.forRoot(luxComponentsConfig)
   ],

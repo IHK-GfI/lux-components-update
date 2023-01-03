@@ -9,7 +9,7 @@ import { messageInfoRule, messageSuccessRule, replaceFirst } from '../../utility
 export const iconAssetBlock = {
   "glob": "**/*",
   "input": "./node_modules/@ihk-gfi/lux-components-icons-and-fonts/assets/icons/",
-  "output": "./assets/lux-icons"
+  "output": "./assets/icons"
 };
 
 export function changeToLuxIcons(options: any): Rule {

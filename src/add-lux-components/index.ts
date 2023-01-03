@@ -56,6 +56,11 @@ export function addLuxComponents(options: any): Rule {
         glob: "*(*.eot|*.ttf|*.woff|*.woff2)",
         input: "./node_modules/material-design-icons-iconfont/dist/fonts",
         output: "./assets/icons/material-icons/fonts"
+      },
+      {
+        glob: "**/*",
+        input: "./node_modules/@ihk-gfi/lux-components-icons-and-fonts/assets/icons/",
+        output: "./assets/icons"
       }
     ];
 
@@ -104,12 +109,14 @@ export function addLuxComponents(options: any): Rule {
       updateJsonArray('/angular.json', jsonPathAssetsTest, assetsValues[3]),
       updateJsonArray('/angular.json', jsonPathAssetsBuild, assetsValues[4]),
       updateJsonArray('/angular.json', jsonPathAssetsTest, assetsValues[4]),
+      updateJsonArray('/angular.json', jsonPathAssetsBuild, assetsValues[5]),
+      updateJsonArray('/angular.json', jsonPathAssetsTest, assetsValues[5]),
       updateJsonArray('/angular.json', jsonPathAllowedCommonJS, 'hammerjs'),
       updateJsonArray('/angular.json', jsonPathAllowedCommonJS, 'ng2-pdf-viewer'),
       updateJsonArray('/angular.json', jsonPathAllowedCommonJS, 'pdfjs-dist'),
       updateJsonArray('/angular.json', jsonPathAllowedCommonJS, 'dompurify'),
       finish(
-        true,
+        false,
         `Die LUX-Components ${updateMajorVersion} wurden erfolgreich eingerichtet.`,
         `${chalk.yellowBright('Fertig!')}`
       )

@@ -6,18 +6,15 @@ import { messageInfoRule, messageSuccessRule } from '../utility/util';
 const addOrUpdate = false;
 const updateIfExists = true;
 
-// updateDep('@ihk-gfi/lux-stammdaten', '14.0.0', updateIfExists),
-// updateDep('@ihk-gfi/lux-components', updateMajorVersion + '.0.0', addOrUpdate),
-// updateDep('@ihk-gfi/lux-components-theme', '' + updateMajorVersion + '.0.0', addOrUpdate),
-// updateDep('@ihk-gfi/lux-components-update', '^' + updateMajorVersion + '.0.0', updateIfExists),
-
 export function updateDependencies(): Rule {
   return chain([
     messageInfoRule(`Abhängigkeiten in der Datei "package.json" werden aktualisiert...`),
-    updateDep('@ihk-gfi/lux-stammdaten', 'file://C:/Projekte/JAST/stammdaten-ui-lib/dist/ihk-gfi-lux-stammdaten-14.0.0.tgz', updateIfExists),
-    updateDep('@ihk-gfi/lux-components', 'file://C:/Projekte/github/Version_14.0.0/lux-components/dist/ihk-gfi-lux-components-14.0.0.tgz', addOrUpdate),
-    updateDep('@ihk-gfi/lux-components-theme', 'file://C:/Projekte/github/Version_14.0.0/lux-components-theme/ihk-gfi-lux-components-theme-14.0.0.tgz', addOrUpdate),
-    updateDep('@ihk-gfi/lux-components-update', 'file://C:/Projekte/github/Version_14.0.0/lux-components-update/ihk-gfi-lux-components-update-14.0.0.tgz', addOrUpdate),
+    updateDep('@ihk-gfi/lux-stammdaten', '14.0.0', updateIfExists),
+    updateDep('@ihk-gfi/lux-components', '14.0.0', addOrUpdate),
+    updateDep('@ihk-gfi/lux-components-theme', '14.0.0', addOrUpdate),
+    updateDep('@ihk-gfi/lux-components-icons-and-fonts', '1.0.0', addOrUpdate),
+    updateDep('@ihk-gfi/lux-components-update', '14.0.0', addOrUpdate),
+    updateDep('@ihk-gfi/lux-components-icons-and-fonts', '1.0.0', addOrUpdate),
     updateDep('@angular/animations', '14.2.11', addOrUpdate),
     updateDep('@angular/common', '14.2.11', addOrUpdate),
     updateDep('@angular/core', '14.2.11', addOrUpdate),

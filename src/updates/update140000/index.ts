@@ -9,7 +9,7 @@ import { applyRuleIf, finish, messageInfoRule, messageSuccessRule } from '../../
 import { validateLuxComponentsVersion, validateNodeVersion } from '../../utility/validation';
 
 export const updateMajorVersion = '14';
-export const updateMinVersion = '13.2.0';
+export const updateMinVersion = '13.3.0';
 export const updateNodeMinVersion = '16.0.0';
 
 export function update(options: any): Rule {
