@@ -1,6 +1,6 @@
 {
   "name": "@ihk-gfi/lux-components-update",
-  "version": "13.3.0",
+  "version": "14.0.0",
   "description": "Schematics für die Aktualisierung von LUX-Applikationen",
   "scripts": {
     "build": "tsc -p tsconfig.json",
@@ -30,22 +30,24 @@
   },
   "schematics": "./src/collection.json",
   "dependencies": {
-    "@angular-devkit/core": "13.3.4",
-    "@angular-devkit/schematics": "13.3.4",
-    "@angular-devkit/schematics-cli": "13.3.4",
-    "@angular/cli": "13.3.4",
+    "@angular-devkit/core": "14.2.6",
+    "@angular-devkit/schematics": "14.2.6",
+    "@angular-devkit/schematics-cli": "14.2.6",
+    "@angular/cli": "14.2.6",
     "@types/jasmine": "4.0.3",
-    "@types/node": "16.11.33",
+    "@types/node": "16.11.34",
     "@types/semver": "7.3.9",
+    "@types/jsdom": "20.0.0",
     "chalk": "4.1.2",
     "cheerio": "1.0.0-rc.9",
     "htmlparser2": "6.1.0",
     "jasmine": "4.1.0",
+    "jsdom": "20.0.1",
     "jsonc-parser": "3.0.0",
     "semver": "7.3.7",
-    "typescript": "4.5.5"
+    "typescript": "4.7.3"
   },
   "devDependencies": {
-    "prettier": "2.5.1"
+    "prettier": "2.6.2"
   }
 }

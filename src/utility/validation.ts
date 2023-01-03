@@ -4,7 +4,7 @@ import * as semver from 'semver';
 import { getPackageJsonDependency } from './dependencies';
 import { formattedSchematicsException, logInfo } from './logging';
 
-export function validateNodeVersion(context: SchematicContext, minimumVersion: string) {
+export function validateNodeVersion(_context: SchematicContext, minimumVersion: string) {
   if (semver.lt(process.versions.node, minimumVersion)) {
     logInfo(`Nodeversion ${process.versions.node} -> ${chalk.redBright('fail')}`);
     throw formattedSchematicsException(
@@ -20,10 +20,9 @@ export function validateNodeVersion(context: SchematicContext, minimumVersion: s
  * Prüft die Angular Version der aufrufenden Applikation und wirft eine SchematicsException, wenn
  * die Version nicht der erforderlichen entspricht.
  * @param tree
- * @param context
  * @param angularVersion
  */
-export function validateAngularVersion(tree: Tree, context: SchematicContext, angularVersion: string) {
+export function validateAngularVersion(tree: Tree, angularVersion: string) {
   const currentVersion = getPackageJsonDependency(tree, '@angular/common').version.replace(/([\^~])/g, '');
   if (!semver.satisfies(currentVersion, angularVersion)) {
     logInfo(`Angularversion ${currentVersion} -> ${chalk.redBright('fail')}`);

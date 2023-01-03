@@ -1,14 +1,11 @@
 import { chain, Rule, SchematicContext, Tree } from '@angular-devkit/schematics';
 import * as chalk from 'chalk';
-import { applyEdits, Edit, modify } from 'jsonc-parser';
+import { applyEdits, Edit, modify, Node } from 'jsonc-parser';
 import { updateDependencies } from '../update-dependencies/index';
 import {
-  updateBuildThemeAssets,
-  copyFiles,
   updateMajorVersion,
   updateNodeMinVersion,
-  updateTestThemeAssets
-} from '../updates/update130000/index';
+} from '../updates/update140000/index';
 import { iterateFilesAndModifyContent, moveFilesToDirectory } from '../utility/files';
 import {
   findObjectPropertyInArray,
@@ -23,7 +20,7 @@ import { finish, messageInfoRule, messageSuccessRule, replaceAll, waitForTreeCal
 import { validateAngularVersion, validateNodeVersion } from '../utility/validation';
 
 export function addLuxComponents(options: any): Rule {
-  return (tree: Tree, _context: SchematicContext) => {
+  return (_tree: Tree, _context: SchematicContext) => {
     const jsonPathAllowedCommonJS = ['projects', options.project, 'architect', 'build', 'options', 'allowedCommonJsDependencies'];
     const jsonPathBudget = ['projects', options.project, 'architect', 'build', 'configurations', 'production', 'budgets'];
     const budgetValue = {
@@ -59,6 +56,11 @@ export function addLuxComponents(options: any): Rule {
         glob: "*(*.eot|*.ttf|*.woff|*.woff2)",
         input: "./node_modules/material-design-icons-iconfont/dist/fonts",
         output: "./assets/icons/material-icons/fonts"
+      },
+      {
+        glob: "**/*",
+        input: "./node_modules/@ihk-gfi/lux-components-icons-and-fonts/assets/icons/",
+        output: "./assets/icons"
       }
     ];
 
@@ -72,7 +74,18 @@ export function addLuxComponents(options: any): Rule {
       "fonts": true
     };
 
-    const findBudgetFn = (node) => findObjectPropertyInArray(node, 'type', 'initial');
+    const jsonPathLang = ['projects', options.project, 'i18n'];
+    const jsonValueLang =  {
+      "sourceLocale": {
+        "code": "de",
+        "baseHref": "/"
+      },
+      "locales": {
+        "en": "src/locale/messages.en.xlf"
+      }
+    };
+
+    const findBudgetFn = (node: Node) => findObjectPropertyInArray(node, 'type', 'initial');
 
     return chain([
       check(),
@@ -81,26 +94,29 @@ export function addLuxComponents(options: any): Rule {
       updateDependencies(),
 
       updateIndexHtml(options),
-      copyFiles(options),
       updateApp(options),
-      updateJsonValue(options, '/tsconfig.json', ['compilerOptions', 'strict'], false),
-      updateJsonValue(options, '/angular.json', jsonPathOptimization, jsonValueOptimization),
-      updateJsonArray(options, '/angular.json', jsonPathBudget, budgetValue, true,  findBudgetFn),
-      updateJsonArray(options, '/angular.json', jsonPathAssetsBuild, assetsValues[0]),
-      updateJsonArray(options, '/angular.json', jsonPathAssetsTest, assetsValues[0]),
-      updateJsonArray(options, '/angular.json', jsonPathAssetsBuild, assetsValues[1]),
-      updateJsonArray(options, '/angular.json', jsonPathAssetsTest, assetsValues[1]),
-      updateJsonArray(options, '/angular.json', jsonPathAssetsBuild, assetsValues[2]),
-      updateJsonArray(options, '/angular.json', jsonPathAssetsTest, assetsValues[2]),
-      updateJsonArray(options, '/angular.json', jsonPathAssetsBuild, assetsValues[3]),
-      updateJsonArray(options, '/angular.json', jsonPathAssetsTest, assetsValues[3]),
-      updateJsonArray(options, '/angular.json', jsonPathAssetsBuild, assetsValues[4]),
-      updateJsonArray(options, '/angular.json', jsonPathAssetsTest, assetsValues[4]),
-      updateJsonArray(options, '/angular.json', jsonPathAllowedCommonJS, 'hammerjs'),
-      updateJsonArray(options, '/angular.json', jsonPathAllowedCommonJS, 'ng2-pdf-viewer'),
-      updateJsonArray(options, '/angular.json', jsonPathAllowedCommonJS, 'pdfjs-dist'),
+      updateJsonValue('/tsconfig.json', ['compilerOptions', 'strict'], true),
+      updateJsonValue('/angular.json', jsonPathLang, jsonValueLang),
+      updateJsonValue('/angular.json', jsonPathOptimization, jsonValueOptimization),
+      updateJsonArray('/angular.json', jsonPathBudget, budgetValue, true, findBudgetFn),
+      updateJsonArray('/angular.json', jsonPathAssetsBuild, assetsValues[0]),
+      updateJsonArray('/angular.json', jsonPathAssetsTest, assetsValues[0]),
+      updateJsonArray('/angular.json', jsonPathAssetsBuild, assetsValues[1]),
+      updateJsonArray('/angular.json', jsonPathAssetsTest, assetsValues[1]),
+      updateJsonArray('/angular.json', jsonPathAssetsBuild, assetsValues[2]),
+      updateJsonArray('/angular.json', jsonPathAssetsTest, assetsValues[2]),
+      updateJsonArray('/angular.json', jsonPathAssetsBuild, assetsValues[3]),
+      updateJsonArray('/angular.json', jsonPathAssetsTest, assetsValues[3]),
+      updateJsonArray('/angular.json', jsonPathAssetsBuild, assetsValues[4]),
+      updateJsonArray('/angular.json', jsonPathAssetsTest, assetsValues[4]),
+      updateJsonArray('/angular.json', jsonPathAssetsBuild, assetsValues[5]),
+      updateJsonArray('/angular.json', jsonPathAssetsTest, assetsValues[5]),
+      updateJsonArray('/angular.json', jsonPathAllowedCommonJS, 'hammerjs'),
+      updateJsonArray('/angular.json', jsonPathAllowedCommonJS, 'ng2-pdf-viewer'),
+      updateJsonArray('/angular.json', jsonPathAllowedCommonJS, 'pdfjs-dist'),
+      updateJsonArray('/angular.json', jsonPathAllowedCommonJS, 'dompurify'),
       finish(
-          true,
+        false,
         `Die LUX-Components ${updateMajorVersion} wurden erfolgreich eingerichtet.`,
         `${chalk.yellowBright('Fertig!')}`
       )
@@ -114,7 +130,7 @@ export function addLuxComponents(options: any): Rule {
 export function check(): Rule {
   return (tree: Tree, context: SchematicContext) => {
     return waitForTreeCallback(tree, () => {
-      validateAngularVersion(tree, context, `^${+updateMajorVersion}.0.0`);
+      validateAngularVersion(tree, `^${ +updateMajorVersion }.0.0`);
       validateNodeVersion(context, updateNodeMinVersion);
 
       return tree;
@@ -122,10 +138,10 @@ export function check(): Rule {
   };
 }
 
-export function updatePackageJson(options: any): Rule {
+export function updatePackageJson(_options: any): Rule {
   return chain([
     messageInfoRule(`package.json wird aktualisiert...`),
-    (tree: Tree, context: SchematicContext) => {
+    (tree: Tree, _context: SchematicContext) => {
       const filePath = `/package.json`;
 
       const newValuesArr = [
@@ -176,7 +192,7 @@ export function updatePackageJson(options: any): Rule {
 export function updateIndexHtml(options: any): Rule {
   return chain([
     messageInfoRule(`index.html wird aktualisiert...`),
-    (tree: Tree, context: SchematicContext) => {
+    (tree: Tree, _context: SchematicContext) => {
       iterateFilesAndModifyContent(
         tree,
         options.path,
@@ -198,8 +214,10 @@ export function copyAppFiles(options: any): Rule {
   return chain([
     messageInfoRule(`App-Dateien werden angelegt...`),
     moveFilesToDirectory(options, 'files/app', 'src/app'),
+    moveFilesToDirectory(options, 'files/assets', 'src/assets'),
     moveFilesToDirectory(options, 'files/environments', 'src/environments'),
-    moveFilesToDirectory(options, 'files/scripts', '/'),
+    moveFilesToDirectory(options, 'files/locale', '/src/locale'),
+    moveFilesToDirectory(options, 'files/root', '/'),
     moveFilesToDirectory(options, 'files/src', '/src'),
     messageSuccessRule(`App-Dateien wurden angelegt.`)
   ]);
@@ -208,7 +226,7 @@ export function copyAppFiles(options: any): Rule {
 export function updateApp(options: any): Rule {
   return chain([
     messageInfoRule(`App-Dateien wird angepasst...`),
-    (tree: Tree, context: SchematicContext) => {
+    (tree: Tree, _context: SchematicContext) => {
       const filePath = `/package.json`;
 
       const newValuesArr = [
@@ -243,7 +261,7 @@ export function updateApp(options: any): Rule {
 
       return tree;
     },
-    (tree: Tree, context: SchematicContext) => {
+    (tree: Tree, _context: SchematicContext) => {
       const filePath = `/angular.json`;
 
       const newValuesArr = [
