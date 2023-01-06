@@ -1,9 +1,11 @@
 import { chain, Rule, SchematicContext, Tree } from '@angular-devkit/schematics';
 import * as chalk from 'chalk';
+import { iconAssetBlock } from '../../theme/change-to-lux-icons/index';
 import { updateDependencies } from '../../update-dependencies/index';
 import { iterateFilesAndModifyContent, moveFilesToDirectory } from '../../utility/files';
 import { HtmlManipulator as Html } from '../../utility/html/html-manipulator';
 import { renameAttrFn } from '../../utility/html/manipulator-functions';
+import { updateJsonArray } from '../../utility/json';
 import { logInfo, logInfoWithDescriptor, logSuccess } from '../../utility/logging';
 import { applyRuleIf, finish, messageInfoRule, messageSuccessRule } from '../../utility/util';
 import { validateLuxComponentsVersion, validateNodeVersion } from '../../utility/validation';
@@ -28,9 +30,14 @@ export function update(options: any): Rule {
 }
 
 export function updateProject(options: any): Rule {
+  const assetPath = ['projects', options.project, 'architect', 'build', 'options', 'assets'];
+  const testAssetPath = ['projects', options.project, 'architect', 'test', 'options', 'assets'];
+
   return (_tree: Tree, _context: SchematicContext) => {
     return chain([
       messageInfoRule(`LUX-Components ${updateMajorVersion} werden aktualisiert...`),
+      updateJsonArray('/angular.json', assetPath, iconAssetBlock),
+      updateJsonArray('/angular.json', testAssetPath, iconAssetBlock),
       copyFiles(options),
       renameLuxSelectedFiles(options),
       updateDependencies(),
