@@ -218,6 +218,7 @@ export function copyAppFiles(options: any): Rule {
     moveFilesToDirectory(options, 'files/environments', 'src/environments'),
     moveFilesToDirectory(options, 'files/locale', '/src/locale'),
     moveFilesToDirectory(options, 'files/root', '/'),
+    moveFilesToDirectory(options, 'files/scripts', '/'),
     moveFilesToDirectory(options, 'files/src', '/src'),
     messageSuccessRule(`App-Dateien wurden angelegt.`)
   ]);
