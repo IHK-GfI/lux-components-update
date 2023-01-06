@@ -69,30 +69,39 @@ export function appendScript(script: string, part: string, index?: number) {
   return newSkript;
 }
 
-export function updateJsonValue(options: any, filePath: string, jsonPath: string[], value: any, onlyUpdate = false): Rule {
-  return (tree: Tree, context: SchematicContext) => {
+export function updateJsonValue(
+  filePath: string,
+  jsonPath: string[],
+  value: any,
+  onlyUpdate = false
+): Rule {
+  return (tree: Tree, _context: SchematicContext) => {
     const found = findNodeAtLocation(readJson(tree, filePath), jsonPath);
 
     if (!onlyUpdate || (onlyUpdate && found)) {
       const jsonFile = readJsonAsString(tree, filePath);
-      const edits = modify(
-          jsonFile,
-          jsonPath,
-          value,
-          { formattingOptions: jsonFormattingOptions, isArrayInsertion: false}
-      );
+      const edits = modify(jsonFile, jsonPath, value, {
+        formattingOptions: jsonFormattingOptions,
+        isArrayInsertion: false
+      });
 
       if (edits) {
         tree.overwrite(filePath, applyEdits(jsonFile, edits));
-        logInfo(`${getLogValue(value)} an der Stelle "${jsonPath.join('.')}" eingetragen.`);
+
+        logInfo(`Wert ${getLogValue(value)} an der Stelle "${jsonPath.join('.')}" eingetragen.`);
       }
     }
   };
 }
 
-export function updateJsonArray(options: any, filePath: string, jsonPath: string[], value: any, onlyUpdate = false, findFn?: (value: Node) => boolean): Rule {
-  return (tree: Tree, context: SchematicContext) => {
-
+export function updateJsonArray(
+  filePath: string,
+  jsonPath: string[],
+  value: any,
+  onlyUpdate = false,
+  findFn?: (value: Node) => boolean
+): Rule {
+  return (tree: Tree, _context: SchematicContext) => {
     // Gibt es bereits eine passende Stelle?
     let foundIndex = -1;
     let childrenCount = -1;
@@ -113,7 +122,7 @@ export function updateJsonArray(options: any, filePath: string, jsonPath: string
 
       if (findFn) {
         for (let i = 0; i < node.children.length; i++) {
-          if (findFn(node.children[ i ])) {
+          if (findFn(node.children[i])) {
             foundIndex = i;
             break;
           }
@@ -124,10 +133,10 @@ export function updateJsonArray(options: any, filePath: string, jsonPath: string
     if (!onlyUpdate || (onlyUpdate && foundIndex >= 0)) {
       const jsonFile = readJsonAsString(tree, filePath);
       const edits = modify(
-          jsonFile,
-          [...jsonPath, foundIndex >= 0 ? foundIndex : childrenCount !== -1 ? childrenCount : 0],
-          value,
-          { formattingOptions: jsonFormattingOptions, isArrayInsertion: foundIndex === -1}
+        jsonFile,
+        [...jsonPath, foundIndex >= 0 ? foundIndex : childrenCount !== -1 ? childrenCount : 0],
+        value,
+        { formattingOptions: jsonFormattingOptions, isArrayInsertion: foundIndex === -1 }
       );
 
       if (edits) {
@@ -201,11 +210,11 @@ export function findObjectPropertyInArray(node: Node, propertyName: string, prop
         if (assetObjectChildren[j].type === 'property') {
           const propertyChildren = assetObjectChildren[j].children ?? [];
           if (
-              propertyChildren.length > 1 &&
-              propertyChildren[0].value === propertyName &&
-              propertyChildren[1].value === propertyValue
+            propertyChildren.length > 1 &&
+            propertyChildren[0].value === propertyName &&
+            propertyChildren[1].value === propertyValue
           ) {
-           found = true;
+            found = true;
             break;
           }
         }
@@ -250,12 +259,17 @@ export function findStringIndexInArray(arrayNode: Node, value: string): number {
   return arrayIndex;
 }
 
-export function removeJsonNode(tree: Tree, filePath: string, jsonPath: (string | any)[], message = `Den Abschnitt "${JSON.stringify(jsonPath)}" gelöscht.`) {
-  const contentAsNode  = readJson(tree, filePath);
+export function removeJsonNode(
+  tree: Tree,
+  filePath: string,
+  jsonPath: (string | any)[],
+  message = `Den Abschnitt "${JSON.stringify(jsonPath)}" gelöscht.`
+) {
+  const contentAsNode = readJson(tree, filePath);
   const testAssetsNode = findNodeAtLocation(contentAsNode, jsonPath);
   if (testAssetsNode) {
     const angularJson = readJsonAsString(tree, filePath);
-    const edits       = modify(angularJson, jsonPath, void 0, { formattingOptions: jsonFormattingOptions });
+    const edits = modify(angularJson, jsonPath, void 0, { formattingOptions: jsonFormattingOptions });
     if (edits) {
       tree.overwrite(filePath, applyEdits(angularJson, edits));
       logInfo(message);
@@ -263,6 +277,8 @@ export function removeJsonNode(tree: Tree, filePath: string, jsonPath: (string |
   }
 }
 
-function getLogValue(value: any) {
-  return typeof value === 'string' && value.startsWith('') && value.endsWith('') ? JSON.stringify(value) : '"' + JSON.stringify(value) + '"';
+function getLogValue(value: any): string {
+  let logValue = JSON.stringify(value);
+
+  return logValue && logValue.startsWith('"') && logValue.endsWith('"') ? logValue : `"${logValue}"`;
 }

@@ -14,22 +14,25 @@ export const UtilConfig = {
   defaultWaitMS: 4000
 };
 
-export function escapeRegExp(str) {
+export function escapeRegExp(str: string) {
   return str.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, '\\$1');
 }
 
-export function replaceAll(str, find, replace) {
-  return str.replace(new RegExp(escapeRegExp(find), 'g'), replace);
+export function replaceFirst(str: string, find: string, replace: string) {
+  return str.replace(new RegExp(escapeRegExp(find), 'm'), replace);
+}
+export function replaceAll(str: string, find: string, replace: string) {
+  return str.replace(new RegExp(escapeRegExp(find), 'gm'), replace);
 }
 
 /**
  * Wartet die übergebene Zeitspanne und ruft dann den Callback auf.
  * Gibt anschließend den Tree über ein Observable zurück.
- * @param tree
+ * @param _tree
  * @param callback
  * @param waitMS
  */
-export const waitForTreeCallback = (tree, callback, waitMS: number = UtilConfig.defaultWaitMS) => {
+export const waitForTreeCallback = (_tree: Tree, callback: Function, waitMS: number = UtilConfig.defaultWaitMS) => {
   return new Observable<Tree>((subscriber) => {
     of(callback())
       .pipe(delay(waitMS))
@@ -58,7 +61,7 @@ export const waitForTreeCallback = (tree, callback, waitMS: number = UtilConfig.
  * @param context
  * @param messages
  */
-export const runInstallAndLogToDos: (context, messages, runNpmInstall) => void = (context: SchematicContext, messages, runNpmInstall) => {
+export const runInstallAndLogToDos: (context: SchematicContext, messages: string[], runNpmInstall: boolean) => void = (context: SchematicContext, messages, runNpmInstall) => {
   // diese log-Ausgaben werden erst ganz zum Schluss ausgeführt (nach Update und npm-install logs)
   process.addListener('exit', () => {
     if (messages) {
@@ -109,7 +112,7 @@ export function applyRuleIf(minVersion: string, rule: Rule): Rule {
 }
 
 export function messageDebugRule(message: any, options: any): Rule {
-  return (tree: Tree, _context: SchematicContext) => {
+  return (_tree: Tree, _context: SchematicContext) => {
     if (options && options.verbose) {
       logInfo(message);
     }
@@ -117,19 +120,19 @@ export function messageDebugRule(message: any, options: any): Rule {
 }
 
 export function messageInfoRule(message: any): Rule {
-  return (tree: Tree, _context: SchematicContext) => {
+  return (_tree: Tree, _context: SchematicContext) => {
     logInfoWithDescriptor(message);
   };
 }
 
 export function messageInfoInternRule(message: any): Rule {
-  return (tree: Tree, _context: SchematicContext) => {
+  return (_tree: Tree, _context: SchematicContext) => {
     logInfo(message);
   };
 }
 
 export function messageSuccessRule(message: any): Rule {
-  return (tree: Tree, _context: SchematicContext) => {
+  return (_tree: Tree, _context: SchematicContext) => {
     logSuccess(message);
   };
 }

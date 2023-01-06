@@ -1,7 +1,9 @@
 import { chain, Rule, SchematicContext, Tree } from '@angular-devkit/schematics';
-import cheerio from 'cheerio';
+import { load } from 'cheerio';
 import { logInfo } from '../utility/logging';
 import { messageInfoRule } from '../utility/util';
+
+const TRANS_UNIT_SELECTOR: string = 'trans-unit';
 
 export function updateEnMessages(): Rule {
     return chain([
@@ -23,19 +25,14 @@ function updateEnMessagesIntern(): Rule {
         const contentAPPEn = readTransUnitFile(tree, filePathAPPEn);
         const contentAPPDe = readTransUnitFile(tree, filePathAPPDe);
 
-        const fnLCEEn = cheerio.load(contentLCEn, { xmlMode: true, decodeEntities: false });
-        const fnSDEn  = cheerio.load(contentSDEn, { xmlMode: true, decodeEntities: false });
-        const fnAPPEn = cheerio.load(contentAPPEn, { xmlMode: true, decodeEntities: false });
-        const fnAPPDe = cheerio.load(contentAPPDe, { xmlMode: true, decodeEntities: false });
+        const fnLCEEn = load(contentLCEn, { xmlMode: true, decodeEntities: false });
+        const fnSDEn  = load(contentSDEn, { xmlMode: true, decodeEntities: false });
+        const fnAPPEn = load(contentAPPEn, { xmlMode: true, decodeEntities: false });
+        const fnAPPDe = load(contentAPPDe, { xmlMode: true, decodeEntities: false });
 
-        let newContent = `
-<?xml version="1.0" encoding="UTF-8" ?>
-<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
-  <file source-language="en" datatype="plaintext" original="ng2.template">
-    <body>                
-`;
+        let newContent = headerContent;
 
-        fnAPPDe('trans-unit').each((i, element) => {
+        fnAPPDe(TRANS_UNIT_SELECTOR).each((_i, element) => {
             const id = fnAPPDe(element).attr('id');
             if (id?.startsWith('luxc.')) {
                 const transUnit = fnLCEEn(`trans-unit[id="${ id }"]`).first();
@@ -52,10 +49,7 @@ function updateEnMessagesIntern(): Rule {
             }
         });
 
-        newContent += `
-    </body>
-  </file>
-</xliff>                `;
+        newContent += footerContent;
 
         logInfo(`Die Datei '${ filePathAPPEn }' wurde aktualisiert.`);
         if (!tree.exists(filePathAPPEn)) {
@@ -76,3 +70,15 @@ function readTransUnitFile(tree: Tree, filePath: string): string {
 
     return content;
 }
+
+const headerContent = `
+<?xml version="1.0" encoding="UTF-8" ?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+  <file source-language="en" datatype="plaintext" original="ng2.template">
+    <body>                
+`;
+
+const footerContent = `
+    </body>
+  </file>
+</xliff>                `;

@@ -4,8 +4,8 @@ Dieses Projekt enthält alle Updateskripte (umgesetzt mit Angular Schematics) f�
 
 Updateskripte:
 
-- `update` (aktualisiert das Projekt auf die Version 12.0.0)
-- `update-12.x.x` (aktualisiert das Projekt auf die Version 12.x.x)
+- `update` (aktualisiert das Projekt auf die Version 14.0.0)
+- `update-14.x.x` (aktualisiert das Projekt auf die Version 14.x.x)
 - `add-lux-components` (fügt die LUX-Components zu einem Angular-Projekt hinzu)
 
 ## Voraussetzungen

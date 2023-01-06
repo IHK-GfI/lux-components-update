@@ -21,7 +21,7 @@ import { logInfo, logInfoWithDescriptor, logSuccess } from './logging';
  * @param filePath
  * @param searchString
  */
-export function deleteLineFromFile(tree: Tree, context: SchematicContext, filePath: string, searchString: string, withLog = true) {
+export function deleteLineFromFile(tree: Tree, _context: SchematicContext, filePath: string, searchString: string, withLog = true) {
   let changed = false;
 
   const fileContent: Buffer | null = tree.read(filePath);
@@ -94,7 +94,7 @@ export function deleteLineFromFile(tree: Tree, context: SchematicContext, filePa
  * @param filePath
  * @param lines
  */
-export function writeLinesToFile(tree: Tree, context: SchematicContext, filePath: string, ...lines: string[]) {
+export function writeLinesToFile(tree: Tree, _context: SchematicContext, filePath: string, ...lines: string[]) {
   const fileContent: Buffer | null = tree.read(filePath);
   let content: string = '';
 
@@ -175,7 +175,7 @@ export function iterateFilesAndModifyContent(
  * @param targetPath Ein Zielpfad (z.B. src/theming/).
  */
 export function moveFilesToDirectory(options: any, sourcePath: string, targetPath: string): Rule {
-  return (tree: Tree, context: SchematicContext) => {
+  return (tree: Tree, _context: SchematicContext) => {
     if (!targetPath.startsWith('/')) {
       targetPath = '/' + targetPath;
     }
@@ -217,7 +217,7 @@ export function moveFilesToDirectory(options: any, sourcePath: string, targetPat
  * @param exclude Ein Array mit Dateinamen, die nicht gelöscht werden sollen.
  */
 export function deleteFilesInDirectory(options: any, path: string, exclude: string[]): Rule {
-  return (tree: Tree, context: SchematicContext) => {
+  return (tree: Tree, _context: SchematicContext) => {
     if (!path.startsWith('/')) {
       path = '/' + path;
     }
@@ -349,7 +349,7 @@ export function findModule(
  * @param targetPath
  */
 export function deleteFile(options: any, targetPath: string): Rule {
-  return (tree: Tree, context: SchematicContext) => {
+  return (tree: Tree, _context: SchematicContext) => {
     logInfoWithDescriptor('Lösche Datei ' + targetPath + '.');
     if (!targetPath.startsWith('/')) {
       targetPath = '/' + targetPath;
