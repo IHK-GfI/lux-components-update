@@ -88,7 +88,11 @@ export function updateJsonValue(
       if (edits) {
         tree.overwrite(filePath, applyEdits(jsonFile, edits));
 
-        logInfo(`Wert ${getLogValue(value)} an der Stelle "${jsonPath.join('.')}" eingetragen.`);
+        if (value) {
+          logInfo(`Wert ${getLogValue(value)} an der Stelle "${jsonPath.join('.')}" eingetragen.`);
+        } else {
+          logInfo(`Wert an der Stelle "${jsonPath.join('.')}" gelöscht.`);
+        }
       }
     }
   };

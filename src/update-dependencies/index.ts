@@ -13,8 +13,7 @@ export function updateDependencies(): Rule {
     updateDep('@ihk-gfi/lux-components', '14.0.0', addOrUpdate),
     updateDep('@ihk-gfi/lux-components-theme', '14.0.0', addOrUpdate),
     updateDep('@ihk-gfi/lux-components-icons-and-fonts', '1.1.0', addOrUpdate),
-    updateDep('@ihk-gfi/lux-components-update', '14.0.0', addOrUpdate),
-    updateDep('@ihk-gfi/lux-components-icons-and-fonts', '1.0.0', addOrUpdate),
+    deleteDep('@ihk-gfi/lux-components-update'),
     updateDep('@angular/animations', '14.2.11', addOrUpdate),
     updateDep('@angular/common', '14.2.11', addOrUpdate),
     updateDep('@angular/core', '14.2.11', addOrUpdate),
@@ -39,6 +38,7 @@ export function updateDependencies(): Rule {
     updateDep('pdfjs-dist', '2.13.216', addOrUpdate),
     updateDep('ngx-cookie-service', '14.0.1', addOrUpdate),
 
+    updateDevDep('@ihk-gfi/lux-components-update', '^14.0.0', addOrUpdate),
     updateDevDep('@angular-eslint/builder', '14.3.0', updateIfExists),
     updateDevDep('@angular-eslint/eslint-plugin', '14.3.0', updateIfExists),
     updateDevDep('@angular-eslint/eslint-plugin-template', '14.3.0', updateIfExists),
@@ -77,6 +77,10 @@ function updateDep(name: string, version: string, onlyUpdate: boolean): Rule {
   return updateJsonValue('/package.json', [NodeDependencyType.Default, name], version, onlyUpdate);
 }
 
-function updateDevDep(name: string, version: string, onlyUpdate: boolean): Rule {
+function deleteDep(name: string): Rule {
+  return updateJsonValue('/package.json', [NodeDependencyType.Default, name], void 0, true);
+}
+
+function updateDevDep(name: string, version: string | null, onlyUpdate: boolean): Rule {
   return updateJsonValue('/package.json', [NodeDependencyType.Dev, name], version, onlyUpdate);
 }
