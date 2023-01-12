@@ -172,7 +172,7 @@ const luxIcons: LuxIcon[] = [
   new LuxIcon('fa-crop-alt', 'lux-interface-edit-crop'),
   new LuxIcon('fa-crosshairs', 'lux-travel-map-location-target-1'),
   new LuxIcon('fa-cut', 'lux-interface-edit-scissors'),
-  // new LuxIcon('fa-database', ''),
+  new LuxIcon('fa-database', 'lux-database'),
   new LuxIcon('fa-dice-five', 'lux-dice'),
   new LuxIcon('fa-download', 'lux-interface-download-button-2'),
   new LuxIcon('fa-edit', 'lux-interface-edit-write-2'),

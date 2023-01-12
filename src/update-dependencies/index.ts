@@ -12,7 +12,7 @@ export function updateDependencies(): Rule {
     updateDep('@ihk-gfi/lux-stammdaten', '14.0.0', updateIfExists),
     updateDep('@ihk-gfi/lux-components', '14.0.0', addOrUpdate),
     updateDep('@ihk-gfi/lux-components-theme', '14.0.0', addOrUpdate),
-    updateDep('@ihk-gfi/lux-components-icons-and-fonts', '1.0.0', addOrUpdate),
+    updateDep('@ihk-gfi/lux-components-icons-and-fonts', '1.1.0', addOrUpdate),
     updateDep('@ihk-gfi/lux-components-update', '14.0.0', addOrUpdate),
     updateDep('@ihk-gfi/lux-components-icons-and-fonts', '1.0.0', addOrUpdate),
     updateDep('@angular/animations', '14.2.11', addOrUpdate),
