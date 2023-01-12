@@ -2,25 +2,11 @@ import { chain, Rule, SchematicContext, Tree } from '@angular-devkit/schematics'
 import { iterateFilesAndModifyContent } from '../../utility/files';
 import { Hit } from '../../utility/html/hit';
 import { HtmlManipulator as Html } from '../../utility/html/html-manipulator';
-import { updateJsonArray } from '../../utility/json';
 import { logInfo, logWarn } from '../../utility/logging';
 import { messageInfoRule, messageSuccessRule, replaceFirst } from '../../utility/util';
 
-export const iconAssetBlock = {
-  "glob": "**/*",
-  "input": "./node_modules/@ihk-gfi/lux-components-icons-and-fonts/assets/icons/",
-  "output": "./assets/icons"
-};
-
 export function changeToLuxIcons(options: any): Rule {
-  const assetPath = ['projects', options.project, 'architect', 'build', 'options', 'assets'];
-  const testAssetPath = ['projects', options.project, 'architect', 'test', 'options', 'assets'];
-
   return chain([
-    messageInfoRule(`Die LUX-Iconpfade werden in den Asset-Abschnitten ergänzt...`),
-    updateJsonArray('/angular.json', assetPath, iconAssetBlock),
-    updateJsonArray('/angular.json', testAssetPath, iconAssetBlock),
-    messageSuccessRule(`Die LUX-Iconpfade wurden in den Asset-Abschnitten ergänzt.`),
     messageInfoRule(`Die FA- und Material-Icons werden durch die LUX-Icons ersetzt...`),
     (tree: Tree, _context: SchematicContext) => {
       iterateFilesAndModifyContent(
