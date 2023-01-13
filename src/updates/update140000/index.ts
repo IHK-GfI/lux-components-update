@@ -1,6 +1,5 @@
 import { chain, Rule, SchematicContext, Tree } from '@angular-devkit/schematics';
 import * as chalk from 'chalk';
-import { iconAssetBlock } from '../../theme/change-to-lux-icons/index';
 import { updateDependencies } from '../../update-dependencies/index';
 import { iterateFilesAndModifyContent, moveFilesToDirectory } from '../../utility/files';
 import { HtmlManipulator as Html } from '../../utility/html/html-manipulator';
@@ -13,6 +12,12 @@ import { validateLuxComponentsVersion, validateNodeVersion } from '../../utility
 export const updateMajorVersion = '14';
 export const updateMinVersion = '13.3.0';
 export const updateNodeMinVersion = '16.0.0';
+
+export const iconAssetBlock = {
+  "glob": "**/*",
+  "input": "./node_modules/@ihk-gfi/lux-components-icons-and-fonts/assets/icons/",
+  "output": "./assets/icons"
+};
 
 export function update(options: any): Rule {
   return (_tree: Tree, _context: SchematicContext) => {
@@ -30,20 +35,28 @@ export function update(options: any): Rule {
 }
 
 export function updateProject(options: any): Rule {
-  const assetPath = ['projects', options.project, 'architect', 'build', 'options', 'assets'];
-  const testAssetPath = ['projects', options.project, 'architect', 'test', 'options', 'assets'];
-
   return (_tree: Tree, _context: SchematicContext) => {
     return chain([
       messageInfoRule(`LUX-Components ${updateMajorVersion} werden aktualisiert...`),
-      updateJsonArray('/angular.json', assetPath, iconAssetBlock),
-      updateJsonArray('/angular.json', testAssetPath, iconAssetBlock),
+      addIconAssets(options),
       copyFiles(options),
       renameLuxSelectedFiles(options),
       updateDependencies(),
       messageSuccessRule(`LUX-Components ${updateMajorVersion} wurden aktualisiert.`)
     ]);
   };
+}
+
+export function addIconAssets(options: any): Rule {
+  const assetPath = ['projects', options.project, 'architect', 'build', 'options', 'assets'];
+  const testAssetPath = ['projects', options.project, 'architect', 'test', 'options', 'assets'];
+
+  return chain([
+    messageInfoRule(`Die LUX-Iconpfade werden in den Asset-Abschnitten ergänzt...`),
+    updateJsonArray('/angular.json', assetPath, iconAssetBlock),
+    updateJsonArray('/angular.json', testAssetPath, iconAssetBlock),
+    messageSuccessRule(`Die LUX-Iconpfade wurden in den Asset-Abschnitten ergänzt.`),
+  ]);
 }
 
 export function renameLuxSelectedFiles(options: any): Rule {

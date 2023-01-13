@@ -1,10 +1,12 @@
 import { callRule, SchematicContext } from '@angular-devkit/schematics';
 import { SchematicTestRunner, UnitTestTree } from '@angular-devkit/schematics/testing';
+import { findNodeAtLocation, getNodeValue } from 'jsonc-parser';
 import * as path from 'path';
 import { of as observableOf } from 'rxjs';
+import { readJson } from '../../utility/json';
 import { appOptions, workspaceOptions } from '../../utility/test';
 import { UtilConfig } from '../../utility/util';
-import { renameLuxSelectedFiles } from './index';
+import { addIconAssets, iconAssetBlock, renameLuxSelectedFiles } from './index';
 
 describe('update140000', () => {
   let appTree: UnitTestTree;
@@ -34,6 +36,32 @@ describe('update140000', () => {
     testOptions.project = appOptions.name;
     testOptions.path = workspaceOptions.newProjectRoot + '/' + appOptions.name;
     testOptions.verbose = true;
+  });
+
+  describe('[Rule] addIconAssets', () => {
+    it('Sollte den LUX-Iconpfad in den Assets-Abschnitten ergänzen', (done) => {
+      const filePath = './angular.json';
+      appTree.overwrite(filePath, angularJsonIconAssets);
+
+      callRule(addIconAssets(testOptions), observableOf(appTree), context).subscribe({
+        next: (success) => {
+          const assetPath = ['projects', testOptions.project, 'architect', 'build', 'options', 'assets'];
+          const node = findNodeAtLocation(readJson(success, filePath), assetPath);
+          expect(node).toBeDefined();
+          expect(node?.children?.length).toBe(3);
+          expect(JSON.stringify(getNodeValue(node!.children![2]))).toBe(JSON.stringify(iconAssetBlock));
+
+          const testAssetPath = ['projects', testOptions.project, 'architect', 'test', 'options', 'assets'];
+          const testNode = findNodeAtLocation(readJson(success, filePath), testAssetPath);
+          expect(testNode).toBeDefined();
+          expect(testNode?.children?.length).toBe(3);
+          expect(JSON.stringify(getNodeValue(testNode!.children![2]))).toBe(JSON.stringify(iconAssetBlock));
+
+          done();
+        },
+        error: (reason) => expect(reason).toBeUndefined()
+      });
+    });
   });
 
   describe('[Rule] renameLuxSelectedFiles', () => {
@@ -76,4 +104,68 @@ const renameLuxSelectedFilesContent = `
 <lux-file-upload luxSelectedFiles="selected" (luxSelectedFilesChange)="onSelected()"></lux-file-upload>
 <lux-file-upload [luxSelectedFiles]="selected" (luxSelectedFilesChange)="onSelected()"></lux-file-upload>
 <lux-file-upload [(luxSelectedFiles)]="selected"></lux-file-upload>
+`;
+
+const angularJsonIconAssets = `
+{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "newProjectRoot": "projects",
+  "projects": {
+    "bar": {
+      "root": "",
+      "sourceRoot": "src",
+      "projectType": "application",
+      "i18n": {
+        "sourceLocale": {
+          "code": "de",
+          "baseHref": "/"
+        },
+        "locales": {
+          "en": "src/locale/messages.en.xlf"
+        }
+      },
+      "architect": {
+        "build": {
+          "builder": "ngx-build-plus:browser",
+          "options": {
+            "outputPath": "dist",
+            "index": "src/index.html",
+            "main": "src/main.ts",
+            "tsConfig": "src/tsconfig.app.json",
+            "polyfills": "src/polyfills.ts",
+            "localize": [
+              "de"
+            ],
+            "i18nMissingTranslation": "error",
+            "assets": [
+              "src/assets",
+              "src/favicon.ico"
+            ],
+            "styles": [
+              "src/styles.scss"
+            ]
+          },
+        },
+        "test": {
+          "builder": "ngx-build-plus:karma",
+          "options": {
+            "main": "src/test.ts",
+            "karmaConfig": "./karma.conf.js",
+            "polyfills": "src/polyfills.ts",
+            "tsConfig": "src/tsconfig.spec.json",
+            "scripts": [],
+            "styles": [
+              "src/styles.scss"
+            ],
+            "assets": [
+              "src/assets",
+              "src/favicon.ico"
+            ]
+          }
+        }
+      }
+    }
+  }
+}
 `;
