@@ -6,6 +6,11 @@
       "factory": "./updates/update140000/index#update",
       "schema": "./updates/update140000/schema.json"
     },
+    "update-14.1.0": {
+      "description": "Aktualisiert das LUX-Componentsprojekt auf die Version 14.1.0",
+      "factory": "./updates/update140100/index#update140100",
+      "schema": "./updates/update140100/schema.json"
+    },
     "update-dependencies": {
       "description": "Aktualisiert die Abhängigkeiten im LUX-Componentsprojekt",
       "factory": "./update-dependencies/index#updateDependencies",

@@ -73,14 +73,14 @@ export function updateDependencies(): Rule {
   ]);
 }
 
-function updateDep(name: string, version: string, onlyUpdate: boolean): Rule {
+export function updateDep(name: string, version: string, onlyUpdate: boolean): Rule {
   return updateJsonValue('/package.json', [NodeDependencyType.Default, name], version, onlyUpdate);
 }
 
-function deleteDep(name: string): Rule {
+export function deleteDep(name: string): Rule {
   return updateJsonValue('/package.json', [NodeDependencyType.Default, name], void 0, true);
 }
 
-function updateDevDep(name: string, version: string | null, onlyUpdate: boolean): Rule {
+export function updateDevDep(name: string, version: string | null, onlyUpdate: boolean): Rule {
   return updateJsonValue('/package.json', [NodeDependencyType.Dev, name], version, onlyUpdate);
 }
