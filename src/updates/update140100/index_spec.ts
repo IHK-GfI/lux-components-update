@@ -75,7 +75,7 @@ describe('update140100', () => {
       );
     });
 
-    it('Sollte die Abhängigkeiten aktualisieren', (done) => {
+    it('Sollte die I18N-Dateien aktualisieren', (done) => {
       appTree.create('/src/locale/messages.xlf', i18nDe);
       appTree.create('/src/locale/messages.en.xlf', i18nEn);
 
