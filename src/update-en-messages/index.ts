@@ -37,15 +37,15 @@ function updateEnMessagesIntern(): Rule {
             if (id?.startsWith('luxc.')) {
                 const transUnit = fnLCEEn(`trans-unit[id="${ id }"]`).first();
                 fnAPPDe('\n        ' + fnLCEEn(transUnit).find('target').toString()).insertAfter(fnAPPDe(`trans-unit[id="${ id }"]`).find('source'));
-                newContent += '      ' + fnAPPDe(element).toString() + '\n';
+                newContent += '\n      ' + fnAPPDe(element).toString();
             } else if (id?.startsWith('luxsd.')) {
                 const transUnit = fnSDEn(`trans-unit[id="${ id }"]`).first();
                 fnAPPDe('\n        ' + fnSDEn(transUnit).find('target').toString()).insertAfter(fnAPPDe(`trans-unit[id="${ id }"]`).find('source'));
-                newContent += '      ' + fnAPPDe(element).toString() + '\n';
+                newContent += '\n      ' + fnAPPDe(element).toString();
             } else {
                 const transUnit = fnAPPEn(`trans-unit[id="${ id }"]`).first();
                 fnAPPDe('\n        ' + fnAPPEn(transUnit).find('target').toString()).insertAfter(fnAPPDe(`trans-unit[id="${ id }"]`).find('source'));
-                newContent += '      ' + fnAPPDe(element).toString() + '\n';
+                newContent += '\n      ' + fnAPPDe(element).toString();
             }
         });
 
@@ -71,14 +71,13 @@ function readTransUnitFile(tree: Tree, filePath: string): string {
     return content;
 }
 
-const headerContent = `
-<?xml version="1.0" encoding="UTF-8" ?>
+const headerContent = `<?xml version="1.0" encoding="UTF-8" ?>
 <xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
   <file source-language="en" datatype="plaintext" original="ng2.template">
-    <body>                
-`;
+    <body>`;
 
 const footerContent = `
     </body>
   </file>
-</xliff>                `;
+</xliff>
+`;

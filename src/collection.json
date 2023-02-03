@@ -18,6 +18,7 @@
     },
     "update-en-messages": {
       "description": "Aktualisiert die englischen Übersetzungen im Projekt",
+      "factory": "./update-en-messages/index#updateEnMessages",
       "schema": "./update-en-messages/schema.json"
     },
     "add-lux-components": {
