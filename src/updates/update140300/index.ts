@@ -43,7 +43,7 @@ export function updateStylesScss(options: any): Rule {
   return chain([
     messageInfoRule(`Die Fonts werden in der Datei "styles.scss" ergänzt...`),
     (tree: Tree, _context: SchematicContext) => {
-      const filePath = options.path + '/src/styles.scss';
+      const filePath = (options.path ?? '.') + '/src/styles.scss';
 
       if (!tree.exists(filePath)) {
         throw Error(`Die Datei ${filePath} konnte nicht gefunden werden.`);
