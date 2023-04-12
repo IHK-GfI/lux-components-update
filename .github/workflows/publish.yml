@@ -13,7 +13,7 @@ jobs:
         with:
           node-version: 16
       - run: npm install
-      - run: npm run smoketest
+      - run: npm run pack
 
   publish-npm:
     needs: build
@@ -24,9 +24,13 @@ jobs:
         with:
           node-version: 16
           registry-url: https://registry.npmjs.org/
-      - run: npm install
-      - run: npm run build
-      - run: npm publish --access public
+      - name: Publish NPM
+        run: |
+          npm install
+          npm run pack
+          cd dist
+          ls -l
+          npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM}}
 
@@ -40,8 +44,12 @@ jobs:
           node-version: 16
           registry-url: https://npm.pkg.github.com/
           scope: '@ihk-gfi'
-      - run: npm install
-      - run: npm run build
-      - run: npm publish
+      - name: Publish Github
+        run: |
+          npm install
+          npm run pack
+          cd dist
+          ls -l
+          npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{secrets.GITHUB}}

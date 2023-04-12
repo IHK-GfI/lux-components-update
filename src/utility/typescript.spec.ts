@@ -23,10 +23,8 @@ describe('typescript', () => {
   beforeEach(async () => {
     runner = new SchematicTestRunner('schematics', collectionPath);
 
-    appTree = await runner.runExternalSchematicAsync('@schematics/angular', 'workspace', workspaceOptions).toPromise();
-    appTree = await runner
-      .runExternalSchematicAsync('@schematics/angular', 'application', appOptions, appTree)
-      .toPromise();
+    appTree = await runner.runExternalSchematic('@schematics/angular', 'workspace', workspaceOptions);
+    appTree = await runner.runExternalSchematic('@schematics/angular', 'application', appOptions, appTree);
 
     UtilConfig.defaultWaitMS = 0;
 
@@ -69,7 +67,7 @@ export class AppModule {
         `
       );
 
-      removeProvider(appTree, filePath,  'LuxStorageService', false);
+      removeProvider(appTree, filePath, 'LuxStorageService', false);
 
       const content = appTree.read(filePath)?.toString();
       expect(content).toContain('providers      : [\n    LuxDialogService,\n    DatePipe\n  ],');
@@ -110,7 +108,7 @@ export class AppModule {
         `
       );
 
-      removeProvider(appTree, filePath,  'LuxStorageService', false);
+      removeProvider(appTree, filePath, 'LuxStorageService', false);
 
       const content = appTree.read(filePath)?.toString();
       expect(content).toContain('providers      : [\n    LuxDialogService,\n    DatePipe\n  ],');
@@ -155,7 +153,7 @@ export class AppModule {
         `
       );
 
-      removeProvider(appTree, filePath,  'HTTP_INTERCEPTORS', false);
+      removeProvider(appTree, filePath, 'HTTP_INTERCEPTORS', false);
 
       const content = appTree.read(filePath)?.toString();
       expect(content).toContain('providers      : [\n    LuxDialogService,\n    DatePipe\n  ],');
@@ -196,7 +194,7 @@ export class AppModule {
         `
       );
 
-      removeProvider(appTree, filePath,  'LuxStorageService', false);
+      removeProvider(appTree, filePath, 'LuxStorageService', false);
 
       const content = appTree.read(filePath)?.toString();
       expect(content).toContain('providers      : [\n    LuxDialogService,\n    DatePipe\n  ],');
@@ -236,7 +234,7 @@ export class AppModule {
         `
       );
 
-      removeProvider(appTree, filePath,  'LuxStorageService', false);
+      removeProvider(appTree, filePath, 'LuxStorageService', false);
 
       const content = appTree.read(filePath)?.toString();
       expect(content).toContain('providers      : [\n    LuxDialogService,\n    DatePipe\n  ],');
@@ -272,14 +270,13 @@ export class AppModule {
         `
       );
 
-      removeProvider(appTree, filePath,  'LuxStorageService', false);
+      removeProvider(appTree, filePath, 'LuxStorageService', false);
 
       const content = appTree.read(filePath)?.toString();
       expect(content).not.toContain('providers');
 
       done();
     });
-
   });
 
   describe('[Method] removeInterface', () => {
@@ -308,10 +305,10 @@ export class AnbindungLazyComponent implements OnInit, OnDestroy {
         `
       );
 
-      removeInterface(appTree, filePath,  'OnInit', false);
+      removeInterface(appTree, filePath, 'OnInit', false);
 
       const content = appTree.read(filePath)?.toString();
-      expect(content).toContain("export class AnbindungLazyComponent implements OnDestroy {");
+      expect(content).toContain('export class AnbindungLazyComponent implements OnDestroy {');
 
       done();
     });
@@ -341,10 +338,10 @@ export class AnbindungLazyComponent implements OnChanges, OnInit, OnDestroy {
         `
       );
 
-      removeInterface(appTree, filePath,  'OnInit', false);
+      removeInterface(appTree, filePath, 'OnInit', false);
 
       const content = appTree.read(filePath)?.toString();
-      expect(content).toContain("export class AnbindungLazyComponent implements OnChanges, OnDestroy {");
+      expect(content).toContain('export class AnbindungLazyComponent implements OnChanges, OnDestroy {');
 
       done();
     });
@@ -374,10 +371,10 @@ export class AnbindungLazyComponent extends Aaa implements OnChanges, OnInit, On
         `
       );
 
-      removeInterface(appTree, filePath,  'OnInit', false);
+      removeInterface(appTree, filePath, 'OnInit', false);
 
       const content = appTree.read(filePath)?.toString();
-      expect(content).toContain("export class AnbindungLazyComponent extends Aaa implements OnChanges, OnDestroy {");
+      expect(content).toContain('export class AnbindungLazyComponent extends Aaa implements OnChanges, OnDestroy {');
 
       done();
     });
@@ -407,10 +404,10 @@ export class AnbindungLazyComponent implements OnChanges, OnDestroy, OnInit {
         `
       );
 
-      removeInterface(appTree, filePath,  'OnInit', false);
+      removeInterface(appTree, filePath, 'OnInit', false);
 
       const content = appTree.read(filePath)?.toString();
-      expect(content).toContain("export class AnbindungLazyComponent implements OnChanges, OnDestroy {");
+      expect(content).toContain('export class AnbindungLazyComponent implements OnChanges, OnDestroy {');
 
       done();
     });
@@ -440,14 +437,13 @@ export class AnbindungLazyComponent {
         `
       );
 
-      removeInterface(appTree, filePath,  'OnInit', false);
+      removeInterface(appTree, filePath, 'OnInit', false);
 
       const content = appTree.read(filePath)?.toString();
-      expect(content).toContain("export class AnbindungLazyComponent {");
+      expect(content).toContain('export class AnbindungLazyComponent {');
 
       done();
     });
-
   });
 
   describe('[Method] addInterface', () => {
@@ -936,7 +932,7 @@ export class AnbindungLazyComponent implements OnInit {
       removeImport(appTree, filePath, '@angular/common/locales/global/de', undefined, false);
 
       const content = appTree.read(filePath)?.toString();
-      expect(content).not.toContain("import");
+      expect(content).not.toContain('import');
 
       done();
     });
@@ -1006,7 +1002,6 @@ export class AnbindungLazyComponent implements OnInit {
 
       done();
     });
-
   });
 
   describe('[Method] addConstructorContent', () => {
@@ -1221,10 +1216,10 @@ export class AppComponent implements OnInit {
         `
       );
 
-      addClassProperty(appTree, filePath, '@Input() luxAppHeader: \'normal\' | \'minimal\' | \'none\' = \'normal\';');
+      addClassProperty(appTree, filePath, "@Input() luxAppHeader: 'normal' | 'minimal' | 'none' = 'normal';");
 
       const content = appTree.read(filePath)?.toString();
-      expect(content).toContain('  @Input() luxAppHeader: \'normal\' | \'minimal\' | \'none\' = \'normal\';');
+      expect(content).toContain("  @Input() luxAppHeader: 'normal' | 'minimal' | 'none' = 'normal';");
 
       done();
     });
@@ -1254,10 +1249,10 @@ export class AppComponent implements OnInit {
         `
       );
 
-      addClassProperty(appTree, filePath, '@Input() luxAppHeader: \'normal\' | \'minimal\' | \'none\' = \'normal\';');
+      addClassProperty(appTree, filePath, "@Input() luxAppHeader: 'normal' | 'minimal' | 'none' = 'normal';");
 
       const content = appTree.read(filePath)?.toString();
-      expect(content).toContain('  @Input() luxAppHeader: \'normal\' | \'minimal\' | \'none\' = \'normal\';');
+      expect(content).toContain("  @Input() luxAppHeader: 'normal' | 'minimal' | 'none' = 'normal';");
 
       done();
     });

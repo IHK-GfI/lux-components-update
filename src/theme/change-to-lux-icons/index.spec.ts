@@ -22,8 +22,8 @@ describe('update140000', () => {
     runner = new SchematicTestRunner('schematics', collectionPath);
 
     const collection = '@schematics/angular';
-    appTree = await runner.runExternalSchematicAsync(collection, 'workspace', workspaceOptions).toPromise();
-    appTree = await runner.runExternalSchematicAsync(collection, 'application', appOptions, appTree).toPromise();
+    appTree = await runner.runExternalSchematic(collection, 'workspace', workspaceOptions);
+    appTree = await runner.runExternalSchematic(collection, 'application', appOptions, appTree);
 
     context = runner.engine.createContext(
       runner.engine.createSchematic('change-to-lux-icons', runner.engine.createCollection(collectionPath))

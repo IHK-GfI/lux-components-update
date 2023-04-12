@@ -9,10 +9,10 @@ import { LuxSideNavComponent } from '@ihk-gfi/lux-components';
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
-
   @ViewChild(LuxSideNavComponent) sideNavComp!: LuxSideNavComponent;
 
   constructor(public router: Router, themeService: LuxThemeService) {
+    themeService.setTheme('authentic');
     themeService.loadTheme();
     router.initialNavigation();
   }

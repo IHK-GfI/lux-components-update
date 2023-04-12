@@ -1,10 +1,8 @@
 {
   "compilerOptions": {
-    "baseUrl": "tslint.json",
-    "lib": [
-      "es2018",
-      "dom"
-    ],
+    "baseUrl": "./",
+    "outDir": "dist",
+    "lib": ["es2018", "dom"],
     "declaration": true,
     "module": "commonjs",
     "moduleResolution": "node",
@@ -15,21 +13,13 @@
     "noUnusedLocals": true,
     "rootDir": "src/",
     "skipDefaultLibCheck": true,
+    "resolveJsonModule": true,
     "skipLibCheck": true,
-    "sourceMap": true,
+    "sourceMap": false,
     "strict": true,
     "target": "ES2015",
-    "types": [
-      "jasmine",
-      "node"
-    ]
+    "types": ["node"]
   },
-  "include": [
-    "src/**/*"
-  ],
-  "exclude": [
-    "src/**/files/**/*",
-    "node_modules",
-    "**/*.spec.ts"
-  ]
+  "include": ["src", "src/**/*.json"],
+  "exclude": ["src/**/files/**/*", "node_modules", "**/*.spec.ts"]
 }

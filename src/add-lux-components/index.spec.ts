@@ -2,7 +2,7 @@ import { callRule, SchematicContext } from '@angular-devkit/schematics';
 import { SchematicTestRunner, UnitTestTree } from '@angular-devkit/schematics/testing';
 import * as path from 'path';
 import { of as observableOf } from 'rxjs';
-import { updateMajorVersion } from '../updates/update140000';
+import { updateMajorVersion } from '../updates/15.0.0';
 import { getPackageJsonDependency, NodeDependencyType, updatePackageJsonDependency } from '../utility/dependencies';
 import { appOptions, workspaceOptions } from '../utility/test';
 import { UtilConfig } from '../utility/util';
@@ -20,10 +20,8 @@ describe('add-lux-components', () => {
   beforeEach(async () => {
     runner = new SchematicTestRunner('schematics', collectionPath);
 
-    appTree = await runner.runExternalSchematicAsync('@schematics/angular', 'workspace', workspaceOptions).toPromise();
-    appTree = await runner
-      .runExternalSchematicAsync('@schematics/angular', 'application', appOptions, appTree)
-      .toPromise();
+    appTree = await runner.runExternalSchematic('@schematics/angular', 'workspace', workspaceOptions);
+    appTree = await runner.runExternalSchematic('@schematics/angular', 'application', appOptions, appTree);
 
     UtilConfig.defaultWaitMS = 0;
 
@@ -38,10 +36,11 @@ describe('add-lux-components', () => {
 
   describe('[Rule] addLuxComponents', () => {
     it('Sollte die LUX-Components im Projekt eingerichtet haben', (done) => {
-      updatePackageJsonDependency(
-        appTree,
-        { type: NodeDependencyType.Default, version: updateMajorVersion + '.0.0', name: '@angular/common' }
-      );
+      updatePackageJsonDependency(appTree, {
+        type: NodeDependencyType.Default,
+        version: updateMajorVersion + '.0.0',
+        name: '@angular/common'
+      });
 
       callRule(addLuxComponents(testOptions), observableOf(appTree), context).subscribe(
         () => {

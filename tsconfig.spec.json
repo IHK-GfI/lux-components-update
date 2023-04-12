@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "skipLibCheck": true,
+    "types": ["jasmine"]
+  },
+  "include": ["src", "src/**/*.json", "**/*.spec.ts"],
+  "exclude": ["src/**/files/**/*", "node_modules"]
+}

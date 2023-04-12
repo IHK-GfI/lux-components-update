@@ -2,49 +2,9 @@
   "$schema": "../node_modules/@angular-devkit/schematics/collection-schema.json",
   "schematics": {
     "update": {
-      "description": "Aktualisiert das LUX-Componentsprojekt auf die Version 14.0.0",
-      "factory": "./updates/update140000/index#update",
-      "schema": "./updates/update140000/schema.json"
-    },
-    "update-14.8.0": {
-      "description": "Aktualisiert das LUX-Componentsprojekt auf die Version 14.8.0",
-      "factory": "./updates/update140800/index#update140800",
-      "schema": "./updates/update140800/schema.json"
-    },
-    "update-14.7.0": {
-      "description": "Aktualisiert das LUX-Componentsprojekt auf die Version 14.7.0",
-      "factory": "./updates/update140700/index#update140700",
-      "schema": "./updates/update140700/schema.json"
-    },
-    "update-14.6.0": {
-      "description": "Aktualisiert das LUX-Componentsprojekt auf die Version 14.6.0",
-      "factory": "./updates/update140600/index#update140600",
-      "schema": "./updates/update140600/schema.json"
-    },
-    "update-14.5.0": {
-      "description": "Aktualisiert das LUX-Componentsprojekt auf die Version 14.5.0",
-      "factory": "./updates/update140500/index#update140500",
-      "schema": "./updates/update140500/schema.json"
-    },
-    "update-14.4.0": {
-      "description": "Aktualisiert das LUX-Componentsprojekt auf die Version 14.4.0",
-      "factory": "./updates/update140400/index#update140400",
-      "schema": "./updates/update140400/schema.json"
-    },
-    "update-14.3.0": {
-      "description": "Aktualisiert das LUX-Componentsprojekt auf die Version 14.3.0",
-      "factory": "./updates/update140300/index#update140300",
-      "schema": "./updates/update140300/schema.json"
-    },
-    "update-14.2.0": {
-      "description": "Aktualisiert das LUX-Componentsprojekt auf die Version 14.2.0",
-      "factory": "./updates/update140200/index#update140200",
-      "schema": "./updates/update140200/schema.json"
-    },
-    "update-14.1.0": {
-      "description": "Aktualisiert das LUX-Componentsprojekt auf die Version 14.1.0",
-      "factory": "./updates/update140100/index#update140100",
-      "schema": "./updates/update140100/schema.json"
+      "description": "Aktualisiert das LUX-Componentsprojekt auf die Version 15.0.0",
+      "factory": "./updates/15.0.0/index#update",
+      "schema": "./updates/15.0.0/schema.json"
     },
     "update-dependencies": {
       "description": "Aktualisiert die Abhängigkeiten im LUX-Componentsprojekt",

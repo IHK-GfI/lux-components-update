@@ -4,8 +4,8 @@ Dieses Projekt enth채lt alle Updateskripte (umgesetzt mit Angular Schematics) f�
 
 Updateskripte:
 
-- `update` (aktualisiert das Projekt auf die Version 14.0.0)
-- `update-14.x.x` (aktualisiert das Projekt auf die Version 14.x.x)
+- `update` (aktualisiert das Projekt auf die Version 15.0.0)
+- `update-14.x.x` (aktualisiert das Projekt auf die Version 15.x.x)
 - `add-lux-components` (f체gt die LUX-Components zu einem Angular-Projekt hinzu)
 
 ## Voraussetzungen
@@ -40,6 +40,7 @@ ng generate @ihk-gfi/lux-components-update:add-lux-components
 ```
 
 ## Migration von TS-Lint nach ES-Lint
+
 ```bash
 ng generate @ihk-gfi/lux-components-update:migrate-to-eslint
 ```
@@ -47,6 +48,7 @@ ng generate @ihk-gfi/lux-components-update:migrate-to-eslint
 WICHTIG! Der Updater schreibt zus채tzliche Befehle in die Console. Diese m체ssen manuell ausgef체hrt werden.
 
 ## Migration zur Web Component
+
 ```bash
 ng generate @ihk-gfi/lux-components-update:migrate-to-webcomponent
 ```

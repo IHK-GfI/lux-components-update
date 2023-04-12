@@ -22,8 +22,8 @@ describe('updateEnMessages', () => {
     runner = new SchematicTestRunner('schematics', collectionPath);
 
     const collection = '@schematics/angular';
-    appTree = await runner.runExternalSchematicAsync(collection, 'workspace', workspaceOptions).toPromise();
-    appTree = await runner.runExternalSchematicAsync(collection, 'application', appOptions, appTree).toPromise();
+    appTree = await runner.runExternalSchematic(collection, 'workspace', workspaceOptions);
+    appTree = await runner.runExternalSchematic(collection, 'application', appOptions, appTree);
 
     context = runner.engine.createContext(
       runner.engine.createSchematic('update-en-messages', runner.engine.createCollection(collectionPath))
@@ -44,15 +44,14 @@ describe('updateEnMessages', () => {
       appTree.create(filePathDe, i18nDeApp);
       appTree.create(filePathEn, i18nEnApp);
 
-      const filePathLCEn  = '/node_modules/@ihk-gfi/lux-components/src/locale/messages.en.xlf';
-      const filePathSDEn  = '/node_modules/@ihk-gfi/lux-stammdaten/src/locale/messages.en.xlf';
+      const filePathLCEn = '/node_modules/@ihk-gfi/lux-components/src/locale/messages.en.xlf';
+      const filePathSDEn = '/node_modules/@ihk-gfi/lux-stammdaten/src/locale/messages.en.xlf';
 
       appTree.create(filePathLCEn, i18nEnLuxC);
       appTree.create(filePathSDEn, i18nEnStamm);
 
       callRule(updateEnMessages(), observableOf(appTree), context).subscribe({
         next: (success) => {
-
           expect(success.exists(filePathDe)).toBeTrue();
           expect(success.exists(filePathEn)).toBeTrue();
           expect(success.exists(filePathLCEn)).toBeTrue();
@@ -64,7 +63,8 @@ describe('updateEnMessages', () => {
         },
         error: (reason) => expect(reason).toBeUndefined()
       });
-    })});
+    });
+  });
 });
 
 const i18nDeApp = `<?xml version="1.0" encoding="UTF-8" ?>

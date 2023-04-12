@@ -1,30 +1,32 @@
 <div class="lux-app-container">
-  <lux-app-header luxAppTitle="Change Me" luxAppTitleShort="CM" luxUserName="Test" (luxClicked)="router.navigate(['/'])">
-    <lux-side-nav>
-      <lux-side-nav-header>
-        <h3 i18n="@@luxapp.welcome">Willkommen!</h3>
-      </lux-side-nav-header>
-      <lux-side-nav-item
-        luxLabel="Home"
-        luxTagId="project-side-nav-item"
-        luxIconName="lux-home-1"
-        (luxClicked)="router.navigate(['/'])"
-      >
-      </lux-side-nav-item>
-      <lux-side-nav-item
+  <lux-app-header-ac
+    luxAppTitle="Change Me"
+    luxAppTitleShort="CM"
+    luxBrandLogoSrc="assets/svg/box.svg"
+    luxAppLogoSrc="assets/svg/demoAppLogo.svg"
+    [luxUserName]="'Max Mustermann'"
+    (luxAppLogoClicked)="router.navigate(['/'])"
+    (luxBrandLogoClicked)="router.navigate(['/'])"
+  >
+    <lux-app-header-ac-nav-menu [luxNavMenuMaximumExtended]="5">
+      <lux-app-header-ac-nav-menu-item luxLabel="Home" luxIconName="lux-home-1" (luxClicked)="router.navigate(['/'])">
+      </lux-app-header-ac-nav-menu-item>
+      <lux-app-header-ac-nav-menu-item
         luxLabel="Profil"
-        luxTagId="project-side-nav-item"
         luxIconName="lux-interface-user-single"
         (luxClicked)="router.navigate(['/profil'])"
       >
-      </lux-side-nav-item>
-      <lux-side-nav-footer>
-        <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="8px" class="lux-mt-3">
-          <lux-link-plain luxLabel="Lizenzhinweis" [luxRaised]="true" (luxClicked)="goToLicenseHint()"></lux-link-plain>
-        </div>
-      </lux-side-nav-footer>
-    </lux-side-nav>
-  </lux-app-header>
+      </lux-app-header-ac-nav-menu-item>
+      <lux-app-header-ac-nav-menu-item
+        luxLabel="Lizenzhinweise"
+        luxIconName="lux-interface-file-text"
+        (luxClicked)="router.navigate(['/license-hint'])"
+      >
+      </lux-app-header-ac-nav-menu-item>
+    </lux-app-header-ac-nav-menu>
+
+    <lux-app-header-ac-user-menu luxTooltip="Usermenü"></lux-app-header-ac-user-menu>
+  </lux-app-header-ac>
 
   <lux-app-content luxAriaRoleMainLabel=""></lux-app-content>
 

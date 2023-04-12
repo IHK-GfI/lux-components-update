@@ -1,27 +1,25 @@
 {
   "name": "@ihk-gfi/lux-components-update",
-  "version": "14.8.0",
+  "version": "15.0.0",
   "description": "Schematics für die Aktualisierung von LUX-Applikationen",
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "npm run clean && tsc -p tsconfig.json",
+    "clean": "del-cli --force dist/",
     "husky-init": "husky install",
+    "pack-copy-base-files": "copyfiles package.json README.md LICENSE ./dist",
+    "pack-copy-template-dirs": "copyfiles -u 1 ./src/**/files/**/*.* ./dist",
+    "pack-update-colletion-path": "replace --silent './src/collection.json' './collection.json' dist/package.json",
+    "pack": "npm run build && npm run pack-copy-base-files && npm run pack-copy-template-dirs && npm run pack-update-colletion-path",
     "security": "npm audit --registry=https://registry.npmjs.org --audit-level high",
-    "smoketest": "npm run build && jasmine src/**/*_spec.js",
-    "test": "jasmine src/**/*_spec.js"
+    "smoketest": "npm run test && npm run pack",
+    "test": "npm run build && tsc -p tsconfig.spec.json && jasmine dist/**/*.spec.js"
   },
   "keywords": [
     "schematics",
     "lux-components",
-    "blueprint"
+    "jast"
   ],
   "license": "IHK-GfI Open-Source-Lizenz",
-  "files": [
-    "src/**/*",
-    "LICENSE",
-    "package.json",
-    "README.md",
-    "tsconfig.json"
-  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/IHK-GfI/lux-components-update.git"
@@ -32,26 +30,28 @@
   },
   "schematics": "./src/collection.json",
   "dependencies": {
-    "@angular-devkit/core": "14.2.6",
-    "@angular-devkit/schematics": "14.2.6",
-    "@angular-devkit/schematics-cli": "14.2.6",
-    "@angular/cli": "14.2.6",
-    "@types/jasmine": "4.0.3",
-    "@types/node": "16.11.34",
-    "@types/semver": "7.5.0",
-    "@types/jsdom": "20.0.0",
+    "@angular-devkit/core": "15.2.5",
+    "@angular-devkit/schematics": "15.2.5",
+    "@angular-devkit/schematics-cli": "15.2.5",
+    "@angular/cli": "15.2.5",
+    "@types/jasmine": "4.3.1",
+    "@types/node": "16.11.7",
+    "@types/semver": "7.3.13",
+    "@types/jsdom": "21.1.1",
     "chalk": "4.1.2",
     "cheerio": "1.0.0-rc.9",
     "htmlparser2": "6.1.0",
-    "jasmine": "4.1.0",
+    "jasmine": "4.6.0",
     "jsdom": "20.0.1",
     "jsonc-parser": "3.0.0",
-    "semver": "7.5.4",
-    "typescript": "4.7.3"
+    "semver": "7.3.7",
+    "typescript": "4.9.5"
   },
   "devDependencies": {
-    "husky": "8.0.3",
-    "prettier": "2.6.2",
-    "pretty-quick": "3.1.3"
+    "copyfiles": "2.4.1",
+    "del-cli": "5.0.0",
+    "prettier": "2.8.3",
+    "pretty-quick": "3.1.3",
+    "replace": "1.2.2"
   }
 }

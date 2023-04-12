@@ -2,38 +2,40 @@ import { callRule, SchematicContext } from '@angular-devkit/schematics';
 import { SchematicTestRunner, UnitTestTree } from '@angular-devkit/schematics/testing';
 import * as path from 'path';
 import { of as observableOf } from 'rxjs';
+import { updateDependencies } from '../../update-dependencies';
 import { getPackageJsonDependency } from '../../utility/dependencies';
 import { appOptions, workspaceOptions } from '../../utility/test';
 import { UtilConfig } from '../../utility/util';
-import { update140400 } from './index';
 
-const collectionPath = path.join(__dirname, '../../collection.json');
-
-describe('update140400', () => {
+describe('update150000', () => {
   let appTree: UnitTestTree;
   let runner: SchematicTestRunner;
   let context: SchematicContext;
 
-  const testOptions: any = {};
+  const testOptions: { project: string; path: string; verbose: boolean } = {
+    project: '',
+    path: '/',
+    verbose: false
+  };
 
   beforeEach(async () => {
+    const collectionPath = path.join(__dirname, '../../collection.json');
     runner = new SchematicTestRunner('schematics', collectionPath);
 
-    appTree = await runner.runExternalSchematicAsync('@schematics/angular', 'workspace', workspaceOptions).toPromise();
-    appTree = await runner.runExternalSchematicAsync('@schematics/angular', 'application', appOptions, appTree).toPromise();
+    const collection = '@schematics/angular';
+    appTree = await runner.runExternalSchematic(collection, 'workspace', workspaceOptions);
+    appTree = await runner.runExternalSchematic(collection, 'application', appOptions, appTree);
+
+    context = runner.engine.createContext(runner.engine.createSchematic('update', runner.engine.createCollection(collectionPath)));
 
     UtilConfig.defaultWaitMS = 0;
-
-    const collection = runner.engine.createCollection(collectionPath);
-    const schematic = runner.engine.createSchematic('update-14.4.0', collection);
-    context = runner.engine.createContext(schematic);
 
     testOptions.project = appOptions.name;
     testOptions.path = workspaceOptions.newProjectRoot + '/' + appOptions.name;
     testOptions.verbose = true;
   });
 
-  describe('[Rule] update140400', () => {
+  describe('[Rule] updateDependencies', () => {
     it('Sollte die Abhängigkeiten aktualisieren', (done) => {
       appTree.overwrite(
         '/package.json',
@@ -49,10 +51,9 @@ describe('update140400', () => {
                 "@angular/animations": "14.3.7",
                 "@angular/cdk": "14.3.7",
                 "@angular/common": "14.3.7",
-                "@ihk-gfi/lux-components": "14.2.0",
+                "@ihk-gfi/lux-components": "14.4.0",
                 "@ihk-gfi/lux-components-theme": "14.4.0",
-                "@angular/compiler": "14.3.7",
-                "@ihk-gfi/lux-components-icons-and-fonts": "1.4.0"
+                "@angular/compiler": "14.3.7"
               },
               "devDependencies": {
                 "@angular-devkit/build-angular": "14.3.5",
@@ -62,20 +63,17 @@ describe('update140400', () => {
         `
       );
 
-      callRule(update140400(testOptions), observableOf(appTree), context).subscribe(
-        () => {
-          expect(getPackageJsonDependency(appTree, '@ihk-gfi/lux-components').version).not.toEqual('14.3.0');
-          expect(getPackageJsonDependency(appTree, '@ihk-gfi/lux-components').version).toEqual('14.4.0');
+      callRule(updateDependencies(), observableOf(appTree), context).subscribe({
+        next: () => {
+          expect(getPackageJsonDependency(appTree, '@ihk-gfi/lux-components').version).not.toEqual('14.4.0');
+          expect(getPackageJsonDependency(appTree, '@ihk-gfi/lux-components').version).toEqual('15.0.0');
 
           expect(getPackageJsonDependency(appTree, '@ihk-gfi/lux-components-theme').version).not.toEqual('14.4.0');
-          expect(getPackageJsonDependency(appTree, '@ihk-gfi/lux-components-theme').version).toEqual('14.5.0');
-
-          expect(getPackageJsonDependency(appTree, '@ihk-gfi/lux-components-icons-and-fonts').version).not.toEqual('1.4.0');
-          expect(getPackageJsonDependency(appTree, '@ihk-gfi/lux-components-icons-and-fonts').version).toEqual('1.5.0');
+          expect(getPackageJsonDependency(appTree, '@ihk-gfi/lux-components-theme').version).toEqual('15.0.0');
           done();
         },
-        (reason) => expect(reason).toBeUndefined()
-      );
+        error: (reason) => expect(reason).toBeUndefined()
+      });
     });
   });
 });

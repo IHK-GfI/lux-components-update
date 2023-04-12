@@ -2,10 +2,7 @@ import { chain, Rule, SchematicContext, Tree } from '@angular-devkit/schematics'
 import * as chalk from 'chalk';
 import { applyEdits, Edit, modify, Node } from 'jsonc-parser';
 import { updateDependencies } from '../update-dependencies/index';
-import {
-  updateMajorVersion,
-  updateNodeMinVersion,
-} from '../updates/update140000/index';
+import { updateMajorVersion, updateNodeMinVersion } from '../updates/15.0.0/index';
 import { iterateFilesAndModifyContent, moveFilesToDirectory } from '../utility/files';
 import {
   findObjectPropertyInArray,
@@ -24,9 +21,9 @@ export function addLuxComponents(options: any): Rule {
     const jsonPathAllowedCommonJS = ['projects', options.project, 'architect', 'build', 'options', 'allowedCommonJsDependencies'];
     const jsonPathBudget = ['projects', options.project, 'architect', 'build', 'configurations', 'production', 'budgets'];
     const budgetValue = {
-      "type": "initial",
-      "maximumWarning": "1mb",
-      "maximumError": "2mb"
+      type: 'initial',
+      maximumWarning: '1mb',
+      maximumError: '2mb'
     };
 
     const jsonPathAssetsBuild = ['projects', options.project, 'architect', 'build', 'options', 'assets'];
@@ -38,50 +35,50 @@ export function addLuxComponents(options: any): Rule {
         output: './assets/themes'
       },
       {
-        glob: "all.css",
-        input: "./node_modules/@fortawesome/fontawesome-free/css",
-        output: "./assets/icons/fontawesome/css"
+        glob: 'all.css',
+        input: './node_modules/@fortawesome/fontawesome-free/css',
+        output: './assets/icons/fontawesome/css'
       },
       {
-        glob: "*(*.eot|*.ttf|*.woff|*.woff2)",
-        input: "./node_modules/@fortawesome/fontawesome-free/webfonts",
-        output: "./assets/icons/fontawesome/webfonts"
+        glob: '*(*.eot|*.ttf|*.woff|*.woff2)',
+        input: './node_modules/@fortawesome/fontawesome-free/webfonts',
+        output: './assets/icons/fontawesome/webfonts'
       },
       {
-        glob: "material-design-icons.css*",
-        input: "./node_modules/material-design-icons-iconfont/dist",
-        output: "./assets/icons/material-icons"
+        glob: 'material-design-icons.css*',
+        input: './node_modules/material-design-icons-iconfont/dist',
+        output: './assets/icons/material-icons'
       },
       {
-        glob: "*(*.eot|*.ttf|*.woff|*.woff2)",
-        input: "./node_modules/material-design-icons-iconfont/dist/fonts",
-        output: "./assets/icons/material-icons/fonts"
+        glob: '*(*.eot|*.ttf|*.woff|*.woff2)',
+        input: './node_modules/material-design-icons-iconfont/dist/fonts',
+        output: './assets/icons/material-icons/fonts'
       },
       {
-        glob: "**/*",
-        input: "./node_modules/@ihk-gfi/lux-components-icons-and-fonts/assets/icons/",
-        output: "./assets/icons"
+        glob: '**/*',
+        input: './node_modules/@ihk-gfi/lux-components-icons-and-fonts/assets/icons/',
+        output: './assets/icons'
       }
     ];
 
     const jsonPathOptimization = ['projects', options.project, 'architect', 'build', 'configurations', 'production', 'optimization'];
     const jsonValueOptimization = {
-      "scripts": true,
-      "styles": {
-        "minify": true,
-        "inlineCritical": false
+      scripts: true,
+      styles: {
+        minify: true,
+        inlineCritical: false
       },
-      "fonts": true
+      fonts: true
     };
 
     const jsonPathLang = ['projects', options.project, 'i18n'];
-    const jsonValueLang =  {
-      "sourceLocale": {
-        "code": "de",
-        "baseHref": "/"
+    const jsonValueLang = {
+      sourceLocale: {
+        code: 'de',
+        baseHref: '/'
       },
-      "locales": {
-        "en": "src/locale/messages.en.xlf"
+      locales: {
+        en: 'src/locale/messages.en.xlf'
       }
     };
 
@@ -115,11 +112,7 @@ export function addLuxComponents(options: any): Rule {
       updateJsonArray('/angular.json', jsonPathAllowedCommonJS, 'ng2-pdf-viewer'),
       updateJsonArray('/angular.json', jsonPathAllowedCommonJS, 'pdfjs-dist'),
       updateJsonArray('/angular.json', jsonPathAllowedCommonJS, 'dompurify'),
-      finish(
-        false,
-        `Die LUX-Components ${updateMajorVersion} wurden erfolgreich eingerichtet.`,
-        `${chalk.yellowBright('Fertig!')}`
-      )
+      finish(false, `Die LUX-Components ${updateMajorVersion} wurden erfolgreich eingerichtet.`, `${chalk.yellowBright('Fertig!')}`)
     ]);
   };
 }
@@ -130,7 +123,7 @@ export function addLuxComponents(options: any): Rule {
 export function check(): Rule {
   return (tree: Tree, context: SchematicContext) => {
     return waitForTreeCallback(tree, () => {
-      validateAngularVersion(tree, `^${ +updateMajorVersion }.0.0`);
+      validateAngularVersion(tree, `^${+updateMajorVersion}.0.0`);
       validateNodeVersion(context, updateNodeMinVersion);
 
       return tree;
