@@ -26,8 +26,6 @@ export function updateDependencies(): Rule {
     updateDep('@angular/cdk', '15.2.5', addOrUpdate),
     updateDep('@angular/material', '15.2.5', addOrUpdate),
     updateDep('@angular/flex-layout', '15.0.0-beta.42', addOrUpdate),
-    updateDep('@fortawesome/fontawesome-free', '5.15.4', addOrUpdate),
-    updateDep('material-design-icons-iconfont', '6.5.0', addOrUpdate),
     updateDep('rxjs', '7.8.0', addOrUpdate),
     updateDep('dompurify', '2.3.7', addOrUpdate),
     updateDep('marked', '4.0.15', addOrUpdate),

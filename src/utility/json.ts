@@ -69,12 +69,7 @@ export function appendScript(script: string, part: string, index?: number) {
   return newSkript;
 }
 
-export function updateJsonValue(
-  filePath: string,
-  jsonPath: string[],
-  value: any,
-  onlyUpdate = false
-): Rule {
+export function updateJsonValue(filePath: string, jsonPath: string[], value: any, onlyUpdate = false): Rule {
   return (tree: Tree, _context: SchematicContext) => {
     const found = findNodeAtLocation(readJson(tree, filePath), jsonPath);
 
@@ -89,9 +84,9 @@ export function updateJsonValue(
         tree.overwrite(filePath, applyEdits(jsonFile, edits));
 
         if (value) {
-          logInfo(`Wert ${getLogValue(value)} an der Stelle "${jsonPath.join('.')}" eingetragen.`);
+          logInfo(`${filePath}: Wert ${getLogValue(value)} an der Stelle "${jsonPath.join('.')}" eingetragen.`);
         } else {
-          logInfo(`Wert an der Stelle "${jsonPath.join('.')}" gelöscht.`);
+          logInfo(`${filePath}: Wert an der Stelle "${jsonPath.join('.')}" gelöscht.`);
         }
       }
     }
@@ -136,12 +131,10 @@ export function updateJsonArray(
 
     if (!onlyUpdate || (onlyUpdate && foundIndex >= 0)) {
       const jsonFile = readJsonAsString(tree, filePath);
-      const edits = modify(
-        jsonFile,
-        [...jsonPath, foundIndex >= 0 ? foundIndex : childrenCount !== -1 ? childrenCount : 0],
-        value,
-        { formattingOptions: jsonFormattingOptions, isArrayInsertion: foundIndex === -1 }
-      );
+      const edits = modify(jsonFile, [...jsonPath, foundIndex >= 0 ? foundIndex : childrenCount !== -1 ? childrenCount : 0], value, {
+        formattingOptions: jsonFormattingOptions,
+        isArrayInsertion: foundIndex === -1
+      });
 
       if (edits) {
         tree.overwrite(filePath, applyEdits(jsonFile, edits));
@@ -213,11 +206,7 @@ export function findObjectPropertyInArray(node: Node, propertyName: string, prop
       for (let j = 0; j < assetObjectChildren.length; j++) {
         if (assetObjectChildren[j].type === 'property') {
           const propertyChildren = assetObjectChildren[j].children ?? [];
-          if (
-            propertyChildren.length > 1 &&
-            propertyChildren[0].value === propertyName &&
-            propertyChildren[1].value === propertyValue
-          ) {
+          if (propertyChildren.length > 1 && propertyChildren[0].value === propertyName && propertyChildren[1].value === propertyValue) {
             found = true;
             break;
           }
