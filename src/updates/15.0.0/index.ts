@@ -1,12 +1,15 @@
 import { chain, Rule, SchematicContext, Tree } from '@angular-devkit/schematics';
 import * as chalk from 'chalk';
 import { deleteDep, updateDependencies } from '../../update-dependencies/index';
+import { deleteFile, moveFilesToDirectory } from '../../utility/files';
+import { deleteJsonArray, deleteJsonValue, findObjectPropertyInArray, updateJsonValue } from '../../utility/json';
 import { logInfo, logInfoWithDescriptor, logSuccess } from '../../utility/logging';
+import { removeImport, removeProvider } from '../../utility/typescript';
 import { applyRuleIf, finish, messageInfoRule, messageSuccessRule } from '../../utility/util';
 import { validateLuxComponentsVersion, validateNodeVersion } from '../../utility/validation';
 
 export const updateMajorVersion = '15';
-export const updateMinVersion = '14.7.0';
+export const updateMinVersion = '14.8.0';
 export const updateNodeMinVersion = '16.0.0';
 
 export function update(options: any): Rule {
@@ -30,6 +33,8 @@ export function updateProject(options: any): Rule {
       messageInfoRule(`LUX-Components ${updateMajorVersion} werden aktualisiert...`),
       updateDependencies(),
       removeMaAndFaIcons(options),
+      updateProjectStructure(options),
+      removeLuxMasterDetailMobileHelperService(options),
       messageSuccessRule(`LUX-Components ${updateMajorVersion} wurden aktualisiert.`)
     ]);
   };
@@ -54,9 +59,51 @@ export function removeMaAndFaIcons(options: any): Rule {
           logInfo(`${filePath}: Die Links auf die Css-Dateien entfernt.`);
         }
       },
+      deleteJsonArray('/angular.json', ['projects', options.project, 'architect', 'build', 'options', 'assets'], (node) =>
+        findObjectPropertyInArray(node, 'input', './node_modules/@fortawesome/fontawesome-free/css')
+      ),
+      deleteJsonArray('/angular.json', ['projects', options.project, 'architect', 'build', 'options', 'assets'], (node) =>
+        findObjectPropertyInArray(node, 'input', './node_modules/@fortawesome/fontawesome-free/webfonts')
+      ),
+      deleteJsonArray('/angular.json', ['projects', options.project, 'architect', 'build', 'options', 'assets'], (node) =>
+        findObjectPropertyInArray(node, 'input', './node_modules/material-design-icons-iconfont/dist')
+      ),
+      deleteJsonArray('/angular.json', ['projects', options.project, 'architect', 'build', 'options', 'assets'], (node) =>
+        findObjectPropertyInArray(node, 'input', './node_modules/material-design-icons-iconfont/dist/fonts')
+      ),
+      deleteJsonArray('/angular.json', ['projects', options.project, 'architect', 'test', 'options', 'assets'], (node) =>
+        findObjectPropertyInArray(node, 'input', './node_modules/@fortawesome/fontawesome-free/css')
+      ),
+      deleteJsonArray('/angular.json', ['projects', options.project, 'architect', 'test', 'options', 'assets'], (node) =>
+        findObjectPropertyInArray(node, 'input', './node_modules/@fortawesome/fontawesome-free/webfonts')
+      ),
+      deleteJsonArray('/angular.json', ['projects', options.project, 'architect', 'test', 'options', 'assets'], (node) =>
+        findObjectPropertyInArray(node, 'input', './node_modules/material-design-icons-iconfont/dist')
+      ),
+      deleteJsonArray('/angular.json', ['projects', options.project, 'architect', 'test', 'options', 'assets'], (node) =>
+        findObjectPropertyInArray(node, 'input', './node_modules/material-design-icons-iconfont/dist/fonts')
+      ),
       messageSuccessRule(`Abhängigkeiten der Material- und FA-Icons wurden entfernt.`)
     ]);
   };
+}
+
+export function updateProjectStructure(options: any): Rule {
+  return chain([
+    messageInfoRule(`Projektstruktur wird angepasst...`),
+    copyAppFiles(options),
+    deleteFile(options, '/src/polyfills.ts'),
+    deleteFile(options, '/src/tsconfig.app.ie.json'),
+    updateJsonValue('/angular.json', ['projects', options.project, 'architect', 'build', 'options', 'polyfills'], ['zone.js'], false),
+    updateJsonValue(
+      '/angular.json',
+      ['projects', options.project, 'architect', 'test', 'options', 'polyfills'],
+      ['zone.js', 'zone.js/testing', 'src/test.ts'],
+      false
+    ),
+    deleteJsonValue('/angular.json', ['projects', options.project, 'architect', 'test', 'options', 'main']),
+    messageSuccessRule(`Projektstruktur wurde angepasst.`)
+  ]);
 }
 
 function check(_options: any): Rule {
@@ -70,4 +117,34 @@ function check(_options: any): Rule {
 
     return tree;
   };
+}
+
+function removeLuxMasterDetailMobileHelperService(options: any): Rule {
+  return chain([
+    messageInfoRule(`LuxMasterDetailMobileHelperService wird entfernt...`),
+    (tree: Tree, _context: SchematicContext) => {
+      removeImport(
+        tree,
+        (options.path ? options.path : '') + '/src/app/app.component.spec.ts',
+        '@ihk-gfi/lux-components',
+        'LuxMasterDetailMobileHelperService',
+        true
+      );
+      removeProvider(
+        tree,
+        (options.path ? options.path : '') + '/src/app/app.component.spec.ts',
+        'LuxMasterDetailMobileHelperService',
+        true
+      );
+    },
+    messageSuccessRule(`LuxMasterDetailMobileHelperService wurde entfernt.`)
+  ]);
+}
+
+function copyAppFiles(options: any): Rule {
+  return chain([
+    messageInfoRule(`Dateien werden kopiert...`),
+    moveFilesToDirectory(options, 'files/src', '/src'),
+    messageSuccessRule(`Dateien wurden kopiert.`)
+  ]);
 }

@@ -93,6 +93,10 @@ export function updateJsonValue(filePath: string, jsonPath: string[], value: any
   };
 }
 
+export function deleteJsonValue(filePath: string, jsonPath: string[]): Rule {
+  return updateJsonValue(filePath, jsonPath, void 0, true);
+}
+
 export function updateJsonArray(
   filePath: string,
   jsonPath: string[],
@@ -142,6 +146,10 @@ export function updateJsonArray(
       }
     }
   };
+}
+
+export function deleteJsonArray(filePath: string, jsonPath: string[], findFn?: (value: Node) => boolean): Rule {
+  return updateJsonArray(filePath, jsonPath, void 0, true, findFn);
 }
 
 /**

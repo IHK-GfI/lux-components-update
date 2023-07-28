@@ -6,7 +6,7 @@ import { updateDependencies } from '../../update-dependencies';
 import { getPackageJsonDependency } from '../../utility/dependencies';
 import { appOptions, workspaceOptions } from '../../utility/test';
 import { UtilConfig } from '../../utility/util';
-import { removeMaAndFaIcons } from './index';
+import { removeMaAndFaIcons, updateProjectStructure } from './index';
 
 describe('update150000', () => {
   let appTree: UnitTestTree;
@@ -52,7 +52,7 @@ describe('update150000', () => {
                 "@angular/animations": "14.3.7",
                 "@angular/cdk": "14.3.7",
                 "@angular/common": "14.3.7",
-                "@ihk-gfi/lux-components": "14.7.0",
+                "@ihk-gfi/lux-components": "14.8.0",
                 "@ihk-gfi/lux-components-theme": "14.7.0",
                 "@angular/compiler": "14.3.7"
               },
@@ -66,11 +66,15 @@ describe('update150000', () => {
 
       callRule(updateDependencies(), observableOf(appTree), context).subscribe({
         next: () => {
-          expect(getPackageJsonDependency(appTree, '@ihk-gfi/lux-components').version).not.toEqual('14.7.0');
-          expect(getPackageJsonDependency(appTree, '@ihk-gfi/lux-components').version).toEqual('15.0.0');
+          expect(getPackageJsonDependency(appTree, '@ihk-gfi/lux-components').version).not.toEqual('14.8.0');
+          expect(getPackageJsonDependency(appTree, '@ihk-gfi/lux-components').version).toEqual(
+            'file://C:/Projekte/github/v15/lux-components/dist/ihk-gfi-lux-components-15.0.0.tgz'
+          );
 
           expect(getPackageJsonDependency(appTree, '@ihk-gfi/lux-components-theme').version).not.toEqual('14.7.0');
-          expect(getPackageJsonDependency(appTree, '@ihk-gfi/lux-components-theme').version).toEqual('15.0.0');
+          expect(getPackageJsonDependency(appTree, '@ihk-gfi/lux-components-theme').version).toEqual(
+            'file://C:/Projekte/github/v15/lux-components-theme/ihk-gfi-lux-components-theme-15.0.0.tgz'
+          );
           done();
         },
         error: (reason) => expect(reason).toBeUndefined()
@@ -95,6 +99,35 @@ describe('update150000', () => {
           const indexHtmlContent = appTree.readContent(indexHtmlPath);
           expect(indexHtmlContent).not.toContain('material');
           expect(indexHtmlContent).not.toContain('fontawesome');
+          done();
+        },
+        error: (reason) => expect(reason).toBeUndefined()
+      });
+    });
+  });
+
+  describe('[Rule] updateProjectStructure', () => {
+    it('Sollte die Projektstruktur anpassen', (done) => {
+      appTree.overwrite('/angular.json', ANGULAR_JSON_FULL);
+      appTree.create((testOptions.path ? testOptions.path : '') + '/src/polyfills.ts', '{}');
+      appTree.create((testOptions.path ? testOptions.path : '') + '/src/tsconfig.app.ie.json', '{}');
+
+      callRule(updateProjectStructure(testOptions), observableOf(appTree), context).subscribe({
+        next: () => {
+          const angularJsonContent = appTree.readContent('/angular.json');
+          expect(angularJsonContent).not.toContain('"polyfills": "src/polyfills.ts"');
+          expect(angularJsonContent).toContain('"polyfills": [\n' + '              "zone.js"\n' + '            ],');
+          expect(angularJsonContent).not.toContain('"main": "src/test.ts"');
+          expect(angularJsonContent).toContain(
+            '"polyfills": [\n' +
+              '              "zone.js",\n' +
+              '              "zone.js/testing",\n' +
+              '              "src/test.ts"\n' +
+              '            ]'
+          );
+
+          expect(appTree.exists('/src/polyfills.ts')).toBeFalse();
+          expect(appTree.exists('/src/tsconfig.app.ie.json')).toBeFalse();
           done();
         },
         error: (reason) => expect(reason).toBeUndefined()
@@ -160,4 +193,249 @@ const INDEX_HTML_001 = `<!doctype html>
 </body>
 </html>
 
+`;
+
+const ANGULAR_JSON_FULL = `{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "newProjectRoot": "projects",
+  "projects": {
+    "bar": {
+      "root": "",
+      "sourceRoot": "src",
+      "projectType": "application",
+      "i18n": {
+        "sourceLocale": {
+          "code": "de",
+          "baseHref": "/"
+        },
+        "locales": {
+          "en": "src/locale/messages.en.xlf"
+        }
+      },
+      "architect": {
+        "build": {
+          "builder": "ngx-build-plus:browser",
+          "options": {
+            "outputPath": "dist",
+            "index": "src/index.html",
+            "main": "src/main.ts",
+            "tsConfig": "src/tsconfig.app.json",
+            "polyfills": "src/polyfills.ts",
+            "assets": [
+              "src/assets",
+              {
+                "glob": "all.css",
+                "input": "./node_modules/@fortawesome/fontawesome-free/css",
+                "output": "./assets/icons/fontawesome/css"
+              },
+              {
+                "glob": "*(*.eot|*.ttf|*.woff|*.woff2)",
+                "input": "./node_modules/@fortawesome/fontawesome-free/webfonts",
+                "output": "./assets/icons/fontawesome/webfonts"
+              },
+              {
+                "glob": "material-design-icons.css*",
+                "input": "./node_modules/material-design-icons-iconfont/dist",
+                "output": "./assets/icons/material-icons"
+              },
+              {
+                "glob": "*(*.eot|*.ttf|*.woff|*.woff2)",
+                "input": "./node_modules/material-design-icons-iconfont/dist/fonts",
+                "output": "./assets/icons/material-icons/fonts"
+              },
+              {
+                "glob": "*(*min.css|*min.css.map)",
+                "input": "./node_modules/@ihk-gfi/lux-components-theme/prebuilt-themes",
+                "output": "./assets/themes"
+              },
+              {
+                "glob": "**/*",
+                "input": "./node_modules/@ihk-gfi/lux-components-icons-and-fonts/assets/icons/",
+                "output": "./assets/icons"
+              },
+              {
+                "glob": "**/*",
+                "input": "./node_modules/@ihk-gfi/lux-components-icons-and-fonts/assets/logos/",
+                "output": "./assets/logos"
+              },
+              {
+                "glob": "**/*",
+                "input": "./node_modules/@ihk-gfi/lux-components-icons-and-fonts/assets/fonts/",
+                "output": "./assets/fonts"
+              }
+            ],
+            "styles": [
+              "src/styles.scss"
+            ],
+            "scripts": [
+              {
+                "bundleName": "polyfill-webcomp",
+                "input": "node_modules/@webcomponents/webcomponentsjs/bundles/webcomponents-sd-ce-pf.js"
+              },
+              {
+                "bundleName": "polyfill-webcomp-es5",
+                "input": "node_modules/@webcomponents/webcomponentsjs/custom-elements-es5-adapter.js"
+              }
+            ],
+            "allowedCommonJsDependencies": [
+              "hammerjs",
+              "ng2-pdf-viewer",
+              "pdfjs-dist",
+              "dompurify"
+            ],
+            "localize": [
+              "de"
+            ],
+            "i18nMissingTranslation": "error"
+          },
+          "configurations": {
+            "production": {
+              "budgets": [
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "6kb"
+                }
+              ],
+              "optimization": {
+                "scripts": true,
+                "styles": {
+                  "minify": true,
+                  "inlineCritical": false
+                },
+                "fonts": true
+              },
+              "outputHashing": "all",
+              "sourceMap": false,
+              "namedChunks": false,
+              "aot": true,
+              "extractLicenses": true,
+              "vendorChunk": false,
+              "buildOptimizer": true,
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.prod.ts"
+                }
+              ]
+            },
+            "development": {
+              "buildOptimizer": false,
+              "optimization": false,
+              "vendorChunk": true,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "namedChunks": true
+            },
+            "en": {
+              "localize": [
+                "en"
+              ],
+              "aot": true,
+              "outputPath": "dist/en",
+              "i18nMissingTranslation": "error"
+            }
+          }
+        },
+        "serve": {
+          "builder": "ngx-build-plus:dev-server",
+          "options": {
+            "browserTarget": "bar:build"
+          },
+          "configurations": {
+            "production": {
+              "browserTarget": "bar:build:production"
+            },
+            "development": {
+              "browserTarget": "bar:build:development"
+            },
+            "en": {
+              "browserTarget": "bar:build:en"
+            }
+          },
+          "defaultConfiguration": "development"
+        },
+        "extract-i18n": {
+          "builder": "@angular-devkit/build-angular:extract-i18n",
+          "options": {
+            "browserTarget": "bar:build"
+          }
+        },
+        "test": {
+          "builder": "ngx-build-plus:karma",
+          "options": {
+            "main": "src/test.ts",
+            "karmaConfig": "./karma.conf.js",
+            "polyfills": "src/polyfills.ts",
+            "tsConfig": "src/tsconfig.spec.json",
+            "scripts": [],
+            "styles": [
+              "src/styles.scss"
+            ],
+            "assets": [
+              "src/assets",
+              {
+                "glob": "*(*min.css|*min.css.map)",
+                "input": "./node_modules/@ihk-gfi/lux-components-theme/prebuilt-themes",
+                "output": "./assets/themes"
+              },
+              {
+                "glob": "**/*",
+                "input": "./node_modules/@ihk-gfi/lux-components-icons-and-fonts/assets/icons/",
+                "output": "./assets/icons"
+              },
+              {
+                "glob": "**/*",
+                "input": "./node_modules/@ihk-gfi/lux-components-icons-and-fonts/assets/logos/",
+                "output": "./assets/logos"
+              },
+              {
+                "glob": "**/*",
+                "input": "./node_modules/@ihk-gfi/lux-components-icons-and-fonts/assets/fonts/",
+                "output": "./assets/fonts"
+              }
+            ]
+          }
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": [
+              "src/**/*.ts",
+              "src/**/*.html"
+            ]
+          }
+        }
+      }
+    },
+    "bar-e2e": {
+      "root": "e2e",
+      "sourceRoot": "e2e",
+      "projectType": "application",
+      "architect": {
+        "e2e": {
+          "builder": "@angular-devkit/build-angular:protractor",
+          "options": {
+            "protractorConfig": "./protractor.conf.js",
+            "devServerTarget": "bar:serve"
+          }
+        }
+      }
+    }
+  },
+  "cli": {
+    "schematicCollections": [
+      "@angular-eslint/schematics"
+    ]
+  },
+  "schematics": {
+    "@schematics/angular:component": {
+      "prefix": "bp",
+      "style": "scss"
+    },
+    "@schematics/angular:directive": {
+      "prefix": "bp"
+    }
+  }
+}
 `;
