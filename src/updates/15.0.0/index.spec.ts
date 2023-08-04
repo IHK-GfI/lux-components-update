@@ -67,14 +67,10 @@ describe('update150000', () => {
       callRule(updateDependencies(), observableOf(appTree), context).subscribe({
         next: () => {
           expect(getPackageJsonDependency(appTree, '@ihk-gfi/lux-components').version).not.toEqual('14.8.0');
-          expect(getPackageJsonDependency(appTree, '@ihk-gfi/lux-components').version).toEqual(
-            'file://C:/Projekte/github/v15/lux-components/dist/ihk-gfi-lux-components-15.0.0.tgz'
-          );
+          expect(getPackageJsonDependency(appTree, '@ihk-gfi/lux-components').version).toEqual('15.0.0');
 
           expect(getPackageJsonDependency(appTree, '@ihk-gfi/lux-components-theme').version).not.toEqual('14.7.0');
-          expect(getPackageJsonDependency(appTree, '@ihk-gfi/lux-components-theme').version).toEqual(
-            'file://C:/Projekte/github/v15/lux-components-theme/ihk-gfi-lux-components-theme-15.0.0.tgz'
-          );
+          expect(getPackageJsonDependency(appTree, '@ihk-gfi/lux-components-theme').version).toEqual('15.0.0');
           done();
         },
         error: (reason) => expect(reason).toBeUndefined()

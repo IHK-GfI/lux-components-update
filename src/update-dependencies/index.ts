@@ -9,21 +9,9 @@ const updateIfExists = true;
 export function updateDependencies(): Rule {
   return chain([
     messageInfoRule(`Abhängigkeiten in der Datei "package.json" werden aktualisiert...`),
-    updateDep(
-      '@ihk-gfi/lux-stammdaten',
-      'file://C:/Projekte/JAST/stammdaten-ui-lib/dist/ihk-gfi-lux-stammdaten-15.0.0.tgz',
-      updateIfExists
-    ),
-    updateDep(
-      '@ihk-gfi/lux-components',
-      'file://C:/Projekte/github/v15/lux-components/dist/ihk-gfi-lux-components-15.0.0.tgz',
-      addOrUpdate
-    ),
-    updateDep(
-      '@ihk-gfi/lux-components-theme',
-      'file://C:/Projekte/github/v15/lux-components-theme/ihk-gfi-lux-components-theme-15.0.0.tgz',
-      addOrUpdate
-    ),
+    updateDep('@ihk-gfi/lux-stammdaten', '15.0.0', updateIfExists),
+    updateDep('@ihk-gfi/lux-components', '15.0.0', addOrUpdate),
+    updateDep('@ihk-gfi/lux-components-theme', '15.0.0', addOrUpdate),
     updateDep('@ihk-gfi/lux-components-icons-and-fonts', '1.6.0', addOrUpdate),
     deleteDep('@ihk-gfi/lux-components-update'),
     updateDep('@angular/animations', '15.2.9', addOrUpdate),
@@ -49,11 +37,7 @@ export function updateDependencies(): Rule {
     updateDep('pdfjs-dist', '2.13.216', addOrUpdate),
     updateDep('ngx-cookie-service', '15.0.0', addOrUpdate),
 
-    updateDevDep(
-      '@ihk-gfi/lux-components-update',
-      'file://C:/Projekte/github/v15/lux-components-update/dist/ihk-gfi-lux-components-update-15.0.0.tgz',
-      addOrUpdate
-    ),
+    updateDevDep('@ihk-gfi/lux-components-update', '15.0.0', addOrUpdate),
     updateDevDep('@angular-eslint/builder', '15.2.1', updateIfExists),
     updateDevDep('@angular-eslint/eslint-plugin', '15.2.1', updateIfExists),
     updateDevDep('@angular-eslint/eslint-plugin-template', '15.2.1', updateIfExists),
