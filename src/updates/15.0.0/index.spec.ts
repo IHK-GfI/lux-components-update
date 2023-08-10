@@ -110,7 +110,7 @@ describe('update150000', () => {
       appTree.create((testOptions.path ? testOptions.path : '') + '/src/tsconfig.app.json', TS_CONfIG_APP_JSON);
 
       callRule(updateProjectStructure(testOptions), observableOf(appTree), context).subscribe({
-        next: () => {
+        next: (success) => {
           const angularJsonContent = appTree.readContent('/angular.json');
           expect(angularJsonContent).not.toContain('"polyfills": "src/polyfills.ts"');
           expect(angularJsonContent).toContain('"polyfills": [\n' + '              "zone.js"\n' + '            ],');
@@ -123,8 +123,10 @@ describe('update150000', () => {
               '            ]'
           );
 
-          expect(appTree.exists('/src/polyfills.ts')).toBeFalse();
-          expect(appTree.exists('/src/tsconfig.app.ie.json')).toBeFalse();
+          expect(success.exists('/src/polyfills.ts')).toBeFalse();
+          expect(success.exists('/src/tsconfig.app.ie.json')).toBeFalse();
+          expect(success.exists((testOptions.path ? testOptions.path : '') + '/src/main.ts')).toBeTrue();
+          expect(success.exists((testOptions.path ? testOptions.path : '') + '/src/test.ts')).toBeTrue();
           done();
         },
         error: (reason) => expect(reason).toBeUndefined()

@@ -158,7 +158,7 @@ function removeLuxMasterDetailMobileHelperService(options: any): Rule {
 function copyAppFiles(options: any): Rule {
   return chain([
     messageInfoRule(`Dateien werden kopiert...`),
-    moveFilesToDirectory(options, 'files/src', '/src'),
+    moveFilesToDirectory(options, '/files/src', '/src'),
     messageSuccessRule(`Dateien wurden kopiert.`)
   ]);
 }

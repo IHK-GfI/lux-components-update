@@ -1,18 +1,18 @@
 {
   "name": "@ihk-gfi/lux-components-update",
-  "version": "15.0.2",
+  "version": "15.0.3",
   "description": "Schematics für die Aktualisierung von LUX-Applikationen",
   "scripts": {
     "build": "npm run clean && tsc -p tsconfig.json",
     "clean": "del-cli --force dist/",
     "husky-init": "husky install",
     "pack-copy-base-files": "copyfiles package.json README.md LICENSE ./dist",
-    "pack-copy-template-dirs": "copyfiles -u 1 ./src/**/files/**/*.* ./dist",
+    "pack-copy-template-dirs": "copyfiles -u 1 src/**/files/** dist",
     "pack-update-colletion-path": "replace --silent './src/collection.json' './collection.json' dist/package.json",
     "pack": "npm run build && npm run pack-copy-base-files && npm run pack-copy-template-dirs && npm run pack-update-colletion-path",
     "security": "npm audit --registry=https://registry.npmjs.org --audit-level high",
     "smoketest": "npm run test && npm run pack",
-    "test": "npm run build && tsc -p tsconfig.spec.json && jasmine dist/**/*.spec.js"
+    "test": "npm run build && tsc -p tsconfig.spec.json && npm run pack-copy-template-dirs && jasmine dist/**/*.spec.js"
   },
   "keywords": [
     "schematics",

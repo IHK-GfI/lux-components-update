@@ -38,7 +38,7 @@ export function updateDependencies(): Rule {
     updateDep('ngx-cookie-service', '15.0.0', addOrUpdate),
     updateDep('ngx-build-plus', '15.0.0', addOrUpdate),
 
-    updateDevDep('@ihk-gfi/lux-components-update', '15.0.0', addOrUpdate),
+    updateDevDep('@ihk-gfi/lux-components-update', '^15.0.0', addOrUpdate),
     updateDevDep('@angular-eslint/builder', '15.2.1', updateIfExists),
     updateDevDep('@angular-eslint/eslint-plugin', '15.2.1', updateIfExists),
     updateDevDep('@angular-eslint/eslint-plugin-template', '15.2.1', updateIfExists),
