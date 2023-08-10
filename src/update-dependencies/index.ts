@@ -36,6 +36,7 @@ export function updateDependencies(): Rule {
     updateDep('ng2-pdf-viewer', '8.0.1', addOrUpdate),
     updateDep('pdfjs-dist', '2.13.216', addOrUpdate),
     updateDep('ngx-cookie-service', '15.0.0', addOrUpdate),
+    updateDep('ngx-build-plus', '15.0.0', addOrUpdate),
 
     updateDevDep('@ihk-gfi/lux-components-update', '15.0.0', addOrUpdate),
     updateDevDep('@angular-eslint/builder', '15.2.1', updateIfExists),

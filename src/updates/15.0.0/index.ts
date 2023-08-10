@@ -110,6 +110,12 @@ export function updateProjectStructure(options: any): Rule {
       deleteJsonArray((options.path ?? '.') + '/src/tsconfig.spec.json', ['files'], (node) => findStringInArray(node, 'polyfills.ts')),
       (options.path ?? '.') + '/src/tsconfig.spec.json'
     ),
+    applyRuleIfFileExists(
+      deleteJsonArray((options.path ?? '.') + '/src/tsconfig.spec.json', ['compilerOptions', 'types'], (node) =>
+        findStringInArray(node, 'node')
+      ),
+      (options.path ?? '.') + '/src/tsconfig.spec.json'
+    ),
     messageSuccessRule(`Projektstruktur wurde angepasst.`)
   ]);
 }
