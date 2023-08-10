@@ -30,10 +30,10 @@
   },
   "schematics": "./src/collection.json",
   "dependencies": {
-    "@angular-devkit/core": "15.2.5",
-    "@angular-devkit/schematics": "15.2.5",
-    "@angular-devkit/schematics-cli": "15.2.5",
-    "@angular/cli": "15.2.5",
+    "@angular-devkit/core": "15.2.9",
+    "@angular-devkit/schematics": "15.2.9",
+    "@angular-devkit/schematics-cli": "15.2.9",
+    "@angular/cli": "15.2.9",
     "@types/jasmine": "4.3.1",
     "@types/node": "16.11.7",
     "@types/semver": "7.3.13",
@@ -44,7 +44,7 @@
     "jasmine": "4.6.0",
     "jsdom": "20.0.1",
     "jsonc-parser": "3.0.0",
-    "semver": "7.3.7",
+    "semver": "7.5.2",
     "typescript": "4.9.5"
   },
   "devDependencies": {

@@ -102,7 +102,8 @@ export function updateJsonArray(
   jsonPath: string[],
   value: any,
   onlyUpdate = false,
-  findFn?: (value: Node) => boolean
+  findFn?: (value: Node) => boolean,
+  message?: string
 ): Rule {
   return (tree: Tree, _context: SchematicContext) => {
     // Gibt es bereits eine passende Stelle?
@@ -142,14 +143,25 @@ export function updateJsonArray(
 
       if (edits) {
         tree.overwrite(filePath, applyEdits(jsonFile, edits));
-        logInfo(`"${JSON.stringify(value)}" an der Stelle "${jsonPath.join('.')}" hinzugefügt.`);
+        if (message) {
+          logInfo(message);
+        } else {
+          logInfo(`"${JSON.stringify(value)}" an der Stelle "${jsonPath.join('.')}" hinzugefügt.`);
+        }
       }
     }
   };
 }
 
 export function deleteJsonArray(filePath: string, jsonPath: string[], findFn?: (value: Node) => boolean): Rule {
-  return updateJsonArray(filePath, jsonPath, void 0, true, findFn);
+  return updateJsonArray(
+    filePath,
+    jsonPath,
+    void 0,
+    true,
+    findFn,
+    `${filePath}: Wert aus dem Array an der Stelle "${jsonPath.join('.')}" gelöscht.`
+  );
 }
 
 /**
@@ -221,6 +233,16 @@ export function findObjectPropertyInArray(node: Node, propertyName: string, prop
         }
       }
     }
+  }
+
+  return found;
+}
+
+export function findStringInArray(arrayNode: Node, value: string): boolean {
+  let found = false;
+
+  if (arrayNode.type === 'string' && arrayNode.value === value) {
+    found = true;
   }
 
   return found;

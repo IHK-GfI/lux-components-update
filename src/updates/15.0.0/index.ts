@@ -2,10 +2,10 @@ import { chain, Rule, SchematicContext, Tree } from '@angular-devkit/schematics'
 import * as chalk from 'chalk';
 import { deleteDep, updateDependencies } from '../../update-dependencies/index';
 import { deleteFile, moveFilesToDirectory } from '../../utility/files';
-import { deleteJsonArray, deleteJsonValue, findObjectPropertyInArray, updateJsonValue } from '../../utility/json';
+import { deleteJsonArray, deleteJsonValue, findObjectPropertyInArray, findStringInArray, updateJsonValue } from '../../utility/json';
 import { logInfo, logInfoWithDescriptor, logSuccess } from '../../utility/logging';
 import { removeImport, removeProvider } from '../../utility/typescript';
-import { applyRuleIf, finish, messageInfoRule, messageSuccessRule } from '../../utility/util';
+import { applyRuleIf, applyRuleIfFileExists, finish, messageInfoRule, messageSuccessRule } from '../../utility/util';
 import { validateLuxComponentsVersion, validateNodeVersion } from '../../utility/validation';
 
 export const updateMajorVersion = '15';
@@ -102,6 +102,14 @@ export function updateProjectStructure(options: any): Rule {
       false
     ),
     deleteJsonValue('/angular.json', ['projects', options.project, 'architect', 'test', 'options', 'main']),
+    applyRuleIfFileExists(
+      deleteJsonArray((options.path ?? '.') + '/src/tsconfig.app.json', ['files'], (node) => findStringInArray(node, 'polyfills.ts')),
+      (options.path ?? '.') + '/src/tsconfig.app.json'
+    ),
+    applyRuleIfFileExists(
+      deleteJsonArray((options.path ?? '.') + '/src/tsconfig.spec.json', ['files'], (node) => findStringInArray(node, 'polyfills.ts')),
+      (options.path ?? '.') + '/src/tsconfig.spec.json'
+    ),
     messageSuccessRule(`Projektstruktur wurde angepasst.`)
   ]);
 }

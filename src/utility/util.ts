@@ -61,7 +61,11 @@ export const waitForTreeCallback = (_tree: Tree, callback: Function, waitMS: num
  * @param context
  * @param messages
  */
-export const runInstallAndLogToDos: (context: SchematicContext, messages: string[], runNpmInstall: boolean) => void = (context: SchematicContext, messages, runNpmInstall) => {
+export const runInstallAndLogToDos: (context: SchematicContext, messages: string[], runNpmInstall: boolean) => void = (
+  context: SchematicContext,
+  messages,
+  runNpmInstall
+) => {
   // diese log-Ausgaben werden erst ganz zum Schluss ausgeführt (nach Update und npm-install logs)
   process.addListener('exit', () => {
     if (messages) {
@@ -88,15 +92,25 @@ export function updateI18nFile(tree: Tree, language: string, insertTransUnitId: 
   }
 
   if (tree.exists(filePath)) {
-    let insertTranslation = `<trans-unit id="${ insertTransUnitId }" datatype="html">`;
-    let content           = (tree.read(filePath) as Buffer).toString();
-    let modifiedContent   = replaceAll(content, insertTranslation, translations + '\n      ' + insertTranslation);
+    let insertTranslation = `<trans-unit id="${insertTransUnitId}" datatype="html">`;
+    let content = (tree.read(filePath) as Buffer).toString();
+    let modifiedContent = replaceAll(content, insertTranslation, translations + '\n      ' + insertTranslation);
 
     if (content !== modifiedContent) {
       tree.overwrite(filePath, modifiedContent);
-      logInfo(`Sprachdatei ${ filePath } angepasst.`);
+      logInfo(`Sprachdatei ${filePath} angepasst.`);
     }
   }
+}
+
+export function applyRuleIfFileExists(rule: Rule, path: string): Rule {
+  return (tree: Tree, _context: SchematicContext) => {
+    if (tree.exists(path)) {
+      return rule;
+    } else {
+      return tree;
+    }
+  };
 }
 
 export function applyRuleIf(minVersion: string, rule: Rule): Rule {

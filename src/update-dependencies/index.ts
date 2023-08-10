@@ -45,7 +45,7 @@ export function updateDependencies(): Rule {
     updateDevDep('@angular-eslint/template-parser', '15.2.1', updateIfExists),
     updateDevDep('@typescript-eslint/eslint-plugin', '5.62.0', updateIfExists),
     updateDevDep('@typescript-eslint/parser', '5.62.0', updateIfExists),
-    updateDevDep('eslint', '8.28.0', updateIfExists),
+    updateDevDep('eslint', '8.46.0', updateIfExists),
     updateDevDep('eslint-plugin-import', '2.26.0', updateIfExists),
     updateDevDep('eslint-plugin-jsdoc', '39.2.9', updateIfExists),
     updateDevDep('eslint-plugin-prefer-arrow', '1.2.3', updateIfExists),

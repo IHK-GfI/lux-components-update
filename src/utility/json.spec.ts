@@ -2,7 +2,7 @@ import { callRule, SchematicContext, Tree } from '@angular-devkit/schematics';
 import { SchematicTestRunner, UnitTestTree } from '@angular-devkit/schematics/testing';
 import * as path from 'path';
 import { of as observableOf } from 'rxjs';
-import { findObjectPropertyInArray, updateJsonArray, updateJsonValue } from './json';
+import { deleteJsonArray, findObjectPropertyInArray, findStringInArray, updateJsonArray, updateJsonValue } from './json';
 import { appOptions, workspaceOptions } from './test';
 import { UtilConfig } from './util';
 
@@ -222,7 +222,47 @@ describe('json', () => {
       );
     });
   });
+
+  describe('deleteJsonArr', () => {
+    it('Sollte einen String-Wert aus einem Array löschen', () => {
+      const filePath = testOptions.path + '/deleteJsonArray/deleteJsonArrayStringValue.json';
+
+      appTree.create(filePath, deleteJsonArrayStringValue);
+
+      callRule(
+        deleteJsonArray(filePath, ['files'], (node) => findStringInArray(node, 'polyfills.ts')),
+        observableOf(appTree),
+        context
+      ).subscribe(
+        (success: Tree) => {
+          const content = success.read(filePath)?.toString();
+          expect(content).toContain('  "files": [\n    "test.ts"\n  ],\n');
+        },
+        (reason) => expect(reason).toBeUndefined()
+      );
+    });
+  });
 });
+
+const deleteJsonArrayStringValue = `{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "../out-tsc/spec",
+    "baseUrl": "./",
+    "types": [
+      "jasmine",
+      "node"
+    ]
+  },
+  "files": [
+    "test.ts",
+    "polyfills.ts"
+  ],
+  "include": [
+    "**/*.spec.ts",
+    "**/*.d.ts"
+  ]
+}`;
 
 const updateJsonValueAdd = `
 {

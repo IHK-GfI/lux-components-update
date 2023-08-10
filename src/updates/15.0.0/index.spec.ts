@@ -107,6 +107,7 @@ describe('update150000', () => {
       appTree.overwrite('/angular.json', ANGULAR_JSON_FULL);
       appTree.create((testOptions.path ? testOptions.path : '') + '/src/polyfills.ts', '{}');
       appTree.create((testOptions.path ? testOptions.path : '') + '/src/tsconfig.app.ie.json', '{}');
+      appTree.create((testOptions.path ? testOptions.path : '') + '/src/tsconfig.app.json', TS_CONfIG_APP_JSON);
 
       callRule(updateProjectStructure(testOptions), observableOf(appTree), context).subscribe({
         next: () => {
@@ -131,6 +132,23 @@ describe('update150000', () => {
     });
   });
 });
+
+const TS_CONfIG_APP_JSON = `{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "../out-tsc/app",
+    "baseUrl": "./",
+    "types": []
+  },
+  "files": [
+    "main.ts",
+    "polyfills.ts"
+  ],
+  "include": [
+    "src/**/*.d.ts"
+  ]
+}
+`;
 
 const PACKAGE_JSON_001 = `
             {
