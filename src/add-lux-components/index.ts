@@ -35,26 +35,6 @@ export function addLuxComponents(options: any): Rule {
         output: './assets/themes'
       },
       {
-        glob: 'all.css',
-        input: './node_modules/@fortawesome/fontawesome-free/css',
-        output: './assets/icons/fontawesome/css'
-      },
-      {
-        glob: '*(*.eot|*.ttf|*.woff|*.woff2)',
-        input: './node_modules/@fortawesome/fontawesome-free/webfonts',
-        output: './assets/icons/fontawesome/webfonts'
-      },
-      {
-        glob: 'material-design-icons.css*',
-        input: './node_modules/material-design-icons-iconfont/dist',
-        output: './assets/icons/material-icons'
-      },
-      {
-        glob: '*(*.eot|*.ttf|*.woff|*.woff2)',
-        input: './node_modules/material-design-icons-iconfont/dist/fonts',
-        output: './assets/icons/material-icons/fonts'
-      },
-      {
         glob: '**/*',
         input: './node_modules/@ihk-gfi/lux-components-icons-and-fonts/assets/icons/',
         output: './assets/icons'
@@ -100,14 +80,6 @@ export function addLuxComponents(options: any): Rule {
       updateJsonArray('/angular.json', jsonPathAssetsTest, assetsValues[0]),
       updateJsonArray('/angular.json', jsonPathAssetsBuild, assetsValues[1]),
       updateJsonArray('/angular.json', jsonPathAssetsTest, assetsValues[1]),
-      updateJsonArray('/angular.json', jsonPathAssetsBuild, assetsValues[2]),
-      updateJsonArray('/angular.json', jsonPathAssetsTest, assetsValues[2]),
-      updateJsonArray('/angular.json', jsonPathAssetsBuild, assetsValues[3]),
-      updateJsonArray('/angular.json', jsonPathAssetsTest, assetsValues[3]),
-      updateJsonArray('/angular.json', jsonPathAssetsBuild, assetsValues[4]),
-      updateJsonArray('/angular.json', jsonPathAssetsTest, assetsValues[4]),
-      updateJsonArray('/angular.json', jsonPathAssetsBuild, assetsValues[5]),
-      updateJsonArray('/angular.json', jsonPathAssetsTest, assetsValues[5]),
       updateJsonArray('/angular.json', jsonPathAllowedCommonJS, 'hammerjs'),
       updateJsonArray('/angular.json', jsonPathAllowedCommonJS, 'ng2-pdf-viewer'),
       updateJsonArray('/angular.json', jsonPathAllowedCommonJS, 'pdfjs-dist'),

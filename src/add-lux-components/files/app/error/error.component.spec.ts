@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
+import { RouterTestingModule } from '@angular/router/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import {
@@ -29,6 +30,7 @@ describe('ErrorComponent', () => {
         LuxActionModule,
         LuxIconModule,
         LuxFormModule,
+        HttpClientTestingModule,
         RouterTestingModule.withRoutes([]),
         LuxComponentsConfigModule.forRoot(luxComponentsConfig),
         NoopAnimationsModule
