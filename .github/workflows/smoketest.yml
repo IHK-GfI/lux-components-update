@@ -13,14 +13,4 @@ jobs:
           node-version: 16
       - run: |
           npm install
-          npm run build
-          tsc -p tsconfig.spec.json
-          npm run pack-copy-template-dirs
-          cd dist
-          ls -l
-          cd ..
-          jasmine dist/**/*.spec.js
-          npm run pack
-          cd dist
-          ls -l
-          cd ..
+          npm run smoketest
