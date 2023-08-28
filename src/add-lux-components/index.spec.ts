@@ -43,8 +43,9 @@ describe('add-lux-components', () => {
       });
 
       callRule(addLuxComponents(testOptions), observableOf(appTree), context).subscribe(
-        () => {
+        (success) => {
           expect(getPackageJsonDependency(appTree, '@ihk-gfi/lux-components').version).toContain(updateMajorVersion);
+          expect(success.exists(testOptions.path + '/move-de-files.js')).toBeTrue();
           done();
         },
         (reason) => expect(reason).toBeUndefined()
