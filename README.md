@@ -38,17 +38,3 @@ Wenn man die LUX-Components in seinem Projekt einrichten möchte, kann der folge
 ```bash
 ng generate @ihk-gfi/lux-components-update:add-lux-components
 ```
-
-## Migration von TS-Lint nach ES-Lint
-
-```bash
-ng generate @ihk-gfi/lux-components-update:migrate-to-eslint
-```
-
-WICHTIG! Der Updater schreibt zusätzliche Befehle in die Console. Diese müssen manuell ausgeführt werden.
-
-## Migration zur Web Component
-
-```bash
-ng generate @ihk-gfi/lux-components-update:migrate-to-webcomponent
-```

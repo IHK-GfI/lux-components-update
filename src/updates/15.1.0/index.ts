@@ -3,7 +3,7 @@ import * as chalk from 'chalk';
 import { updateDep } from '../../update-dependencies/index';
 import { finish, messageInfoRule, messageSuccessRule } from '../../utility/util';
 
-export function update150100(_options: any): Rule {
+export function update150100(_options: any, runNpmInstall = true): Rule {
   return (_tree: Tree, _context: SchematicContext) => {
     return chain([
       messageInfoRule(`Die LUX-Components werden auf die Version 15.1.0 aktualisiert...`),
@@ -11,7 +11,7 @@ export function update150100(_options: any): Rule {
       updateDep('@ihk-gfi/lux-components', '15.1.0', false),
       updateDep('@ihk-gfi/lux-components-theme', '15.1.0', false),
       messageSuccessRule(`Die LUX-Components wurden auf die Version 15.1.0 aktualisiert.`),
-      finish(true, `${chalk.yellowBright('Fertig!')}`)
+      finish(runNpmInstall, `${chalk.yellowBright('Fertig!')}`)
     ]);
   };
 }

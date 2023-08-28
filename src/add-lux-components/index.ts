@@ -3,7 +3,7 @@ import * as chalk from 'chalk';
 import { applyEdits, Edit, modify, Node } from 'jsonc-parser';
 import { updateDependencies } from '../update-dependencies/index';
 import { updateMajorVersion, updateNodeMinVersion } from '../updates/15.0.0/index';
-import { iterateFilesAndModifyContent, moveFilesToDirectory } from '../utility/files';
+import { deleteFile, iterateFilesAndModifyContent, moveFilesToDirectory } from '../utility/files';
 import {
   findObjectPropertyInArray,
   jsonFormattingOptions,
@@ -15,6 +15,7 @@ import {
 import { logInfo } from '../utility/logging';
 import { finish, messageInfoRule, messageSuccessRule, replaceAll, waitForTreeCallback } from '../utility/util';
 import { validateAngularVersion, validateNodeVersion } from '../utility/validation';
+import { update150100 } from '../updates/15.1.0';
 
 export function addLuxComponents(options: any): Rule {
   return (_tree: Tree, _context: SchematicContext) => {
@@ -69,7 +70,6 @@ export function addLuxComponents(options: any): Rule {
       copyAppFiles(options),
       updatePackageJson(options),
       updateDependencies(),
-
       updateIndexHtml(options),
       updateApp(options),
       updateJsonValue('/tsconfig.json', ['compilerOptions', 'strict'], true),
@@ -84,7 +84,9 @@ export function addLuxComponents(options: any): Rule {
       updateJsonArray('/angular.json', jsonPathAllowedCommonJS, 'ng2-pdf-viewer'),
       updateJsonArray('/angular.json', jsonPathAllowedCommonJS, 'pdfjs-dist'),
       updateJsonArray('/angular.json', jsonPathAllowedCommonJS, 'dompurify'),
-      finish(false, `Die LUX-Components ${updateMajorVersion} wurden erfolgreich eingerichtet.`, `${chalk.yellowBright('Fertig!')}`)
+      deleteFile(options, (options.path ?? '') + '/package-lock.json'),
+      update150100(options, false),
+      finish(true, `Die LUX-Components ${updateMajorVersion} wurden erfolgreich eingerichtet.`, `${chalk.yellowBright('Fertig!')}`)
     ]);
   };
 }
