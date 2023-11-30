@@ -17,6 +17,7 @@ import { finish, messageInfoRule, messageSuccessRule, replaceAll, waitForTreeCal
 import { validateAngularVersion, validateNodeVersion } from '../utility/validation';
 import { update150100 } from '../updates/15.1.0';
 import { update150200 } from '../updates/15.2.0';
+import { update150300 } from '../updates/15.3.0';
 
 export function addLuxComponents(options: any): Rule {
   return (_tree: Tree, _context: SchematicContext) => {
@@ -88,6 +89,7 @@ export function addLuxComponents(options: any): Rule {
       deleteFile(options, (options.path ?? '') + '/package-lock.json'),
       update150100(options, false),
       update150200(options, false),
+      update150300(options, false),
       finish(true, `Die LUX-Components ${updateMajorVersion} wurden erfolgreich eingerichtet.`, `${chalk.yellowBright('Fertig!')}`)
     ]);
   };
