@@ -19,6 +19,8 @@ import { update150100 } from '../updates/15.1.0';
 import { update150200 } from '../updates/15.2.0';
 import { update150300 } from '../updates/15.3.0';
 import { update150400 } from '../updates/15.4.0';
+import { update150500 } from '../updates/15.5.0';
+import { update150501 } from '../updates/15.5.1';
 
 export function addLuxComponents(options: any): Rule {
   return (_tree: Tree, _context: SchematicContext) => {
@@ -92,6 +94,8 @@ export function addLuxComponents(options: any): Rule {
       update150200(options, false),
       update150300(options, false),
       update150400(options, false),
+      update150500(options, false),
+      update150501(options, false),
       finish(true, `Die LUX-Components ${updateMajorVersion} wurden erfolgreich eingerichtet.`, `${chalk.yellowBright('Fertig!')}`)
     ]);
   };
