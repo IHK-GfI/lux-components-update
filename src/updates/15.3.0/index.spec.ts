@@ -19,8 +19,8 @@ describe('update150300', () => {
   beforeEach(async () => {
     runner = new SchematicTestRunner('schematics', collectionPath);
 
-    appTree = await runner.runExternalSchematicAsync('@schematics/angular', 'workspace', workspaceOptions).toPromise();
-    appTree = await runner.runExternalSchematicAsync('@schematics/angular', 'application', appOptions, appTree).toPromise();
+    appTree = await runner.runExternalSchematic('@schematics/angular', 'workspace', workspaceOptions);
+    appTree = await runner.runExternalSchematic('@schematics/angular', 'application', appOptions, appTree);
 
     UtilConfig.defaultWaitMS = 0;
 
