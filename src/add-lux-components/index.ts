@@ -2,7 +2,7 @@ import { chain, Rule, SchematicContext, Tree } from '@angular-devkit/schematics'
 import * as chalk from 'chalk';
 import { applyEdits, Edit, modify, Node } from 'jsonc-parser';
 import { updateDependencies } from '../update-dependencies/index';
-import { updateMajorVersion, updateNodeMinVersion } from '../updates/15.0.0/index';
+import { updateMajorVersion, updateNodeMinVersion } from '../updates/16.0.0/index';
 import { deleteFile, iterateFilesAndModifyContent, moveFilesToDirectory } from '../utility/files';
 import {
   findObjectPropertyInArray,
@@ -15,12 +15,6 @@ import {
 import { logInfo } from '../utility/logging';
 import { finish, messageInfoRule, messageSuccessRule, replaceAll, waitForTreeCallback } from '../utility/util';
 import { validateAngularVersion, validateNodeVersion } from '../utility/validation';
-import { update150100 } from '../updates/15.1.0';
-import { update150200 } from '../updates/15.2.0';
-import { update150300 } from '../updates/15.3.0';
-import { update150400 } from '../updates/15.4.0';
-import { update150500 } from '../updates/15.5.0';
-import { update150501 } from '../updates/15.5.1';
 
 export function addLuxComponents(options: any): Rule {
   return (_tree: Tree, _context: SchematicContext) => {
@@ -90,12 +84,6 @@ export function addLuxComponents(options: any): Rule {
       updateJsonArray('/angular.json', jsonPathAllowedCommonJS, 'pdfjs-dist'),
       updateJsonArray('/angular.json', jsonPathAllowedCommonJS, 'dompurify'),
       deleteFile(options, (options.path ?? '') + '/package-lock.json'),
-      update150100(options, false),
-      update150200(options, false),
-      update150300(options, false),
-      update150400(options, false),
-      update150500(options, false),
-      update150501(options, false),
       finish(true, `Die LUX-Components ${updateMajorVersion} wurden erfolgreich eingerichtet.`, `${chalk.yellowBright('Fertig!')}`)
     ]);
   };

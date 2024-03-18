@@ -3,7 +3,6 @@ import localeDE from '@angular/common/locales/de';
 import localeDeExtra from '@angular/common/locales/extra/de';
 import { NgModule } from '@angular/core';
 import { HttpClientModule } from '@angular/common/http';
-import { FlexLayoutModule } from '@angular/flex-layout';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import {
@@ -33,6 +32,10 @@ registerLocaleData(localeDE, localeDeExtra);
 
 const luxComponentsConfig: LuxComponentsConfigParameters = {
   generateLuxTagIds: environment.generateLuxTagIds,
+  viewConfiguration: {
+    centeredView: true,
+    centeredWidth: '1024px'
+  },
 };
 
 @NgModule({
@@ -52,7 +55,6 @@ const luxComponentsConfig: LuxComponentsConfigParameters = {
     LuxPopupsModule,
     LuxErrorModule,
     LuxMarkdownModule,
-    FlexLayoutModule,
     LuxComponentsConfigModule.forRoot(luxComponentsConfig)
   ],
   providers: [],

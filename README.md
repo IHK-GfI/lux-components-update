@@ -4,8 +4,7 @@ Dieses Projekt enthält alle Updateskripte (umgesetzt mit Angular Schematics) f�
 
 Updateskripte:
 
-- `update` (aktualisiert das Projekt auf die Version 15.0.0)
-- `update-15.x.x` (aktualisiert das Projekt auf die Version 15.x.x)
+- `update-16.x.x` (aktualisiert das Projekt auf die Version 16.x.x)
 - `add-lux-components` (fügt die LUX-Components zu einem Angular-Projekt hinzu)
 
 ## Voraussetzungen
@@ -21,14 +20,14 @@ npm install -g @angular-devkit/schematics-cli
 Um ein Updateskript zu starten, kann der folgende Befehl verwendet werden:
 
 ```bash
-ng generate @ihk-gfi/lux-components-update:update
+ng generate @ihk-gfi/lux-components-update:update-16.x.x
 ```
 
 Falls erst einmal ein Testdurchlauf ohne persistente Änderungen gewünscht ist,
 ist es möglich den Aufruf mit dem Flag "--dry-run" zu versehen:
 
 ```bash
-ng generate @ihk-gfi/lux-components-update:update --dry-run
+ng generate @ihk-gfi/lux-components-update:update-16.x.x --dry-run
 ```
 
 ## LUX-Components im Projekt einrichten
