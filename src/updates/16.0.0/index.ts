@@ -9,7 +9,7 @@ export const updateMajorVersion = '16';
 export const updateMinVersion = '15.5.1';
 export const updateNodeMinVersion = '18.0.0';
 
-export function update(options: any): Rule {
+export function update160000(options: any): Rule {
   return (_tree: Tree, _context: SchematicContext) => {
     return chain([
       check(options),
