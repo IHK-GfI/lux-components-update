@@ -5,6 +5,7 @@ import { updateDependencies } from '../update-dependencies/index';
 import { updateMajorVersion, updateNodeMinVersion } from '../updates/16.0.0/index';
 import { update160001 } from '../updates/16.0.1/index';
 import { update160100 } from '../updates/16.1.0/index';
+import { update160200 } from '../updates/16.2.0/index';
 import { deleteFile, iterateFilesAndModifyContent, moveFilesToDirectory } from '../utility/files';
 import {
   findObjectPropertyInArray,
@@ -88,6 +89,7 @@ export function addLuxComponents(options: any): Rule {
       deleteFile(options, (options.path ?? '') + '/package-lock.json'),
       update160001(options, false),
       update160100(options, false),
+      update160200(options, false),
       finish(true, `Die LUX-Components ${updateMajorVersion} wurden erfolgreich eingerichtet.`, `${chalk.yellowBright('Fertig!')}`)
     ]);
   };
