@@ -21,10 +21,10 @@ export function getSourceNodes(sourceFile: ts.SourceFile): ts.Node[] {
 }
 
 export function addInterface(tree: Tree, filePath: string, interfaceName: string, logMessage = true) {
-  const content    = (tree.read(filePath) as Buffer).toString();
-  const fileName   = filePath.substring(filePath.lastIndexOf('/') + 1, filePath.length);
-  const sourceFile = ts.createSourceFile(`${ fileName }`, content, ts.ScriptTarget.Latest, true);
-  const nodes      = getSourceNodes(sourceFile);
+  const content = (tree.read(filePath) as Buffer).toString();
+  const fileName = filePath.substring(filePath.lastIndexOf('/') + 1, filePath.length);
+  const sourceFile = ts.createSourceFile(`${fileName}`, content, ts.ScriptTarget.Latest, true);
+  const nodes = getSourceNodes(sourceFile);
 
   const classNode = nodes.find((n) => n.kind === ts.SyntaxKind.ClassDeclaration);
   if (classNode) {
@@ -47,7 +47,7 @@ export function addInterface(tree: Tree, filePath: string, interfaceName: string
     } else {
       if (extendsNode) {
         const updateRecorder = tree.beginUpdate(filePath);
-        updateRecorder.insertLeft(extendsNode.parent.end, ` implements ${interfaceName}`)
+        updateRecorder.insertLeft(extendsNode.parent.end, ` implements ${interfaceName}`);
         tree.commitUpdate(updateRecorder);
         if (logMessage) {
           logInfo(`Interface ${interfaceName} hinzugefügt.`);
@@ -56,17 +56,17 @@ export function addInterface(tree: Tree, filePath: string, interfaceName: string
         const classKeywordNode = findChild(classNode, ts.SyntaxKind.ClassKeyword);
 
         if (!classKeywordNode) {
-          throw new SchematicsException(`Die Klasse ${ filePath } hat kein ClassKeyword.`);
+          throw new SchematicsException(`Die Klasse ${filePath} hat kein ClassKeyword.`);
         }
 
         const classIdentifierNode = getNextSibling(classKeywordNode);
 
         if (!classIdentifierNode) {
-          throw new SchematicsException(`Die Klasse ${ filePath } hat keinen Namen.`);
+          throw new SchematicsException(`Die Klasse ${filePath} hat keinen Namen.`);
         }
 
         const updateRecorder = tree.beginUpdate(filePath);
-        updateRecorder.insertLeft(classIdentifierNode.end, ` implements ${interfaceName}`)
+        updateRecorder.insertLeft(classIdentifierNode.end, ` implements ${interfaceName}`);
         tree.commitUpdate(updateRecorder);
         if (logMessage) {
           logInfo(`Interface ${interfaceName} hinzugefügt.`);
@@ -92,13 +92,9 @@ export function removeInterface(tree: Tree, filePath: string, interfaceName: str
         const heritageClauseNodes = syntaxListNode.getChildren().filter((n) => n.kind === ts.SyntaxKind.HeritageClause);
         if (heritageClauseNodes) {
           heritageClauseNodes.forEach((heritageClauseNode) => {
-            const wordNode = heritageClauseNode
-              .getChildren()
-              .find((n) => n.kind === ts.SyntaxKind.FirstFutureReservedWord);
+            const wordNode = heritageClauseNode.getChildren().find((n) => n.kind === ts.SyntaxKind.FirstFutureReservedWord);
             if (wordNode && wordNode.getText() === 'implements') {
-              const interfaceSyntaxNode = heritageClauseNode
-                .getChildren()
-                .find((n) => n.kind === ts.SyntaxKind.SyntaxList);
+              const interfaceSyntaxNode = heritageClauseNode.getChildren().find((n) => n.kind === ts.SyntaxKind.SyntaxList);
               if (interfaceSyntaxNode) {
                 const interfaceChildren = interfaceSyntaxNode.getChildren();
                 if (interfaceChildren) {
@@ -107,8 +103,7 @@ export function removeInterface(tree: Tree, filePath: string, interfaceName: str
                       const updateRecorder = tree.beginUpdate(filePath);
                       updateRecorder.remove(
                         heritageClauseNode.pos,
-                        heritageClauseNode.getChildren()[heritageClauseNode.getChildren().length - 1].end -
-                          heritageClauseNode.pos
+                        heritageClauseNode.getChildren()[heritageClauseNode.getChildren().length - 1].end - heritageClauseNode.pos
                       );
                       tree.commitUpdate(updateRecorder);
                       if (logMessage) {
@@ -127,10 +122,7 @@ export function removeInterface(tree: Tree, filePath: string, interfaceName: str
                           if (prevSibling) {
                             updateRecorder.remove(prevSibling.pos, interfaceChildren[i].end - prevSibling.pos);
                           } else {
-                            updateRecorder.remove(
-                              interfaceChildren[i].pos,
-                              interfaceChildren[i].end - interfaceChildren[i].pos
-                            );
+                            updateRecorder.remove(interfaceChildren[i].pos, interfaceChildren[i].end - interfaceChildren[i].pos);
                           }
                         }
                         tree.commitUpdate(updateRecorder);
@@ -166,9 +158,7 @@ export function addImport(tree: Tree, filePath: string, packageName: string, imp
 
       if (importDeclarationChildren) {
         const importNameNode = importDeclarationChildren.find(
-          (n) =>
-            n.kind === ts.SyntaxKind.StringLiteral &&
-            (n.getText() === `'${packageName}'` || n.getText() === `"${packageName}"`)
+          (n) => n.kind === ts.SyntaxKind.StringLiteral && (n.getText() === `'${packageName}'` || n.getText() === `"${packageName}"`)
         );
 
         if (importNameNode) {
@@ -178,26 +168,26 @@ export function addImport(tree: Tree, filePath: string, packageName: string, imp
     });
   }
 
-  if(importNode) {
+  if (importNode) {
     const importClauseNode = (importNode as ts.Node).getChildren().find((n) => n.kind === ts.SyntaxKind.ImportClause);
 
     if (importClauseNode) {
       const namedImportsNode = importClauseNode.getChildren().find((n) => n.kind === ts.SyntaxKind.NamedImports);
 
       if (!namedImportsNode) {
-        throw new SchematicsException(`In der Datei ${ filePath } gibt es keine NamedImports.`);
+        throw new SchematicsException(`In der Datei ${filePath} gibt es keine NamedImports.`);
       }
 
       const syntaxListNode = namedImportsNode.getChildren().find((n) => n.kind === ts.SyntaxKind.SyntaxList);
 
       if (!syntaxListNode) {
-        throw new SchematicsException(`In der Datei ${ filePath } gibt es keine SyntaxList für den Import.`);
+        throw new SchematicsException(`In der Datei ${filePath} gibt es keine SyntaxList für den Import.`);
       }
 
       const importChildren = syntaxListNode.getChildren();
       const foundNode = importName ? findChild(syntaxListNode, ts.SyntaxKind.Identifier, importName) : undefined;
       if (!foundNode) {
-        const lastChildNode = importChildren[ syntaxListNode.getChildren().length - 1];
+        const lastChildNode = importChildren[syntaxListNode.getChildren().length - 1];
 
         const updateRecorder = tree.beginUpdate(filePath);
         updateRecorder.insertLeft(lastChildNode.end, ', ' + importName);
@@ -221,13 +211,7 @@ export function addImport(tree: Tree, filePath: string, packageName: string, imp
   }
 }
 
-export function removeImport(
-  tree: Tree,
-  filePath: string,
-  packageName: string,
-  importName?: string,
-  logMessage = true
-) {
+export function removeImport(tree: Tree, filePath: string, packageName: string, importName?: string, logMessage = true) {
   const content = (tree.read(filePath) as Buffer).toString();
   const fileName = filePath.substring(filePath.lastIndexOf('/') + 1, filePath.length);
   const sourceFile = ts.createSourceFile(`${fileName}`, content, ts.ScriptTarget.Latest, true);
@@ -272,10 +256,7 @@ export function removeImport(
             if (importChildren.length === 1) {
               if (importChildren[0].getText() === importName) {
                 const updateRecorder = tree.beginUpdate(filePath);
-                updateRecorder.remove(
-                  importNode.pos,
-                  importNode.getChildren()[importNode.getChildren().length - 1].end - importNode.pos
-                );
+                updateRecorder.remove(importNode.pos, importNode.getChildren()[importNode.getChildren().length - 1].end - importNode.pos);
                 tree.commitUpdate(updateRecorder);
                 if (logMessage) {
                   logInfo(`Import ${importName} entfernt.`);
@@ -375,9 +356,9 @@ export function getSiblings(node: ts.Node, childKind?: ts.SyntaxKind): ts.Node[]
         throw new SchematicsException(`Es konnte kein Knoten vom Typ ${childKind} gefunden werden.`);
       }
 
-      result = childNode.getChildren();
+      result = [...childNode.getChildren()];
     } else {
-      result = node.parent.getChildren();
+      result = [...node.parent.getChildren()];
     }
   }
 
@@ -419,7 +400,7 @@ export function getNextSibling(node: ts.Node, childKind?: ts.SyntaxKind): ts.Nod
 }
 
 export function getNextSiblings(node: ts.Node): ts.Node[] {
-  let result: ts.Node[]  = [];
+  let result: ts.Node[] = [];
 
   if (node) {
     let siblings: ts.Node[] = getSiblings(node);
@@ -449,41 +430,41 @@ export function showTree(node: ts.Node, indent: string = '    '): void {
 
 export function findChild(node: ts.Node, kind: ts.SyntaxKind, text?: string): ts.Node | undefined {
   if (node.kind === kind && (!text || node.getText() === text)) {
-      return node;
-    } else {
-      for (let child of node.getChildren()) {
-        const found = findChild(child, kind, text);
+    return node;
+  } else {
+    for (let child of node.getChildren()) {
+      const found = findChild(child, kind, text);
 
-        if (found) {
-          return found;
-        }
+      if (found) {
+        return found;
       }
     }
+  }
 
   return undefined;
 }
 
 export function getSyntaxListOfClass(tree: Tree, filePath: string): ts.Node {
-  const content    = (tree.read(filePath) as Buffer).toString();
-  const fileName   = filePath.substring(filePath.lastIndexOf('/') + 1, filePath.length);
-  const sourceFile = ts.createSourceFile(`${ fileName }`, content, ts.ScriptTarget.Latest, true);
-  const nodes      = getSourceNodes(sourceFile);
+  const content = (tree.read(filePath) as Buffer).toString();
+  const fileName = filePath.substring(filePath.lastIndexOf('/') + 1, filePath.length);
+  const sourceFile = ts.createSourceFile(`${fileName}`, content, ts.ScriptTarget.Latest, true);
+  const nodes = getSourceNodes(sourceFile);
 
   const classNode = nodes.find((n) => n.kind === ts.SyntaxKind.ClassKeyword);
   if (!classNode) {
-    throw new SchematicsException(`Die Klasse in der Datei ${ fileName } hat kein ClassKeyword.`);
+    throw new SchematicsException(`Die Klasse in der Datei ${fileName} hat kein ClassKeyword.`);
   }
 
-  const firstPunctuationNode = getNextSiblings(classNode).find(n => n.kind === ts.SyntaxKind.FirstPunctuation);
+  const firstPunctuationNode = getNextSiblings(classNode).find((n) => n.kind === ts.SyntaxKind.FirstPunctuation);
 
   if (!firstPunctuationNode) {
-    throw new SchematicsException(`Die Klasse in der Datei ${ fileName } hat keine FirstPunctuation.`);
+    throw new SchematicsException(`Die Klasse in der Datei ${fileName} hat keine FirstPunctuation.`);
   }
 
   const syntaxListNode = getNextSibling(firstPunctuationNode);
 
   if (!syntaxListNode) {
-    throw new SchematicsException(`Die Klasse in der Datei ${ fileName } hat keine SyntaxList.`);
+    throw new SchematicsException(`Die Klasse in der Datei ${fileName} hat keine SyntaxList.`);
   }
 
   return syntaxListNode;
@@ -505,22 +486,22 @@ export function addParameter(tree: Tree, filePath: string, syntaxListNode: ts.No
     updateRecorder.insertLeft(syntaxListNode.pos, service);
   } else if (parameterNodes.length > 0) {
     // Constructor mit Parameter
-    updateRecorder.insertLeft(parameterNodes[ parameterNodes.length - 1 ].end, ', ' + service);
+    updateRecorder.insertLeft(parameterNodes[parameterNodes.length - 1].end, ', ' + service);
   }
   tree.commitUpdate(updateRecorder);
 }
 
 export function addMethod(tree: Tree, filePath: string, _syntaxListNode: ts.Node, method: string) {
   const syntaxList = getSyntaxListOfClass(tree, filePath);
-  const methodNodes = syntaxList.getChildren().filter(n => n.kind === ts.SyntaxKind.MethodDeclaration);
+  const methodNodes = syntaxList.getChildren().filter((n) => n.kind === ts.SyntaxKind.MethodDeclaration);
 
   let startNode = syntaxList;
-  if (methodNodes && methodNodes.length > 0 ) {
+  if (methodNodes && methodNodes.length > 0) {
     startNode = methodNodes[methodNodes.length - 1];
   }
 
   const updateRecorder = tree.beginUpdate(filePath);
-  updateRecorder.insertLeft(startNode.end,  '\n' + method);
+  updateRecorder.insertLeft(startNode.end, '\n' + method);
   tree.commitUpdate(updateRecorder);
 }
 
@@ -528,13 +509,13 @@ export function addConstructorParameter(tree: Tree, filePath: string, service: s
   const constructorNode = getConstructor(tree, filePath);
   if (constructorNode) {
     addParameter(tree, filePath, findChild(constructorNode, ts.SyntaxKind.SyntaxList) as ts.Node, service);
-    logInfo(`Im Konstruktor den Parameter "${ service }" hinzugefügt.`);
+    logInfo(`Im Konstruktor den Parameter "${service}" hinzugefügt.`);
   } else {
     const syntaxListNode = getSyntaxListOfClass(tree, filePath);
     const updateRecorder = tree.beginUpdate(filePath);
-    updateRecorder.insertLeft(syntaxListNode.pos, `\n  constructor(${ service }) {}`);
+    updateRecorder.insertLeft(syntaxListNode.pos, `\n  constructor(${service}) {}`);
     tree.commitUpdate(updateRecorder);
-    logInfo(`constructor(${ service }) {} hinzugefügt.`);
+    logInfo(`constructor(${service}) {} hinzugefügt.`);
   }
 }
 
@@ -546,9 +527,7 @@ export function addClassProperty(tree: Tree, filePath: string, property: string)
   }
 
   const startNode =
-    syntaxListNode.getChildren() && syntaxListNode.getChildren().length > 0
-      ? syntaxListNode.getChildren()[0]
-      : syntaxListNode;
+    syntaxListNode.getChildren() && syntaxListNode.getChildren().length > 0 ? syntaxListNode.getChildren()[0] : syntaxListNode;
 
   const updateRecorder = tree.beginUpdate(filePath);
   updateRecorder.insertLeft(startNode.pos, '\n\n  ' + property + '\n');
@@ -560,29 +539,31 @@ export function addConstructorContent(tree: Tree, filePath: string, content: str
   const constructorNode = getConstructor(tree, filePath);
 
   if (constructorNode) {
-    const blockNode = constructorNode.getChildren().find(n => n.kind === ts.SyntaxKind.Block);
+    const blockNode = constructorNode.getChildren().find((n) => n.kind === ts.SyntaxKind.Block);
 
     if (!blockNode) {
-      throw new SchematicsException(`Der Konstruktor in der Klasse ${ filePath } hat keinen Block.`);
+      throw new SchematicsException(`Der Konstruktor in der Klasse ${filePath} hat keinen Block.`);
     }
 
-    const firstPunctuationNode = blockNode.getChildren().find(n => n.kind === ts.SyntaxKind.FirstPunctuation);
+    const firstPunctuationNode = blockNode.getChildren().find((n) => n.kind === ts.SyntaxKind.FirstPunctuation);
 
     if (!firstPunctuationNode) {
-      throw new SchematicsException(`Der Konstruktor in der Klasse ${ filePath } hat keine FirstPunctuation.`);
+      throw new SchematicsException(`Der Konstruktor in der Klasse ${filePath} hat keine FirstPunctuation.`);
     }
 
     const syntaxListNode = getNextSibling(firstPunctuationNode);
 
     if (syntaxListNode && syntaxListNode.getChildren().length > 0) {
-      const start = append ? syntaxListNode.getChildren()[syntaxListNode.getChildren().length - 1].end : syntaxListNode.getChildren()[0].pos;
+      const start = append
+        ? syntaxListNode.getChildren()[syntaxListNode.getChildren().length - 1].end
+        : syntaxListNode.getChildren()[0].pos;
 
       const updateRecorder = tree.beginUpdate(filePath);
-      updateRecorder.insertLeft(start,  '\n    ' + content);
+      updateRecorder.insertLeft(start, '\n    ' + content);
       tree.commitUpdate(updateRecorder);
     } else {
       const updateRecorder = tree.beginUpdate(filePath);
-      updateRecorder.insertLeft(firstPunctuationNode.end,  '\n    ' + content + '\n  ');
+      updateRecorder.insertLeft(firstPunctuationNode.end, '\n    ' + content + '\n  ');
       tree.commitUpdate(updateRecorder);
     }
     logInfo(`Inhalt ${append ? 'am Ende' : 'am Anfang'} des Konstruktors hinzugefügt.`);
@@ -593,6 +574,4 @@ export function addConstructorContent(tree: Tree, filePath: string, content: str
     tree.commitUpdate(updateRecorder);
     logInfo(`Konstruktor mit Inhalt hinzugefügt.`);
   }
-
-
 }
