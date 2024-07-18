@@ -1,6 +1,11 @@
 {
   "$schema": "../node_modules/@angular-devkit/schematics/collection-schema.json",
   "schematics": {
+    "update-16.4.2": {
+      "description": "Aktualisiert das LUX-Componentsprojekt auf die Version 16.4.2",
+      "factory": "./updates/16.4.2/index#update160402",
+      "schema": "./updates/16.4.2/schema.json"
+    },
     "update-16.4.1": {
       "description": "Aktualisiert das LUX-Componentsprojekt auf die Version 16.4.1",
       "factory": "./updates/16.4.1/index#update160401",
