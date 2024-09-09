@@ -10,6 +10,7 @@ import { update160300 } from '../updates/16.3.0/index';
 import { update160400 } from '../updates/16.4.0/index';
 import { update160401 } from '../updates/16.4.1/index';
 import { update160402 } from '../updates/16.4.2/index';
+import { update160500 } from '../updates/16.5.0/index';
 import { deleteFile, iterateFilesAndModifyContent, moveFilesToDirectory } from '../utility/files';
 import {
   findObjectPropertyInArray,
@@ -98,6 +99,7 @@ export function addLuxComponents(options: any): Rule {
       update160400(options, false),
       update160401(options, false),
       update160402(options, false),
+      update160500(options, false),
       finish(true, `Die LUX-Components ${updateMajorVersion} wurden erfolgreich eingerichtet.`, `${chalk.yellowBright('Fertig!')}`)
     ]);
   };
