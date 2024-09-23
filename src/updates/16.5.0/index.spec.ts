@@ -86,10 +86,10 @@ describe('update160500', () => {
           const content = success.read(filePath)?.toString();
 
           expect(content).not.toContain('pdf.worker.min.js');
-          expect(content).toContain('pdf.worker.min.mjs');
+          expect(content).not.toContain('pdf.worker.min.mjs');
 
           expect(content).not.toContain('node_modules/ng2-pdf-viewer/node_modules/pdfjs-dist/build');
-          expect(content).toContain('node_modules/pdfjs-dist/build');
+          expect(content).not.toContain('node_modules/pdfjs-dist/build');
 
           done();
         },
@@ -107,8 +107,8 @@ describe('update160500', () => {
         next: (success: Tree) => {
           const content = success.read(filePath)?.toString();
 
-          expect(content).not.toContain('pdf.worker.min.js');
-          expect(content).toContain('pdf.worker.min.mjs');
+          expect(content).not.toContain('pdf.worker.min.mjs');
+          expect(content).toContain('pdf.worker.min.js');
 
           done();
         },
@@ -121,7 +121,7 @@ describe('update160500', () => {
 const angularJsonTestFile01 = `           {
   "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
   "projects": {
-    "lux-components": {
+    "bar": {
       "architect": {
         
         "test": {
@@ -133,6 +133,11 @@ const angularJsonTestFile01 = `           {
               {
                 "glob": "pdf.worker.min.js",
                 "input": "./node_modules/ng2-pdf-viewer/node_modules/pdfjs-dist/build",
+                "output": "./assets/pdf"
+              },
+              {
+                "glob": "pdf.worker.min.mjs",
+                "input": "./node_modules/pdfjs-dist/build",
                 "output": "./assets/pdf"
               },
               {
@@ -170,7 +175,7 @@ export class AppModule implements DoBootstrap {
   constructor(private injector: Injector) {}
 
   ngDoBootstrap() {
-    (window as any).pdfWorkerSrc = '/assets/pdf/pdf.worker.min.js';
+    (window as any).pdfWorkerSrc = '/assets/pdf/pdf.worker.min.mjs';
 
     const ce = createCustomElement(AppComponent, { injector: this.injector });
     customElements.define('lux-components-demo', ce);

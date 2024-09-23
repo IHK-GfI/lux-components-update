@@ -1,6 +1,6 @@
-{
+﻿{
   "name": "@ihk-gfi/lux-components-update",
-  "version": "16.6.0",
+  "version": "16.6.1",
   "description": "Schematics für die Aktualisierung von LUX-Applikationen",
   "scripts": {
     "build": "npm run clean && tsc -p tsconfig.json",

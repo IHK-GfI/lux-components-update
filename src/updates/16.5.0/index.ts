@@ -1,7 +1,8 @@
 import { chain, Rule, SchematicContext, Tree } from '@angular-devkit/schematics';
 import * as chalk from 'chalk';
 import { deleteDep, deleteDevDep, updateDep, updateDevDep } from '../../update-dependencies/index';
-import { finish, messageInfoRule, messageSuccessRule, replaceAll } from '../../utility/util';
+import { applyRuleIfFileExists, finish, messageInfoRule, messageSuccessRule, replaceAll } from '../../utility/util';
+import { deleteJsonArray, findObjectPropertyInArray } from '../../utility/json';
 import { iterateFilesAndModifyContent } from '../../utility/files';
 import { logInfo } from '../../utility/logging';
 
@@ -24,15 +25,15 @@ export function update160500(options: any, runNpmInstall = true): Rule {
       finish(
         runNpmInstall,
         ``,
-        `${chalk.yellowBright('Wichtig für Apps, welche die LUX-File-Preview (PDF-Vorschau) einsetzen')}`,
+        `${chalk.yellowBright('Die folgenden manuellen Schritte müssen nur ausgeführt werden,')}`,
+        `${chalk.yellowBright('wenn die App die LUX-File-Preview (PDF-Vorschau) einsetzt')}`,
         `${chalk.yellowBright('----------------------------------------------------------------------')}`,
+        `${chalk.yellowBright('1. Bitte einmal den "node_modules"-Ordner und die "package-lock.json"-Datei löschen und noch einmal "npm install" ausführen.')}`,
+        `${chalk.yellowBright('2. Die Datei "./node_modules/pdfjs-dist/build/pdf.worker.min.mjs" in den Ordner "src/assets/pdf" kopieren.')}`,
+        `${chalk.yellowBright('3. Die Datei "pdf.worker.min.mjs" in "pdf.worker.min.js" umbenennen.')}`,
+        `${chalk.yellowBright('4. Prüfen, ob in der "app.module.ts" die folgende Zeile "(window as any).pdfWorkerSrc = "/assets/pdf/pdf.worker.min.js"; enthalten ist.')}`,
         `${chalk.gray('Die Abhängigkeit "ng2-pdf-viewer" wurde aktualisiert.')}`,
         `${chalk.gray('Diese Library verwendet intern die Abhängigkeit "pdfjs-dist@4.6.82".')}`,
-        `${chalk.gray('Sollte der PDF-Worker NICHT mit der App ausgeliefert werden')}`,
-        `${chalk.gray('siehe https://github.com/IHK-GfI/lux-components/wiki/lux%E2%80%90file%E2%80%90preview-v16')}`,
-        `${chalk.gray('müssen die CSP-Abschnitte in den Konfigurationsdateien (ui-service/src/main/resources/application*.yml) im UI-Service angepasst werden!')}`,
-        ``,
-        `${chalk.yellowBright('Bitte einmal den "node_modules"-Ordner und die "package-lock.json"-Datei löschen und noch einmal "npm install" ausführen')}`,
         ``,
         `${chalk.greenBright('Fertig!')}`
       )
@@ -43,23 +44,30 @@ export function update160500(options: any, runNpmInstall = true): Rule {
 export function updateAngularJson(options: any): Rule {
   return chain([
     messageInfoRule(`Die Datei angular.json wird verarbeitet...`),
-    (tree: Tree, _context: SchematicContext) => {
-      iterateFilesAndModifyContent(
-        tree,
-        options.path,
-        (filePath: string, content: string) => {
-          let result = content;
-          result = replaceAll(result, 'pdf.worker.min.js', 'pdf.worker.min.mjs');
-          result = replaceAll(result, 'node_modules/ng2-pdf-viewer/node_modules/pdfjs-dist/build', 'node_modules/pdfjs-dist/build');
-
-          if (content !== result) {
-            logInfo(filePath + ' wurde angepasst.');
-            tree.overwrite(filePath, result);
-          }
-        },
-        'angular.json'
-      );
-    },
+    applyRuleIfFileExists(
+      deleteJsonArray(options.path + '/angular.json', ['projects', options.project, 'architect', 'build', 'options', 'assets'], (node) =>
+        findObjectPropertyInArray(node, 'glob', 'pdf.worker.min.js')
+      ),
+      (options.path ?? '.') + '/angular.json'
+    ),
+    applyRuleIfFileExists(
+      deleteJsonArray(options.path + '/angular.json', ['projects', options.project, 'architect', 'test', 'options', 'assets'], (node) =>
+        findObjectPropertyInArray(node, 'glob', 'pdf.worker.min.js')
+      ),
+      (options.path ?? '.') + '/angular.json'
+    ),
+    applyRuleIfFileExists(
+      deleteJsonArray(options.path + '/angular.json', ['projects', options.project, 'architect', 'build', 'options', 'assets'], (node) =>
+        findObjectPropertyInArray(node, 'glob', 'pdf.worker.min.mjs')
+      ),
+      (options.path ?? '.') + '/angular.json'
+    ),
+    applyRuleIfFileExists(
+      deleteJsonArray(options.path + '/angular.json', ['projects', options.project, 'architect', 'test', 'options', 'assets'], (node) =>
+        findObjectPropertyInArray(node, 'glob', 'pdf.worker.min.mjs')
+      ),
+      (options.path ?? '.') + '/angular.json'
+    ),
     messageSuccessRule(`Die Datei angular.json wurde verarbeitet.`)
   ]);
 }
@@ -73,7 +81,7 @@ export function updateAppModuleTs(options: any): Rule {
         options.path,
         (filePath: string, content: string) => {
           let result = content;
-          result = replaceAll(result, 'pdf.worker.min.js', 'pdf.worker.min.mjs');
+          result = replaceAll(result, 'pdf.worker.min.mjs', 'pdf.worker.min.js');
 
           if (content !== result) {
             logInfo(filePath + ' wurde angepasst.');
