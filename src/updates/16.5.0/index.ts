@@ -45,26 +45,34 @@ export function updateAngularJson(options: any): Rule {
   return chain([
     messageInfoRule(`Die Datei angular.json wird verarbeitet...`),
     applyRuleIfFileExists(
-      deleteJsonArray(options.path + '/angular.json', ['projects', options.project, 'architect', 'build', 'options', 'assets'], (node) =>
-        findObjectPropertyInArray(node, 'glob', 'pdf.worker.min.js')
+      deleteJsonArray(
+        (options.path ?? '.') + '/angular.json',
+        ['projects', options.project, 'architect', 'build', 'options', 'assets'],
+        (node) => findObjectPropertyInArray(node, 'glob', 'pdf.worker.min.js')
       ),
       (options.path ?? '.') + '/angular.json'
     ),
     applyRuleIfFileExists(
-      deleteJsonArray(options.path + '/angular.json', ['projects', options.project, 'architect', 'test', 'options', 'assets'], (node) =>
-        findObjectPropertyInArray(node, 'glob', 'pdf.worker.min.js')
+      deleteJsonArray(
+        (options.path ?? '.') + '/angular.json',
+        ['projects', options.project, 'architect', 'test', 'options', 'assets'],
+        (node) => findObjectPropertyInArray(node, 'glob', 'pdf.worker.min.js')
       ),
       (options.path ?? '.') + '/angular.json'
     ),
     applyRuleIfFileExists(
-      deleteJsonArray(options.path + '/angular.json', ['projects', options.project, 'architect', 'build', 'options', 'assets'], (node) =>
-        findObjectPropertyInArray(node, 'glob', 'pdf.worker.min.mjs')
+      deleteJsonArray(
+        (options.path ?? '.') + '/angular.json',
+        ['projects', options.project, 'architect', 'build', 'options', 'assets'],
+        (node) => findObjectPropertyInArray(node, 'glob', 'pdf.worker.min.mjs')
       ),
       (options.path ?? '.') + '/angular.json'
     ),
     applyRuleIfFileExists(
-      deleteJsonArray(options.path + '/angular.json', ['projects', options.project, 'architect', 'test', 'options', 'assets'], (node) =>
-        findObjectPropertyInArray(node, 'glob', 'pdf.worker.min.mjs')
+      deleteJsonArray(
+        (options.path ?? '.') + '/angular.json',
+        ['projects', options.project, 'architect', 'test', 'options', 'assets'],
+        (node) => findObjectPropertyInArray(node, 'glob', 'pdf.worker.min.mjs')
       ),
       (options.path ?? '.') + '/angular.json'
     ),
