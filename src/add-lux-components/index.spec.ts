@@ -2,7 +2,7 @@ import { callRule, SchematicContext } from '@angular-devkit/schematics';
 import { SchematicTestRunner, UnitTestTree } from '@angular-devkit/schematics/testing';
 import * as path from 'path';
 import { of as observableOf } from 'rxjs';
-import { updateMajorVersion } from '../updates/16.0.0';
+import { updateMajorVersion } from '../updates/18.0.0';
 import { getPackageJsonDependency, NodeDependencyType, updatePackageJsonDependency } from '../utility/dependencies';
 import { appOptions, workspaceOptions } from '../utility/test';
 import { UtilConfig } from '../utility/util';

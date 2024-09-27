@@ -18,10 +18,19 @@ export function escapeRegExp(str: string) {
   return str.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, '\\$1');
 }
 
-export function replaceFirst(str: string, find: string, replace: string) {
+export function replaceRegEx(str: string, expression: RegExp, replace: string) {
+  return str.replace(expression, replace);
+}
+
+export function replaceString(str: string, find: string, replace: string, isReplaceAll: boolean = true): string {
+  return isReplaceAll ? replaceAll(str, find, replace) : replaceFirst(str, find, replace);
+}
+
+export function replaceFirst(str: string, find: string, replace: string): string {
   return str.replace(new RegExp(escapeRegExp(find), 'm'), replace);
 }
-export function replaceAll(str: string, find: string, replace: string) {
+
+export function replaceAll(str: string, find: string, replace: string): string {
   return str.replace(new RegExp(escapeRegExp(find), 'gm'), replace);
 }
 
