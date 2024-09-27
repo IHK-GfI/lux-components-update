@@ -2,16 +2,7 @@ import { chain, Rule, SchematicContext, Tree } from '@angular-devkit/schematics'
 import * as chalk from 'chalk';
 import { applyEdits, Edit, modify, Node } from 'jsonc-parser';
 import { updateDependencies } from '../update-dependencies/index';
-import { updateMajorVersion, updateNodeMinVersion } from '../updates/16.0.0/index';
-import { update160001 } from '../updates/16.0.1/index';
-import { update160100 } from '../updates/16.1.0/index';
-import { update160200 } from '../updates/16.2.0/index';
-import { update160300 } from '../updates/16.3.0/index';
-import { update160400 } from '../updates/16.4.0/index';
-import { update160401 } from '../updates/16.4.1/index';
-import { update160402 } from '../updates/16.4.2/index';
-import { update160500 } from '../updates/16.5.0/index';
-import { update160600 } from '../updates/16.6.0/index';
+import { updateMajorVersion, updateNodeMinVersion } from '../updates/18.0.0/index';
 import { deleteFile, iterateFilesAndModifyContent, moveFilesToDirectory } from '../utility/files';
 import {
   findObjectPropertyInArray,
@@ -35,9 +26,14 @@ export function addLuxComponents(options: any): Rule {
       maximumError: '2mb'
     };
 
+    const jsonPathPolyfillsBuild = ['projects', options.project, 'architect', 'build', 'options', 'polyfills'];
+    const jsonPathPolyfillsTest = ['projects', options.project, 'architect', 'test', 'options', 'polyfills'];
+    const polyfillsValue = '@angular/localize/init';
+
     const jsonPathAssetsBuild = ['projects', options.project, 'architect', 'build', 'options', 'assets'];
     const jsonPathAssetsTest = ['projects', options.project, 'architect', 'test', 'options', 'assets'];
     const assetsValues = [
+      'src/assets',
       {
         glob: '*(*min.css|*min.css.map)',
         input: './node_modules/@ihk-gfi/lux-components-theme/prebuilt-themes',
@@ -88,20 +84,15 @@ export function addLuxComponents(options: any): Rule {
       updateJsonArray('/angular.json', jsonPathAssetsTest, assetsValues[0]),
       updateJsonArray('/angular.json', jsonPathAssetsBuild, assetsValues[1]),
       updateJsonArray('/angular.json', jsonPathAssetsTest, assetsValues[1]),
+      updateJsonArray('/angular.json', jsonPathAssetsBuild, assetsValues[2]),
+      updateJsonArray('/angular.json', jsonPathAssetsTest, assetsValues[2]),
+      updateJsonArray('/angular.json', jsonPathPolyfillsBuild, polyfillsValue),
+      updateJsonArray('/angular.json', jsonPathPolyfillsTest, polyfillsValue),
       updateJsonArray('/angular.json', jsonPathAllowedCommonJS, 'hammerjs'),
       updateJsonArray('/angular.json', jsonPathAllowedCommonJS, 'ng2-pdf-viewer'),
       updateJsonArray('/angular.json', jsonPathAllowedCommonJS, 'pdfjs-dist'),
       updateJsonArray('/angular.json', jsonPathAllowedCommonJS, 'dompurify'),
       deleteFile(options, (options.path ?? '') + '/package-lock.json'),
-      update160001(options, false),
-      update160100(options, false),
-      update160200(options, false),
-      update160300(options, false),
-      update160400(options, false),
-      update160401(options, false),
-      update160402(options, false),
-      update160500(options, false),
-      update160600(options, false),
       finish(true, `Die LUX-Components ${updateMajorVersion} wurden erfolgreich eingerichtet.`, `${chalk.yellowBright('Fertig!')}`)
     ]);
   };

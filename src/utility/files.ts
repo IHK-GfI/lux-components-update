@@ -1,6 +1,7 @@
 import { join, Path, strings } from '@angular-devkit/core';
 import {
   apply,
+  chain,
   DirEntry,
   forEach,
   MergeStrategy,
@@ -12,6 +13,8 @@ import {
   url
 } from '@angular-devkit/schematics';
 import { logInfo, logInfoWithDescriptor, logSuccess } from './logging';
+import { messageInfoRule, messageSuccessRule, replaceRegEx, replaceString } from './util';
+import { ReplaceItem } from './replace-item';
 
 /**
  * Entfernt eine Zeile aus der Datei, die den searchString beinhaltet.
@@ -73,12 +76,12 @@ export function deleteLineFromFile(tree: Tree, _context: SchematicContext, fileP
       changed = true;
     } else {
       if (withLog) {
-        logInfo(`Die Datei "${ filePath }" enthält den String "${ searchString }" nicht.`);
+        logInfo(`Die Datei "${filePath}" enthält den String "${searchString}" nicht.`);
       }
     }
   } else {
     if (withLog) {
-      logInfo(`Die Datei "${ filePath }" wurde nicht gefunden.`);
+      logInfo(`Die Datei "${filePath}" wurde nicht gefunden.`);
     }
   }
 
@@ -122,12 +125,7 @@ export function writeLinesToFile(tree: Tree, _context: SchematicContext, filePat
  * @param callback(filePath, content)
  * @param filePathEndings Z.B. .html, .ts, src/styles.scss,...
  */
-export function iterateFilesAndModifyContent(
-  tree: Tree,
-  rootPath: string = '',
-  callback: Function,
-  ...filePathEndings: string[]
-) {
+export function iterateFilesAndModifyContent(tree: Tree, rootPath: string = '', callback: Function, ...filePathEndings: string[]) {
   tree.getDir(rootPath).visit((filePath: string) => {
     // Ignoriere folende Odner
     if (
@@ -307,12 +305,7 @@ export function searchInComponentAndModifyModule(
  *
  * Source: https://github.com/angular/angular-cli/blob/master/packages/schematics/angular/utility/find-module.ts
  */
-export function findModule(
-  host: Tree,
-  generateDir: string,
-  moduleExt = '.module.ts',
-  routingModuleExt = '-routing.module.ts'
-): Path {
+export function findModule(host: Tree, generateDir: string, moduleExt = '.module.ts', routingModuleExt = '-routing.module.ts'): Path {
   let dir: DirEntry | null = host.getDir('/' + generateDir);
   let foundRoutingModule = false;
 
@@ -325,10 +318,7 @@ export function findModule(
     if (filteredMatches.length == 1) {
       return join(dir.path, filteredMatches[0]);
     } else if (filteredMatches.length > 1) {
-      throw new Error(
-        'More than one module matches. Use skip-import option to skip importing ' +
-          'the component into the closest module.'
-      );
+      throw new Error('More than one module matches. Use skip-import option to skip importing ' + 'the component into the closest module.');
     }
 
     dir = dir.parent;
@@ -365,4 +355,34 @@ export function deleteFile(options: any, targetPath: string): Rule {
     }
     return tree;
   };
+}
+
+export function replaceRule(options: any, startMsg: string, endMsg: string, filePattern: string, ...replaceItems: ReplaceItem[]): Rule {
+  return chain([
+    messageInfoRule(startMsg),
+    (tree: Tree, _context: SchematicContext) => {
+      iterateFilesAndModifyContent(
+        tree,
+        options.path,
+        (filePath: string, content: string) => {
+          let result = content;
+
+          replaceItems.forEach((item: ReplaceItem) => {
+            if (typeof item.find === 'string') {
+              result = replaceString(result, item.find, item.replacement, item.replaceAll);
+            } else {
+              result = replaceRegEx(result, item.find, item.replacement);
+            }
+          });
+
+          if (content !== result) {
+            logInfo(filePath + ' wurde angepasst.');
+            tree.overwrite(filePath, result);
+          }
+        },
+        filePattern
+      );
+    },
+    messageSuccessRule(endMsg)
+  ]);
 }
