@@ -36,6 +36,8 @@ export function updateProject(options: any): Rule {
       updateChips(options),
       updateSlider(options),
       updateAngularJson(options),
+      updateStylesScss(options),
+      updateStylesCss(options),
       messageSuccessRule(`LUX-Components ${updateMajorVersion} wurden aktualisiert.`)
     ]);
   };
@@ -165,6 +167,40 @@ export function updateAngularJson(options: any): Rule {
         new ReplaceItem('browserTarget', 'buildTarget', true)
       ),
       messageSuccessRule(`angular.json wurde angepasst.`)
+    ]);
+  };
+}
+
+export function updateStylesScss(options: any): Rule {
+  return (_tree: Tree, _context: SchematicContext) => {
+    return chain([
+      messageInfoRule(`styles.scss wird angepasst...`),
+      replaceRule(
+        options,
+        'Import wird geprüft...',
+        'Import wurde geprüft.',
+        'styles.scss',
+        new ReplaceItem(`@import '@ihk-gfi`, `@import '../node_modules/@ihk-gfi`, true),
+        new ReplaceItem(`@import "@ihk-gfi`, `@import "../node_modules/@ihk-gfi`, true)
+      ),
+      messageSuccessRule(`styles.scss wurde angepasst.`)
+    ]);
+  };
+}
+
+export function updateStylesCss(options: any): Rule {
+  return (_tree: Tree, _context: SchematicContext) => {
+    return chain([
+      messageInfoRule(`styles.css wird angepasst...`),
+      replaceRule(
+        options,
+        'Import wird geprüft...',
+        'Import wurde geprüft.',
+        'styles.css',
+        new ReplaceItem(`@import '@ihk-gfi`, `@import '../node_modules/@ihk-gfi`, true),
+        new ReplaceItem(`@import "@ihk-gfi`, `@import "../node_modules/@ihk-gfi`, true)
+      ),
+      messageSuccessRule(`styles.css wurde angepasst.`)
     ]);
   };
 }

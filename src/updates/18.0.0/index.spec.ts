@@ -6,7 +6,7 @@ import { updateDependencies } from '../../update-dependencies';
 import { getPackageJsonDependency } from '../../utility/dependencies';
 import { appOptions, workspaceOptions } from '../../utility/test';
 import { UtilConfig } from '../../utility/util';
-import { updateAngularJson, updateChips, updateFormControls, updateSlider, updateTabs } from './index';
+import { updateAngularJson, updateChips, updateFormControls, updateSlider, updateStylesCss, updateStylesScss, updateTabs } from './index';
 
 describe('update180000', () => {
   let appTree: UnitTestTree;
@@ -185,6 +185,46 @@ describe('update180000', () => {
       });
     });
   });
+
+  describe('[Rule] updateStylesScss', () => {
+    it('Sollte die styles.scss anpassen', (done) => {
+      const filePath = testOptions.path + '/styles.scss';
+
+      appTree.create(filePath, styleScss01);
+
+      callRule(updateStylesScss(testOptions), observableOf(appTree), context).subscribe({
+        next: (successTree: Tree) => {
+          const content = successTree.read(filePath)?.toString();
+
+          expect(content).not.toContain(`@import '@ihk-gfi/lux-components-theme/src/base/luxfonts';`);
+          expect(content).toContain(`@import '../node_modules/@ihk-gfi/lux-components-theme/src/base/luxfonts';`);
+
+          done();
+        },
+        error: (reason) => expect(reason).toBeUndefined()
+      });
+    });
+  });
+
+  describe('[Rule] updateStylesCss', () => {
+    it('Sollte die styles.css anpassen', (done) => {
+      const filePath = testOptions.path + '/styles.css';
+
+      appTree.create(filePath, styleScss01);
+
+      callRule(updateStylesCss(testOptions), observableOf(appTree), context).subscribe({
+        next: (successTree: Tree) => {
+          const content = successTree.read(filePath)?.toString();
+
+          expect(content).not.toContain(`@import '@ihk-gfi/lux-components-theme/src/base/luxfonts';`);
+          expect(content).toContain(`@import '../node_modules/@ihk-gfi/lux-components-theme/src/base/luxfonts';`);
+
+          done();
+        },
+        error: (reason) => expect(reason).toBeUndefined()
+      });
+    });
+  });
 });
 
 const sliderHtml = `
@@ -334,4 +374,15 @@ const angularJson01 = `
     }
   }
 }
+`;
+
+const styleScss01 = `
+/* You can add global styles to this file, and also import other style files */
+@import '@ihk-gfi/lux-components-theme/src/base/luxfonts';
+@import "@ihk-gfi/lux-components-theme/src/base/luxfonts";
+         
+$basepath: 'https://cdn.gfi.ihk.de/lux-components/icons-and-fonts/v1.8.0/';
+
+@include web-fonts($basepath);
+
 `;
