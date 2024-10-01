@@ -28,7 +28,7 @@ export function updateDependencies(): Rule {
     updateDep('@angular/cdk', '^18.2.6', addOrUpdate),
     updateDep('@angular/material', '^18.2.6', addOrUpdate),
     updateDep('rxjs', '~7.8.1', addOrUpdate),
-    updateDep('dompurify', '3.1.6', addOrUpdate),
+    updateDep('dompurify', '~3.1.6', addOrUpdate),
     updateDep('marked', '4.0.15', addOrUpdate),
     updateDep('zone.js', '~0.14.10', addOrUpdate),
     updateDep('tslib', '^2.3.0', updateIfExists),

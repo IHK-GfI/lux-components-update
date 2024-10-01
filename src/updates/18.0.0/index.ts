@@ -18,9 +18,15 @@ export function update180000(options: any): Rule {
       applyRuleIf(updateMinVersion, updateProject(options)),
       finish(
         false,
-        `${chalk.yellowBright(
-          'Wichtig!!!'
-        )} Hinweise im Update Guide beachten -> https://github.com/IHK-GfI/lux-components/wiki/update-guide-v${updateMajorVersion}`
+        ``,
+        `${chalk.yellowBright('Nur für JAST-Apps')}`,
+        `${chalk.yellowBright('----------------------------------------------------------------------')}`,
+        `${chalk.yellowBright('1. Bitte die Node-Version 22 verwenden.')}`,
+        `${chalk.yellowBright('2. Bitte die pipeline.yaml anpassen:')}`,
+        `${chalk.yellowBright('   a. Den Parameter --no-optional entfernen.')}`,
+        `${chalk.yellowBright('   b. Das Image von "node:18-alpine" auf "node:22-alpine" ändern.')}`,
+        ``,
+        `${chalk.greenBright('Fertig!')}`
       )
     ]);
   };
