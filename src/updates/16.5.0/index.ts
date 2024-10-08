@@ -1,6 +1,6 @@
 import { chain, Rule, SchematicContext, Tree } from '@angular-devkit/schematics';
 import * as chalk from 'chalk';
-import { deleteDep, deleteDevDep, updateDep, updateDevDep } from '../../update-dependencies/index';
+import { updateDep, updateDevDep } from '../../update-dependencies/index';
 import { applyRuleIfFileExists, finish, messageInfoRule, messageSuccessRule, replaceAll } from '../../utility/util';
 import { deleteJsonArray, findObjectPropertyInArray } from '../../utility/json';
 import { iterateFilesAndModifyContent } from '../../utility/files';
@@ -17,8 +17,7 @@ export function update160500(options: any, runNpmInstall = true): Rule {
       updateDevDep('@angular/cli', '16.2.15', false),
       updateDevDep('@compodoc/compodoc', '1.1.25', true),
       updateDep('ng2-pdf-viewer', '10.3.0', true),
-      deleteDep('pdfjs-dist'),
-      deleteDevDep('pdfjs-dist'),
+      updateDep('pdfjs-dist', '4.6.82', false),
       updateAngularJson(options),
       updateAppModuleTs(options),
       messageSuccessRule(`Die LUX-Components wurden auf die Version 16.5.0 aktualisiert.`),
