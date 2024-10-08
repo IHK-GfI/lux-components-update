@@ -34,6 +34,7 @@ export function updateDependencies(): Rule {
     updateDep('tslib', '^2.3.0', updateIfExists),
     updateDep('hammerjs', '2.0.8', addOrUpdate),
     updateDep('ng2-pdf-viewer', '10.3.1', addOrUpdate),
+    updateDep('pdfjs-dist', '4.6.82', addOrUpdate),
     updateDep('ngx-cookie-service', '^18.0.0', addOrUpdate),
     updateDep('ngx-build-plus', '^18.0.0', addOrUpdate),
 
