@@ -1,4 +1,4 @@
-import { callRule, SchematicContext, Tree } from '@angular-devkit/schematics';
+import { callRule, Tree } from '@angular-devkit/schematics';
 import { SchematicTestRunner, UnitTestTree } from '@angular-devkit/schematics/testing';
 import * as path from 'path';
 import { of as observableOf } from 'rxjs';
@@ -11,7 +11,7 @@ const collectionPath = path.join(__dirname, '../collection.json');
 describe('json', () => {
   let appTree: UnitTestTree;
   let runner: SchematicTestRunner;
-  let context: SchematicContext;
+  let context: any;
 
   const testOptions: any = {};
 

@@ -9,6 +9,7 @@ export function update180200(_options: any, runNpmInstall = true): Rule {
       messageInfoRule(`Die LUX-Components werden auf die Version 18.2.0 aktualisiert...`),
       messageInfoRule(`Die Datei "package.json" wird angepasst...`),
       updateDep('@ihk-gfi/lux-components', '18.2.0', false),
+      updateDep('@ihk-gfi/lux-components-theme', '18.2.0', false),
       updateI18NFiles(),
       messageSuccessRule(`Die LUX-Components wurden auf die Version 18.2.0 aktualisiert.`),
       finish(runNpmInstall, `${chalk.yellowBright('Fertig!')}`)
