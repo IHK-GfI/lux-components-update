@@ -21,9 +21,28 @@ export function updateI18NFiles(): Rule {
   return (tree: Tree, _context: SchematicContext) => {
     messageInfoRule(`I18n-Dateien werden angepasst...`), updateI18nFile(tree, 'de', 'luxc.datetimepicker.invalid.date', i18nDeDatepicker);
     updateI18nFile(tree, 'en', 'luxc.datetimepicker.invalid.date', i18nEnDatepicker);
+    updateI18nFile(tree, 'de', 'luxc.lookup-autocomplete.error_message.not_available', i18nDeStepper);
+    updateI18nFile(tree, 'en', 'luxc.lookup-autocomplete.error_message.not_available', i18nEnStepper);
     messageInfoRule(`I18n-Dateien wurden angepasst.`);
   };
 }
+
+export const i18nDeStepper = `<trans-unit id="luxc.stepper-large.error_message.steps_not_completed" datatype="html">
+        <source>Die Angaben in Schritt <x id="PH" equiv-text="i+1"/> sind unvollständig oder fehlerhaft. Bitte korrigieren Sie erst Ihre Angaben in diesem Schritt.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/modules/lux-layout/lux-stepper-large/lux-stepper-large.component.ts</context>
+          <context context-type="linenumber">231</context>
+        </context-group>
+      </trans-unit>`;
+
+export const i18nEnStepper = `<trans-unit id="luxc.stepper-large.error_message.steps_not_completed" datatype="html">
+        <source>Die Angaben in Schritt <x id="PH" equiv-text="i+1"/> sind unvollständig oder fehlerhaft. Bitte korrigieren Sie erst Ihre Angaben in diesem Schritt.</source>
+        <target> The information in step <x id="PH" equiv-text="i+1"/> is incomplete or incorrect. Please correct your information in this step first</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/modules/lux-layout/lux-stepper-large/lux-stepper-large.component.ts</context>
+          <context context-type="linenumber">231</context>
+        </context-group>
+      </trans-unit>`;
 
 export const i18nDeDatepicker = `<trans-unit id="luxc.datetimepicker.panel.hours.arialabel" datatype="html">
         <source>Stunden</source>
