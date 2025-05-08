@@ -5,7 +5,7 @@ import { of as observableOf } from 'rxjs';
 import { getPackageJsonDependency } from '../../utility/dependencies';
 import { appOptions, workspaceOptions } from '../../utility/test';
 import { UtilConfig } from '../../utility/util';
-import { update180500 } from './index';
+import { i18nDeChip, i18nEnChip, update180500 } from './index';
 
 describe('update180500', () => {
   let appTree: UnitTestTree;
@@ -61,13 +61,24 @@ describe('update180500', () => {
         `
       );
 
+      const filePathDe = 'src/locale/messages.xlf';
+      const filePathEn = 'src/locale/messages.en.xlf';
+      appTree.create(filePathDe, i18nDe);
+      appTree.create(filePathEn, i18nEn);
+
       callRule(update180500(testOptions), observableOf(appTree), context).subscribe(
-        () => {
+        (successTree) => {
           expect(getPackageJsonDependency(appTree, '@ihk-gfi/lux-components').version).not.toEqual('18.4.0');
           expect(getPackageJsonDependency(appTree, '@ihk-gfi/lux-components').version).toEqual('18.5.0');
 
           expect(getPackageJsonDependency(appTree, '@ihk-gfi/lux-components-theme').version).not.toEqual('18.4.0');
           expect(getPackageJsonDependency(appTree, '@ihk-gfi/lux-components-theme').version).toEqual('18.5.0');
+
+          const contentDe = successTree.read(filePathDe)?.toString();
+          expect(contentDe).toContain(i18nDeChip);
+
+          const contentEn = successTree.read(filePathEn)?.toString();
+          expect(contentEn).toContain(i18nEnChip);
 
           done();
         },
@@ -76,3 +87,33 @@ describe('update180500', () => {
     });
   });
 });
+
+const i18nDe = `<?xml version="1.0" encoding="UTF-8" ?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+  <file source-language="de" datatype="plaintext" original="ng2.template">
+    <body>
+      <trans-unit id="luxc.chips.input.placeholder.lbl" datatype="html">
+        <source>eingeben oder auswählen</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/modules/lux-form/lux-chips-ac/lux-chips-ac.component.ts</context>
+          <context context-type="linenumber">82</context>
+        </context-group>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>`;
+const i18nEn = `<?xml version="1.0" encoding="UTF-8" ?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+  <file source-language="en" datatype="plaintext" original="ng2.template">
+    <body>
+      <trans-unit id="luxc.chips.input.placeholder.lbl" datatype="html">
+        <source>eingeben oder auswählen</source>
+        <target>enter or select</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/modules/lux-form/lux-chips-ac/lux-chips-ac.component.ts</context>
+          <context context-type="linenumber">82</context>
+        </context-group>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>`;
