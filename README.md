@@ -1,3 +1,12 @@
+
+---
+
+:no_entry: **Dieses Projekt wurde archiviert** :no_entry:
+
+Die Weiterentwicklung der _LUX-Components_ findet [hier](https://github.com/IHK-GfI/lux-components-workspace) statt.
+
+---
+
 # LUX-Components-Update
 
 Dieses Projekt enthält alle Updateskripte (umgesetzt mit Angular Schematics) für die LUX-Components.
